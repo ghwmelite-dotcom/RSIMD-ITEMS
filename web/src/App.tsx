@@ -1,5 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { ToastProvider } from "./context/ToastContext";
+import { OfflineProvider } from "./context/OfflineContext";
 import { useAuth } from "./hooks/useAuth";
 import { AppShell } from "./components/layout/AppShell";
 import { LoginPage } from "./pages/LoginPage";
@@ -54,10 +56,14 @@ function LoginRoute() {
 export default function App() {
   return (
     <AuthProvider>
-      <Routes>
-        <Route path="/login" element={<LoginRoute />} />
-        <Route path="/*" element={<ProtectedRoutes />} />
-      </Routes>
+      <ToastProvider>
+        <OfflineProvider>
+          <Routes>
+            <Route path="/login" element={<LoginRoute />} />
+            <Route path="/*" element={<ProtectedRoutes />} />
+          </Routes>
+        </OfflineProvider>
+      </ToastProvider>
     </AuthProvider>
   );
 }
