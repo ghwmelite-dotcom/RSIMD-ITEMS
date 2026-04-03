@@ -19,6 +19,14 @@ import {
   createTechnician,
   updateTechnician,
 } from "./routes/technicians";
+import {
+  listEquipmentHandler,
+  getEquipmentHandler,
+  getEquipmentByTagHandler,
+  createEquipmentHandler,
+  updateEquipmentHandler,
+  deleteEquipmentHandler,
+} from "./routes/equipment";
 
 const router = Router();
 
@@ -68,6 +76,26 @@ router.post("/api/technicians", (request: Request, env: Env) => createTechnician
 router.put("/api/technicians/:id", (request: Request, env: Env) => {
   const id = (request as unknown as { params: { id: string } }).params.id;
   return updateTechnician(request, env, id);
+});
+
+// Equipment (by-tag MUST be before :id to match first)
+router.get("/api/equipment/by-tag/:assetTag", (request: Request, env: Env) => {
+  const assetTag = (request as unknown as { params: { assetTag: string } }).params.assetTag;
+  return getEquipmentByTagHandler(request, env, assetTag);
+});
+router.get("/api/equipment", (request: Request, env: Env) => listEquipmentHandler(request, env));
+router.get("/api/equipment/:id", (request: Request, env: Env) => {
+  const id = (request as unknown as { params: { id: string } }).params.id;
+  return getEquipmentHandler(request, env, id);
+});
+router.post("/api/equipment", (request: Request, env: Env) => createEquipmentHandler(request, env));
+router.put("/api/equipment/:id", (request: Request, env: Env) => {
+  const id = (request as unknown as { params: { id: string } }).params.id;
+  return updateEquipmentHandler(request, env, id);
+});
+router.delete("/api/equipment/:id", (request: Request, env: Env) => {
+  const id = (request as unknown as { params: { id: string } }).params.id;
+  return deleteEquipmentHandler(request, env, id);
 });
 
 // 404 catch-all
