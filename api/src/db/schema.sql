@@ -24,6 +24,8 @@ CREATE TABLE IF NOT EXISTS equipment (
   status TEXT DEFAULT 'active' CHECK (status IN ('active', 'faulty', 'decommissioned', 'under_repair')),
   installed_date TEXT,
   notes TEXT,
+  os_version TEXT,
+  processor_gen TEXT,
   created_at TEXT DEFAULT (datetime('now')),
   updated_at TEXT DEFAULT (datetime('now'))
 );

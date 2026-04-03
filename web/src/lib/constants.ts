@@ -36,3 +36,30 @@ export const EQUIPMENT_STATUSES = [
   { value: "under_repair", label: "Under Repair" },
   { value: "decommissioned", label: "Decommissioned" },
 ] as const;
+
+export const OS_OPTIONS = [
+  { value: "Windows 10 Home", label: "Windows 10 Home" },
+  { value: "Windows 10 Pro", label: "Windows 10 Pro" },
+  { value: "Windows 11 Home", label: "Windows 11 Home" },
+  { value: "Windows 11 Pro", label: "Windows 11 Pro" },
+  { value: "Ubuntu 22.04", label: "Ubuntu 22.04" },
+  { value: "Ubuntu 24.04", label: "Ubuntu 24.04" },
+  { value: "Other", label: "Other" },
+] as const;
+
+export const PROCESSOR_GEN_OPTIONS = [
+  { value: "Pentium", label: "Pentium" },
+  { value: "Celeron", label: "Celeron" },
+  { value: "Core 2 Duo", label: "Core 2 Duo" },
+  { value: "4th Gen Intel", label: "4th Gen Intel (Haswell)" },
+  { value: "6th Gen Intel", label: "6th Gen Intel (Skylake)" },
+  { value: "7th Gen Intel", label: "7th Gen Intel (Kaby Lake)" },
+  { value: "8th Gen Intel", label: "8th Gen Intel (Coffee Lake)" },
+  { value: "10th Gen Intel", label: "10th Gen Intel" },
+  { value: "12th Gen Intel", label: "12th Gen Intel" },
+  { value: "13th Gen Intel", label: "13th Gen Intel" },
+  { value: "AMD Ryzen 3", label: "AMD Ryzen 3" },
+  { value: "AMD Ryzen 5", label: "AMD Ryzen 5" },
+  { value: "AMD Ryzen 7", label: "AMD Ryzen 7" },
+  { value: "Other", label: "Other" },
+] as const;

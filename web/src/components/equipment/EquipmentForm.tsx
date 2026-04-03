@@ -1,6 +1,6 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { api } from "../../lib/api-client";
-import { EQUIPMENT_TYPES, EQUIPMENT_STATUSES } from "../../lib/constants";
+import { EQUIPMENT_TYPES, EQUIPMENT_STATUSES, OS_OPTIONS, PROCESSOR_GEN_OPTIONS } from "../../lib/constants";
 import { Modal } from "../ui/Modal";
 import { Input } from "../ui/Input";
 import { Select } from "../ui/Select";
@@ -30,6 +30,8 @@ export function EquipmentForm({ isOpen, onClose, onSaved, editing }: EquipmentFo
   const [status, setStatus] = useState("active");
   const [installedDate, setInstalledDate] = useState("");
   const [notes, setNotes] = useState("");
+  const [osVersion, setOsVersion] = useState("");
+  const [processorGen, setProcessorGen] = useState("");
 
   useEffect(() => {
     if (isOpen) {
@@ -49,6 +51,8 @@ export function EquipmentForm({ isOpen, onClose, onSaved, editing }: EquipmentFo
       setStatus(editing.status);
       setInstalledDate(editing.installed_date ?? "");
       setNotes(editing.notes ?? "");
+      setOsVersion(editing.os_version ?? "");
+      setProcessorGen(editing.processor_gen ?? "");
     } else {
       setType("");
       setMake("");
@@ -60,6 +64,8 @@ export function EquipmentForm({ isOpen, onClose, onSaved, editing }: EquipmentFo
       setStatus("active");
       setInstalledDate("");
       setNotes("");
+      setOsVersion("");
+      setProcessorGen("");
     }
   }, [editing, isOpen]);
 
@@ -78,6 +84,8 @@ export function EquipmentForm({ isOpen, onClose, onSaved, editing }: EquipmentFo
         status,
         installed_date: installedDate || null,
         notes: notes || null,
+        os_version: osVersion || null,
+        processor_gen: processorGen || null,
       };
 
       if (editing) {
@@ -158,6 +166,20 @@ export function EquipmentForm({ isOpen, onClose, onSaved, editing }: EquipmentFo
               onChange={(e) => setStatus(e.target.value)}
             />
           )}
+          <Select
+            label="Operating System"
+            options={[...OS_OPTIONS]}
+            value={osVersion}
+            onChange={(e) => setOsVersion(e.target.value)}
+            placeholder="Select OS"
+          />
+          <Select
+            label="Processor Generation"
+            options={[...PROCESSOR_GEN_OPTIONS]}
+            value={processorGen}
+            onChange={(e) => setProcessorGen(e.target.value)}
+            placeholder="Select processor"
+          />
           <Input
             label="Installed Date"
             type="date"

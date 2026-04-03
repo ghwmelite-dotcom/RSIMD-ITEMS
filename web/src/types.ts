@@ -29,6 +29,8 @@ export interface Equipment {
   status: "active" | "faulty" | "decommissioned" | "under_repair";
   installed_date: string | null;
   notes: string | null;
+  os_version: string | null;
+  processor_gen: string | null;
 }
 
 export interface MaintenanceCategory {

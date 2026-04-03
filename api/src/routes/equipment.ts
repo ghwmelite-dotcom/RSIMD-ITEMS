@@ -106,6 +106,8 @@ export async function createEquipmentHandler(
     room_number?: string;
     installed_date?: string;
     notes?: string;
+    os_version?: string;
+    processor_gen?: string;
   };
   try {
     body = await request.json();
@@ -131,8 +133,8 @@ export async function createEquipmentHandler(
   const now = new Date().toISOString();
 
   await env.DB.prepare(
-    `INSERT INTO equipment (id, asset_tag, type, make, model, processor, serial_number, org_entity_id, room_number, status, installed_date, notes, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?, ?, ?)`
+    `INSERT INTO equipment (id, asset_tag, type, make, model, processor, serial_number, org_entity_id, room_number, status, installed_date, notes, os_version, processor_gen, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?, ?, ?, ?, ?)`
   )
     .bind(
       id,
@@ -146,6 +148,8 @@ export async function createEquipmentHandler(
       body.room_number || null,
       body.installed_date || null,
       body.notes || null,
+      body.os_version || null,
+      body.processor_gen || null,
       now,
       now
     )
@@ -179,6 +183,8 @@ export async function updateEquipmentHandler(
     status?: string;
     installed_date?: string;
     notes?: string;
+    os_version?: string;
+    processor_gen?: string;
   };
   try {
     body = await request.json();
@@ -212,10 +218,12 @@ export async function updateEquipmentHandler(
   const status = body.status ?? existing.status;
   const installed_date = body.installed_date !== undefined ? body.installed_date : existing.installed_date;
   const notes = body.notes !== undefined ? body.notes : existing.notes;
+  const os_version = body.os_version !== undefined ? body.os_version : existing.os_version;
+  const processor_gen = body.processor_gen !== undefined ? body.processor_gen : existing.processor_gen;
   const now = new Date().toISOString();
 
   await env.DB.prepare(
-    `UPDATE equipment SET type = ?, make = ?, model = ?, processor = ?, serial_number = ?, org_entity_id = ?, room_number = ?, status = ?, installed_date = ?, notes = ?, updated_at = ? WHERE id = ?`
+    `UPDATE equipment SET type = ?, make = ?, model = ?, processor = ?, serial_number = ?, org_entity_id = ?, room_number = ?, status = ?, installed_date = ?, notes = ?, os_version = ?, processor_gen = ?, updated_at = ? WHERE id = ?`
   )
     .bind(
       type,
@@ -228,6 +236,8 @@ export async function updateEquipmentHandler(
       status,
       installed_date,
       notes,
+      os_version,
+      processor_gen,
       now,
       id
     )
