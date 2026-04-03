@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { api } from "../../lib/api-client";
+import { exportToCsv } from "../../lib/export-csv";
 import { useToast } from "../../hooks/useToast";
 import { Table } from "../ui/Table";
 import { Button } from "../ui/Button";
@@ -119,7 +120,25 @@ export function CategoryManager() {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-900">Categories</h3>
-        <Button onClick={openCreate}>Add Category</Button>
+        <div className="flex gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              const exportData = categories.map((c) => ({
+                name: c.name,
+                description: c.description ?? "",
+              }));
+              exportToCsv("categories", [
+                { key: "name", header: "Name" },
+                { key: "description", header: "Description" },
+              ], exportData);
+            }}
+          >
+            Export CSV
+          </Button>
+          <Button onClick={openCreate}>Add Category</Button>
+        </div>
       </div>
 
       <Table

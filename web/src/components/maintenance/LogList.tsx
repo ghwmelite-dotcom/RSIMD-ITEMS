@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { api } from "../../lib/api-client";
 import { MAINTENANCE_TYPES } from "../../lib/constants";
+import { exportToCsv } from "../../lib/export-csv";
 import { Select } from "../ui/Select";
 import { Table } from "../ui/Table";
+import { Button } from "../ui/Button";
 import { StatusPill } from "../ui/StatusPill";
 import type { MaintenanceLog, OrgEntity, MaintenanceCategory } from "../../types";
 
@@ -131,27 +133,59 @@ export function LogList({ refreshKey }: LogListProps) {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <Select
-          options={YEAR_OPTIONS}
-          value={filterYear}
-          onChange={(e) => setFilterYear(e.target.value)}
-        />
-        <Select
-          options={QUARTER_OPTIONS}
-          value={filterQuarter}
-          onChange={(e) => setFilterQuarter(e.target.value)}
-        />
-        <Select
-          options={TYPE_OPTIONS}
-          value={filterType}
-          onChange={(e) => setFilterType(e.target.value)}
-        />
-        <Select
-          options={locationOptions}
-          value={filterLocation}
-          onChange={(e) => setFilterLocation(e.target.value)}
-        />
+      <div className="flex items-center justify-between gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 flex-1">
+          <Select
+            options={YEAR_OPTIONS}
+            value={filterYear}
+            onChange={(e) => setFilterYear(e.target.value)}
+          />
+          <Select
+            options={QUARTER_OPTIONS}
+            value={filterQuarter}
+            onChange={(e) => setFilterQuarter(e.target.value)}
+          />
+          <Select
+            options={TYPE_OPTIONS}
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+          />
+          <Select
+            options={locationOptions}
+            value={filterLocation}
+            onChange={(e) => setFilterLocation(e.target.value)}
+          />
+        </div>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => {
+            const exportData = logs.map((log) => ({
+              logged_date: log.logged_date
+                ? new Date(log.logged_date).toLocaleDateString()
+                : "",
+              maintenance_type: typeMap.get(log.maintenance_type) ?? log.maintenance_type,
+              category: log.category_id
+                ? categoryMap.get(log.category_id)?.name ?? ""
+                : "",
+              location: entityMap.get(log.org_entity_id)?.code ?? "",
+              room_number: log.room_number ?? "",
+              description: log.description ?? "",
+              status: log.status,
+            }));
+            exportToCsv("maintenance-logs", [
+              { key: "logged_date", header: "Date" },
+              { key: "maintenance_type", header: "Type" },
+              { key: "category", header: "Category" },
+              { key: "location", header: "Location" },
+              { key: "room_number", header: "Room" },
+              { key: "description", header: "Description" },
+              { key: "status", header: "Status" },
+            ], exportData);
+          }}
+        >
+          Export CSV
+        </Button>
       </div>
 
       {loading ? (

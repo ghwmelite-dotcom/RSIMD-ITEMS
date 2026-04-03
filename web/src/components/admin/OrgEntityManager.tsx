@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { api } from "../../lib/api-client";
+import { exportToCsv } from "../../lib/export-csv";
 import { useToast } from "../../hooks/useToast";
 import { Table } from "../ui/Table";
 import { Button } from "../ui/Button";
@@ -168,7 +169,29 @@ export function OrgEntityManager() {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-900">Org Entities</h3>
-        <Button onClick={openCreate}>Add Entity</Button>
+        <div className="flex gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              const exportData = entities.map((e) => ({
+                code: e.code,
+                name: e.name,
+                type: e.type,
+                rooms: e.rooms.join(", "),
+              }));
+              exportToCsv("org-entities", [
+                { key: "code", header: "Code" },
+                { key: "name", header: "Name" },
+                { key: "type", header: "Type" },
+                { key: "rooms", header: "Rooms" },
+              ], exportData);
+            }}
+          >
+            Export CSV
+          </Button>
+          <Button onClick={openCreate}>Add Entity</Button>
+        </div>
       </div>
 
       <Table

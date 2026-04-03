@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { api } from "../../lib/api-client";
+import { exportToCsv } from "../../lib/export-csv";
 import { useToast } from "../../hooks/useToast";
 import { Table } from "../ui/Table";
 import { Button } from "../ui/Button";
@@ -169,7 +170,27 @@ export function TechnicianManager() {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-900">Technicians</h3>
-        <Button onClick={openCreate}>Add Technician</Button>
+        <div className="flex gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              const exportData = technicians.map((t) => ({
+                name: t.name,
+                email: t.email ?? "",
+                role: t.role,
+              }));
+              exportToCsv("technicians", [
+                { key: "name", header: "Name" },
+                { key: "email", header: "Email" },
+                { key: "role", header: "Role" },
+              ], exportData);
+            }}
+          >
+            Export CSV
+          </Button>
+          <Button onClick={openCreate}>Add Technician</Button>
+        </div>
       </div>
 
       <Table

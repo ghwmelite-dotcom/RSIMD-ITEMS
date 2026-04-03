@@ -2,8 +2,10 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../lib/api-client";
 import { EQUIPMENT_TYPES, EQUIPMENT_STATUSES } from "../../lib/constants";
+import { exportToCsv } from "../../lib/export-csv";
 import { Select } from "../ui/Select";
 import { Table } from "../ui/Table";
+import { Button } from "../ui/Button";
 import { StatusPill } from "../ui/StatusPill";
 import type { Equipment, OrgEntity } from "../../types";
 
@@ -86,25 +88,53 @@ export function EquipmentList({ refreshKey }: EquipmentListProps) {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Select
-          options={locationOptions}
-          value={filterLocation}
-          onChange={(e) => setFilterLocation(e.target.value)}
-          placeholder="All Locations"
-        />
-        <Select
-          options={typeOptions}
-          value={filterType}
-          onChange={(e) => setFilterType(e.target.value)}
-          placeholder="All Types"
-        />
-        <Select
-          options={statusOptions}
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-          placeholder="All Statuses"
-        />
+      <div className="flex items-center justify-between gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 flex-1">
+          <Select
+            options={locationOptions}
+            value={filterLocation}
+            onChange={(e) => setFilterLocation(e.target.value)}
+            placeholder="All Locations"
+          />
+          <Select
+            options={typeOptions}
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+            placeholder="All Types"
+          />
+          <Select
+            options={statusOptions}
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            placeholder="All Statuses"
+          />
+        </div>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => {
+            const exportData = equipment.map((e) => ({
+              asset_tag: e.asset_tag,
+              type: typeMap.get(e.type) ?? e.type,
+              make: e.make ?? "",
+              model: e.model ?? "",
+              location: entityMap.get(e.org_entity_id)?.code ?? "",
+              room_number: e.room_number ?? "",
+              status: e.status,
+            }));
+            exportToCsv("equipment", [
+              { key: "asset_tag", header: "Asset Tag" },
+              { key: "type", header: "Type" },
+              { key: "make", header: "Make" },
+              { key: "model", header: "Model" },
+              { key: "location", header: "Location" },
+              { key: "room_number", header: "Room" },
+              { key: "status", header: "Status" },
+            ], exportData);
+          }}
+        >
+          Export CSV
+        </Button>
       </div>
 
       {loading ? (
