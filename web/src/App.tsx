@@ -4,6 +4,7 @@ import { useAuth } from "./hooks/useAuth";
 import { AppShell } from "./components/layout/AppShell";
 import { LoginPage } from "./pages/LoginPage";
 import { DashboardPage } from "./pages/DashboardPage";
+import { AdminPage } from "./pages/AdminPage";
 
 function ProtectedRoutes() {
   const { user, isLoading } = useAuth();
@@ -24,6 +25,7 @@ function ProtectedRoutes() {
     <AppShell>
       <Routes>
         <Route index element={<DashboardPage />} />
+        <Route path="admin" element={<AdminPage />} />
       </Routes>
     </AppShell>
   );
