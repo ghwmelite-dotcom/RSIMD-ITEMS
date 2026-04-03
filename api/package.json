@@ -11,13 +11,14 @@
     "db:reset": "npm run db:init && npm run db:seed"
   },
   "dependencies": {
-    "itty-router": "^5.0.0",
-    "bcryptjs": "^2.4.3"
+    "bcryptjs": "^2.4.3",
+    "docx": "^9.6.1",
+    "itty-router": "^5.0.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240909.0",
+    "@types/bcryptjs": "^2.4.6",
     "typescript": "^5.5.0",
-    "wrangler": "^3.78.0",
-    "@types/bcryptjs": "^2.4.6"
+    "wrangler": "^3.78.0"
   }
 }

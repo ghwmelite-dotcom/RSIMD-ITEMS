@@ -35,6 +35,12 @@ import {
   bulkSync,
 } from "./routes/maintenance";
 import { dashboardSummary, dashboardTrends } from "./routes/dashboard";
+import {
+  listReports,
+  getReport,
+  generateReport,
+  downloadReport,
+} from "./routes/reports";
 
 const router = Router();
 
@@ -122,6 +128,18 @@ router.put("/api/maintenance/:id", (request: Request, env: Env) => {
 // Dashboard
 router.get("/api/dashboard/summary", (request: Request, env: Env) => dashboardSummary(request, env));
 router.get("/api/dashboard/trends", (request: Request, env: Env) => dashboardTrends(request, env));
+
+// Reports (generate and download MUST be before :id)
+router.get("/api/reports", (request: Request, env: Env) => listReports(request, env));
+router.post("/api/reports/generate", (request: Request, env: Env) => generateReport(request, env));
+router.get("/api/reports/:id/download", (request: Request, env: Env) => {
+  const id = (request as unknown as { params: { id: string } }).params.id;
+  return downloadReport(request, env, id);
+});
+router.get("/api/reports/:id", (request: Request, env: Env) => {
+  const id = (request as unknown as { params: { id: string } }).params.id;
+  return getReport(request, env, id);
+});
 
 // 404 catch-all
 router.all("*", () => {
