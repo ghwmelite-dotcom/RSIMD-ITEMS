@@ -6,7 +6,10 @@ import {
   getEquipmentById,
   getEquipmentByTag,
   getMaintenanceForEquipment,
+  getEquipmentLogStats,
+  getAllEquipmentLogStats,
 } from "../db/queries";
+import { calculateHealthScore, getWin11Readiness } from "../services/health-score";
 
 const VALID_TYPES = [
   "desktop",
@@ -49,7 +52,18 @@ export async function listEquipmentHandler(
   };
 
   const equipment = await listEquipment(env.DB, filters);
-  return jsonResponse(equipment, 200, request);
+  const logStatsMap = await getAllEquipmentLogStats(env.DB);
+
+  const enriched = equipment.map((item) => {
+    const stats = logStatsMap.get(item.id) ?? { corrective_emergency_count: 0, last_log_date: null };
+    return {
+      ...item,
+      health_score: calculateHealthScore(item, stats.corrective_emergency_count, stats.last_log_date),
+      win11_readiness: getWin11Readiness(item.os_version, item.processor_gen),
+    };
+  });
+
+  return jsonResponse(enriched, 200, request);
 }
 
 export async function getEquipmentHandler(
@@ -65,8 +79,18 @@ export async function getEquipmentHandler(
     return errorResponse("Equipment not found", 404, request);
   }
 
-  const maintenance_history = await getMaintenanceForEquipment(env.DB, id);
-  return jsonResponse({ equipment, maintenance_history }, 200, request);
+  const [maintenance_history, logStats] = await Promise.all([
+    getMaintenanceForEquipment(env.DB, id),
+    getEquipmentLogStats(env.DB, id),
+  ]);
+
+  const enrichedEquipment = {
+    ...equipment,
+    health_score: calculateHealthScore(equipment, logStats.corrective_emergency_count, logStats.last_log_date),
+    win11_readiness: getWin11Readiness(equipment.os_version, equipment.processor_gen),
+  };
+
+  return jsonResponse({ equipment: enrichedEquipment, maintenance_history }, 200, request);
 }
 
 export async function getEquipmentByTagHandler(
@@ -82,11 +106,18 @@ export async function getEquipmentByTagHandler(
     return errorResponse("Equipment not found for this asset tag", 404, request);
   }
 
-  const maintenance_history = await getMaintenanceForEquipment(
-    env.DB,
-    equipment.id
-  );
-  return jsonResponse({ equipment, maintenance_history }, 200, request);
+  const [maintenance_history, logStats] = await Promise.all([
+    getMaintenanceForEquipment(env.DB, equipment.id),
+    getEquipmentLogStats(env.DB, equipment.id),
+  ]);
+
+  const enrichedEquipment = {
+    ...equipment,
+    health_score: calculateHealthScore(equipment, logStats.corrective_emergency_count, logStats.last_log_date),
+    win11_readiness: getWin11Readiness(equipment.os_version, equipment.processor_gen),
+  };
+
+  return jsonResponse({ equipment: enrichedEquipment, maintenance_history }, 200, request);
 }
 
 export async function createEquipmentHandler(

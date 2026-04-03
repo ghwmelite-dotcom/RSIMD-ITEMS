@@ -190,3 +190,68 @@ export async function getMaintenanceLog(
     .bind(id)
     .first<MaintenanceLogRow>();
 }
+
+export async function getEquipmentLogStats(
+  db: D1Database,
+  equipmentId: string
+): Promise<{ corrective_emergency_count: number; last_log_date: string | null }> {
+  const [countResult, lastDateResult] = await Promise.all([
+    db
+      .prepare(
+        "SELECT COUNT(*) as cnt FROM maintenance_logs WHERE equipment_id = ? AND maintenance_type IN ('corrective', 'emergency')"
+      )
+      .bind(equipmentId)
+      .first<{ cnt: number }>(),
+    db
+      .prepare(
+        "SELECT MAX(logged_date) as last_date FROM maintenance_logs WHERE equipment_id = ?"
+      )
+      .bind(equipmentId)
+      .first<{ last_date: string | null }>(),
+  ]);
+
+  return {
+    corrective_emergency_count: countResult?.cnt ?? 0,
+    last_log_date: lastDateResult?.last_date ?? null,
+  };
+}
+
+export async function getAllEquipmentLogStats(
+  db: D1Database
+): Promise<Map<string, { corrective_emergency_count: number; last_log_date: string | null }>> {
+  const [countResults, lastDateResults] = await Promise.all([
+    db
+      .prepare(
+        "SELECT equipment_id, COUNT(*) as cnt FROM maintenance_logs WHERE maintenance_type IN ('corrective', 'emergency') AND equipment_id IS NOT NULL GROUP BY equipment_id"
+      )
+      .all<{ equipment_id: string; cnt: number }>(),
+    db
+      .prepare(
+        "SELECT equipment_id, MAX(logged_date) as last_date FROM maintenance_logs WHERE equipment_id IS NOT NULL GROUP BY equipment_id"
+      )
+      .all<{ equipment_id: string; last_date: string | null }>(),
+  ]);
+
+  const statsMap = new Map<string, { corrective_emergency_count: number; last_log_date: string | null }>();
+
+  for (const row of countResults.results) {
+    statsMap.set(row.equipment_id, {
+      corrective_emergency_count: row.cnt,
+      last_log_date: null,
+    });
+  }
+
+  for (const row of lastDateResults.results) {
+    const existing = statsMap.get(row.equipment_id);
+    if (existing) {
+      existing.last_log_date = row.last_date;
+    } else {
+      statsMap.set(row.equipment_id, {
+        corrective_emergency_count: 0,
+        last_log_date: row.last_date,
+      });
+    }
+  }
+
+  return statsMap;
+}
