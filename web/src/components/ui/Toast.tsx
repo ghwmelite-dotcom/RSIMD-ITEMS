@@ -14,7 +14,7 @@ interface ToastProps {
 const typeStyles = {
   success: "bg-ghana-green text-white",
   error: "bg-ghana-red text-white",
-  info: "bg-gray-800 text-white",
+  info: "bg-gray-800 dark:bg-gray-700 text-white",
 };
 
 export function Toast({ toast, onDismiss }: ToastProps) {

@@ -26,11 +26,11 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
       <Card className="w-full max-w-sm" padding="lg">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-ghana-green">RSIMD-ITEMS</h1>
-          <p className="text-sm text-gray-500 mt-1">OHCS Equipment Maintenance</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">OHCS Equipment Maintenance</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
