@@ -9,6 +9,7 @@ import { EquipmentPage } from "./pages/EquipmentPage";
 import { EquipmentDetailPage } from "./pages/EquipmentDetailPage";
 import { MaintenancePage } from "./pages/MaintenancePage";
 import { ScanPage } from "./pages/ScanPage";
+import { ReportsPage } from "./pages/ReportsPage";
 
 function ProtectedRoutes() {
   const { user, isLoading } = useAuth();
@@ -35,6 +36,7 @@ function ProtectedRoutes() {
         <Route path="maintenance" element={<MaintenancePage />} />
         <Route path="scan" element={<ScanPage />} />
         <Route path="scan/:assetTag" element={<ScanPage />} />
+        <Route path="reports" element={<ReportsPage />} />
       </Routes>
     </AppShell>
   );
