@@ -3,6 +3,7 @@ import { useOfflineSync } from "../../hooks/useOfflineSync";
 import { useTheme } from "../../hooks/useTheme";
 import { Button } from "../ui/Button";
 import { Badge } from "../ui/Badge";
+import { SearchBar } from "./SearchBar";
 
 export function Header() {
   const { user, logout } = useAuth();
@@ -15,6 +16,7 @@ export function Header() {
         <h1 className="text-lg font-bold text-ghana-green">RSIMD-ITEMS</h1>
       </div>
       <div className="hidden lg:block" />
+      <SearchBar />
       <div className="flex items-center gap-4">
         <button
           type="button"

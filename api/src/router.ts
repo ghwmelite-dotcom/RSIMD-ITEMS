@@ -35,6 +35,7 @@ import {
   bulkSync,
 } from "./routes/maintenance";
 import { dashboardSummary, dashboardTrends } from "./routes/dashboard";
+import { search } from "./routes/search";
 import {
   listReports,
   getReport,
@@ -140,6 +141,9 @@ router.get("/api/reports/:id", (request: Request, env: Env) => {
   const id = (request as unknown as { params: { id: string } }).params.id;
   return getReport(request, env, id);
 });
+
+// Search
+router.get("/api/search", (request: Request, env: Env) => search(request, env));
 
 // 404 catch-all
 router.all("*", () => {
