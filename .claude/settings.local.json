@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"C:/Users/USER/OneDrive - Smart Workplace/Desktop/Projects/RSIMD-ITEMS\" log --oneline -5)"
+    ]
+  }
+}
