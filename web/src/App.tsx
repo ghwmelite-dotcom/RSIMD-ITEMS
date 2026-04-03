@@ -5,6 +5,8 @@ import { AppShell } from "./components/layout/AppShell";
 import { LoginPage } from "./pages/LoginPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { AdminPage } from "./pages/AdminPage";
+import { EquipmentPage } from "./pages/EquipmentPage";
+import { EquipmentDetailPage } from "./pages/EquipmentDetailPage";
 
 function ProtectedRoutes() {
   const { user, isLoading } = useAuth();
@@ -26,6 +28,8 @@ function ProtectedRoutes() {
       <Routes>
         <Route index element={<DashboardPage />} />
         <Route path="admin" element={<AdminPage />} />
+        <Route path="equipment" element={<EquipmentPage />} />
+        <Route path="equipment/:id" element={<EquipmentDetailPage />} />
       </Routes>
     </AppShell>
   );
