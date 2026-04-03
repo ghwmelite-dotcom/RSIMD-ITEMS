@@ -1,9 +1,50 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import { useAuth } from "./hooks/useAuth";
+import { AppShell } from "./components/layout/AppShell";
+import { LoginPage } from "./pages/LoginPage";
+import { DashboardPage } from "./pages/DashboardPage";
+
+function ProtectedRoutes() {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin h-8 w-8 border-4 border-ghana-green border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return (
+    <AppShell>
+      <Routes>
+        <Route index element={<DashboardPage />} />
+      </Routes>
+    </AppShell>
+  );
+}
+
+function LoginRoute() {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) return null;
+  if (user) return <Navigate to="/" replace />;
+
+  return <LoginPage />;
+}
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<div className="p-8 text-center"><h1 className="text-2xl font-bold text-ghana-green">RSIMD-ITEMS</h1><p className="mt-2 text-gray-600">OHCS Equipment Maintenance System</p></div>} />
-    </Routes>
+    <AuthProvider>
+      <Routes>
+        <Route path="/login" element={<LoginRoute />} />
+        <Route path="/*" element={<ProtectedRoutes />} />
+      </Routes>
+    </AuthProvider>
   );
 }
