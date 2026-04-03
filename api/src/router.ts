@@ -34,6 +34,7 @@ import {
   updateLog,
   bulkSync,
 } from "./routes/maintenance";
+import { dashboardSummary, dashboardTrends } from "./routes/dashboard";
 
 const router = Router();
 
@@ -117,6 +118,10 @@ router.put("/api/maintenance/:id", (request: Request, env: Env) => {
   const id = (request as unknown as { params: { id: string } }).params.id;
   return updateLog(request, env, id);
 });
+
+// Dashboard
+router.get("/api/dashboard/summary", (request: Request, env: Env) => dashboardSummary(request, env));
+router.get("/api/dashboard/trends", (request: Request, env: Env) => dashboardTrends(request, env));
 
 // 404 catch-all
 router.all("*", () => {
