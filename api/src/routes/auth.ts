@@ -82,7 +82,7 @@ export async function me(request: Request, env: Env): Promise<Response> {
       role: technician.role,
       email: technician.email,
       phone: technician.phone,
-      assigned_entities: JSON.parse(technician.assigned_entities),
+      assigned_entities: (() => { try { return JSON.parse(technician.assigned_entities); } catch { return []; } })(),
     },
     200,
     request

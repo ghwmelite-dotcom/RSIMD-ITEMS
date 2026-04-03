@@ -1,4 +1,4 @@
-import type { Env, TechnicianRow } from "../types";
+import type { TechnicianRow } from "../types";
 
 export async function getTechnicianByEmail(
   db: D1Database,

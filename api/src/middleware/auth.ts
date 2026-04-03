@@ -19,12 +19,9 @@ export async function authenticate(
   return JSON.parse(sessionJson) as AuthSession;
 }
 
-export function requireRole(session: AuthSession, ...roles: AuthSession["role"][]): Response | null {
+export function requireRole(session: AuthSession, request: Request, ...roles: AuthSession["role"][]): Response | null {
   if (!roles.includes(session.role)) {
-    return new Response(
-      JSON.stringify({ error: `Requires role: ${roles.join(" or ")}` }),
-      { status: 403, headers: { "Content-Type": "application/json" } }
-    );
+    return errorResponse(`Requires role: ${roles.join(" or ")}`, 403, request);
   }
   return null;
 }
