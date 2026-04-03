@@ -37,4 +37,4 @@ INSERT OR IGNORE INTO maintenance_categories (id, name, description) VALUES
 
 -- Default admin user (bcrypt hash of 'admin123')
 INSERT OR IGNORE INTO technicians (id, name, role, email, phone, assigned_entities, is_active, password_hash) VALUES
-  ('tech-admin', 'System Administrator', 'admin', 'admin@ohcs.gov.gh', '', '[]', 1, '$2a$10$rQEY1f3wOrpOhLFcKXwSIeKlGj6rqFqBmkaT6HODWqbjsxVml3fKa');
+  ('tech-admin', 'System Administrator', 'admin', 'admin@ohcs.gov.gh', '', '[]', 1, '$2a$10$KCoBLAiJU5I1/uin6JvkQ.kFQAjN7MSl3Tie4rXvur.SmlT..Mbf6');
