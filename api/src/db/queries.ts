@@ -136,3 +136,57 @@ export async function getMaintenanceForEquipment(
     .all<MaintenanceLogRow>();
   return result.results;
 }
+
+export async function listMaintenanceLogs(
+  db: D1Database,
+  filters: {
+    year?: number;
+    quarter?: number;
+    maintenance_type?: string;
+    org_entity_id?: string;
+    category_id?: string;
+  }
+): Promise<MaintenanceLogRow[]> {
+  let sql = "SELECT * FROM maintenance_logs WHERE 1=1";
+  const binds: (string | number)[] = [];
+
+  if (filters.year) {
+    sql += " AND year = ?";
+    binds.push(filters.year);
+  }
+  if (filters.quarter) {
+    sql += " AND quarter = ?";
+    binds.push(filters.quarter);
+  }
+  if (filters.maintenance_type) {
+    sql += " AND maintenance_type = ?";
+    binds.push(filters.maintenance_type);
+  }
+  if (filters.org_entity_id) {
+    sql += " AND org_entity_id = ?";
+    binds.push(filters.org_entity_id);
+  }
+  if (filters.category_id) {
+    sql += " AND category_id = ?";
+    binds.push(filters.category_id);
+  }
+
+  sql += " ORDER BY logged_date DESC LIMIT 200";
+
+  const stmt = db.prepare(sql);
+  const result =
+    binds.length > 0
+      ? await stmt.bind(...binds).all<MaintenanceLogRow>()
+      : await stmt.all<MaintenanceLogRow>();
+  return result.results;
+}
+
+export async function getMaintenanceLog(
+  db: D1Database,
+  id: string
+): Promise<MaintenanceLogRow | null> {
+  return db
+    .prepare("SELECT * FROM maintenance_logs WHERE id = ?")
+    .bind(id)
+    .first<MaintenanceLogRow>();
+}

@@ -27,6 +27,13 @@ import {
   updateEquipmentHandler,
   deleteEquipmentHandler,
 } from "./routes/equipment";
+import {
+  listLogs,
+  getLog,
+  createLog,
+  updateLog,
+  bulkSync,
+} from "./routes/maintenance";
 
 const router = Router();
 
@@ -96,6 +103,19 @@ router.put("/api/equipment/:id", (request: Request, env: Env) => {
 router.delete("/api/equipment/:id", (request: Request, env: Env) => {
   const id = (request as unknown as { params: { id: string } }).params.id;
   return deleteEquipmentHandler(request, env, id);
+});
+
+// Maintenance Logs (bulk-sync MUST be before :id)
+router.get("/api/maintenance", (request: Request, env: Env) => listLogs(request, env));
+router.post("/api/maintenance/bulk-sync", (request: Request, env: Env) => bulkSync(request, env));
+router.post("/api/maintenance", (request: Request, env: Env) => createLog(request, env));
+router.get("/api/maintenance/:id", (request: Request, env: Env) => {
+  const id = (request as unknown as { params: { id: string } }).params.id;
+  return getLog(request, env, id);
+});
+router.put("/api/maintenance/:id", (request: Request, env: Env) => {
+  const id = (request as unknown as { params: { id: string } }).params.id;
+  return updateLog(request, env, id);
 });
 
 // 404 catch-all
