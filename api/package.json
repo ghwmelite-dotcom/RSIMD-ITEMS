@@ -1,0 +1,23 @@
+{
+  "name": "rsimd-items-api",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "build": "wrangler deploy --dry-run",
+    "deploy": "wrangler deploy",
+    "db:init": "wrangler d1 execute rsimd_items_db --local --file=src/db/schema.sql",
+    "db:seed": "wrangler d1 execute rsimd_items_db --local --file=src/db/seed.sql",
+    "db:reset": "npm run db:init && npm run db:seed"
+  },
+  "dependencies": {
+    "itty-router": "^5.0.0",
+    "bcryptjs": "^2.4.3"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240909.0",
+    "typescript": "^5.5.0",
+    "wrangler": "^3.78.0",
+    "@types/bcryptjs": "^2.4.6"
+  }
+}
