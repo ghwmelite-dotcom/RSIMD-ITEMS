@@ -18,7 +18,7 @@ export async function listReports(
       "SELECT * FROM reports ORDER BY year DESC, quarter DESC, created_at DESC"
     ).all<ReportRow>();
 
-    return jsonResponse({ data: result.results }, 200, request);
+    return jsonResponse(result.results, 200, request);
   } catch (err) {
     console.error("List reports error:", err);
     return errorResponse("Failed to list reports", 500, request);
@@ -44,7 +44,7 @@ export async function getReport(
       return errorResponse("Report not found", 404, request);
     }
 
-    return jsonResponse({ data: report }, 200, request);
+    return jsonResponse(report, 200, request);
   } catch (err) {
     console.error("Get report error:", err);
     return errorResponse("Failed to get report", 500, request);
@@ -145,7 +145,7 @@ export async function generateReport(
       .bind(id)
       .first<ReportRow>();
 
-    return jsonResponse({ data: report }, 201, request);
+    return jsonResponse(report, 201, request);
   } catch (err) {
     // Step 7: On error, update report with error log
     const errorMsg =

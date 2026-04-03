@@ -25,7 +25,7 @@ export async function dashboardSummary(
 
   try {
     const summary = await getDashboardSummary(env.DB, year, quarter);
-    return jsonResponse({ data: summary }, 200, request);
+    return jsonResponse(summary, 200, request);
   } catch (err) {
     console.error("Dashboard summary error:", err);
     return errorResponse("Failed to load dashboard summary", 500, request);
@@ -51,7 +51,7 @@ export async function dashboardTrends(
 
   try {
     const trends = await getYearlyTrends(env.DB, year);
-    return jsonResponse({ data: trends }, 200, request);
+    return jsonResponse(trends, 200, request);
   } catch (err) {
     console.error("Dashboard trends error:", err);
     return errorResponse("Failed to load dashboard trends", 500, request);

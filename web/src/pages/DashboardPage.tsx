@@ -53,10 +53,9 @@ export function DashboardPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await api.get<{ data: DashboardSummary }>(
+      const result = await api.get<DashboardSummary>(
         `/dashboard/summary?year=${year}&quarter=${quarter}`
       );
-      const result = response.data;
       setData(result);
     } catch {
       showToast("error", "Failed to load dashboard data");
