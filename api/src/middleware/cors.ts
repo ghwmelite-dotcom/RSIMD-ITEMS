@@ -1,11 +1,16 @@
 const ALLOWED_ORIGINS = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
+  "https://rsimd-items.pages.dev",
 ];
 
 export function corsHeaders(request: Request): Record<string, string> {
   const origin = request.headers.get("Origin") ?? "";
-  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0]!;
+  // Allow localhost, *.pages.dev, and *.workers.dev origins
+  const isAllowed = ALLOWED_ORIGINS.includes(origin) ||
+    origin.endsWith(".pages.dev") ||
+    origin.endsWith(".workers.dev");
+  const allowedOrigin = isAllowed ? origin : ALLOWED_ORIGINS[0]!;
 
   return {
     "Access-Control-Allow-Origin": allowedOrigin,

@@ -4,16 +4,16 @@ compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
 [vars]
-ENVIRONMENT = "development"
+ENVIRONMENT = "production"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "rsimd_items_db"
-database_id = "local"
+database_id = "c0ef4000-85be-435e-a9d4-db9654e055f5"
 
 [[kv_namespaces]]
 binding = "KV"
-id = "local"
+id = "b873309f9dba413b93852acd0acf9699"
 
 [[r2_buckets]]
 binding = "R2"
