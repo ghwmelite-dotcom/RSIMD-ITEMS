@@ -454,7 +454,7 @@ export async function detectAnomalies(
       db
         .prepare(
           `SELECT COUNT(*) as count FROM equipment
-           WHERE os_type = 'Windows 10' AND status = 'active'`
+           WHERE os_version LIKE '%Windows 10%' AND status != 'decommissioned'`
         )
         .first<{ count: number }>(),
     ]);
@@ -580,7 +580,7 @@ export async function getEntityDetail(
     // by_equipment (top 10)
     db
       .prepare(
-        `SELECT e.id as equipment_id, e.asset_tag, e.name, COUNT(*) as count
+        `SELECT e.id as equipment_id, e.asset_tag, COALESCE(e.make || ' ' || e.model, e.asset_tag) as name, COUNT(*) as count
          FROM maintenance_logs ml
          JOIN equipment e ON e.id = ml.equipment_id
          WHERE ml.org_entity_id = ? AND ml.year = ? AND ml.quarter = ?
