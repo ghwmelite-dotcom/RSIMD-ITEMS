@@ -25,7 +25,7 @@ export function EntityBreakdown({ data, onEntityClick }: EntityBreakdownProps) {
 
   return (
     <Card>
-      <h3 className="font-display text-lg text-surface-900 dark:text-surface-100 mb-4">By Directorate/Unit</h3>
+      <h3 className="font-display text-sm font-semibold text-surface-900 dark:text-surface-100 uppercase tracking-wider mb-3">By Directorate/Unit</h3>
       <ResponsiveContainer width="100%" height={height}>
         <BarChart data={data} layout="vertical">
           <XAxis type="number" allowDecimals={false} />

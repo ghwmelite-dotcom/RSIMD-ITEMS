@@ -41,7 +41,7 @@ export function RiskSummary() {
 
   return (
     <Card>
-      <h3 className="font-display text-lg text-surface-900 dark:text-surface-100 mb-4">
+      <h3 className="font-display text-sm font-semibold text-surface-900 dark:text-surface-100 uppercase tracking-wider mb-3">
         Equipment Risk
       </h3>
 

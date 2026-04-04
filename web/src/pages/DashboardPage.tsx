@@ -131,7 +131,7 @@ export function DashboardPage() {
             />
           </div>
 
-          <div className="opacity-0 animate-fade-in grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="opacity-0 animate-fade-in grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <CategoryRanking data={data.top_categories} />
             <RecentActivity data={data.recent_logs} />
             <ReadinessWidget />

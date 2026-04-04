@@ -33,7 +33,8 @@
       "Bash(pkill -f wrangler)",
       "Bash(node -e \"const bcrypt = require\\('bcryptjs'\\); bcrypt.hash\\('1234', 10, \\(e, h\\) => console.log\\(h\\)\\)\")",
       "Bash(node -e ':*)",
-      "Bash(npm ls:*)"
+      "Bash(npm ls:*)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(f'OK: table intact, {len\\(d\\)} rows'\\) if isinstance\\(d,list\\) else print\\('Result:', d\\)\")"
     ]
   }
 }

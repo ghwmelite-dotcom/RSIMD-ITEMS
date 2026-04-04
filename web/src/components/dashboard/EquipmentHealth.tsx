@@ -33,7 +33,7 @@ export function EquipmentHealth({ data }: EquipmentHealthProps) {
   if (total === 0) {
     return (
       <Card>
-        <h3 className="font-display text-lg text-surface-900 dark:text-surface-100 mb-4">Equipment Health</h3>
+        <h3 className="font-display text-sm font-semibold text-surface-900 dark:text-surface-100 uppercase tracking-wider mb-3">Equipment Health</h3>
         <p className="text-sm text-surface-400 text-center py-8">No equipment data</p>
       </Card>
     );
@@ -41,7 +41,7 @@ export function EquipmentHealth({ data }: EquipmentHealthProps) {
 
   return (
     <Card>
-      <h3 className="font-display text-lg text-surface-900 dark:text-surface-100 mb-4">Equipment Health</h3>
+      <h3 className="font-display text-sm font-semibold text-surface-900 dark:text-surface-100 uppercase tracking-wider mb-3">Equipment Health</h3>
       <ResponsiveContainer width="100%" height={250}>
         <PieChart>
           <Pie
