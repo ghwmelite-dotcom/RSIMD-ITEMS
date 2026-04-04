@@ -26,6 +26,7 @@ import {
   createEquipmentHandler,
   updateEquipmentHandler,
   deleteEquipmentHandler,
+  bulkImportHandler,
 } from "./routes/equipment";
 import {
   listLogs,
@@ -35,7 +36,8 @@ import {
   bulkSync,
 } from "./routes/maintenance";
 import { readinessReport, agingReport } from "./routes/equipment-analytics";
-import { dashboardSummary, dashboardTrends, entityDetail } from "./routes/dashboard";
+import { dashboardSummary, dashboardTrends, entityDetail, workload } from "./routes/dashboard";
+import { listAuditLog } from "./routes/audit";
 import { search } from "./routes/search";
 import { uploadFile } from "./routes/upload";
 import {
@@ -101,6 +103,7 @@ router.get("/api/equipment/by-tag/:assetTag", (request: Request, env: Env) => {
   const assetTag = (request as unknown as { params: { assetTag: string } }).params.assetTag;
   return getEquipmentByTagHandler(request, env, assetTag);
 });
+router.post("/api/equipment/bulk-import", (request: Request, env: Env) => bulkImportHandler(request, env));
 router.get("/api/equipment/readiness", (request: Request, env: Env) => readinessReport(request, env));
 router.get("/api/equipment/aging", (request: Request, env: Env) => agingReport(request, env));
 router.get("/api/equipment", (request: Request, env: Env) => listEquipmentHandler(request, env));
@@ -134,6 +137,7 @@ router.put("/api/maintenance/:id", (request: Request, env: Env) => {
 // Dashboard
 router.get("/api/dashboard/summary", (request: Request, env: Env) => dashboardSummary(request, env));
 router.get("/api/dashboard/trends", (request: Request, env: Env) => dashboardTrends(request, env));
+router.get("/api/dashboard/workload", (request: Request, env: Env) => workload(request, env));
 router.get("/api/dashboard/entity/:id", (request: Request, env: Env) => {
   const id = (request as unknown as { params: { id: string } }).params.id;
   return entityDetail(request, env, id);
@@ -151,6 +155,9 @@ router.get("/api/reports/:id", (request: Request, env: Env) => {
   const id = (request as unknown as { params: { id: string } }).params.id;
   return getReport(request, env, id);
 });
+
+// Audit Log
+router.get("/api/audit-log", (request: Request, env: Env) => listAuditLog(request, env));
 
 // Search
 router.get("/api/search", (request: Request, env: Env) => search(request, env));

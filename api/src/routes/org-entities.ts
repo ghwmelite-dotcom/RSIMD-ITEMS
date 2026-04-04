@@ -2,6 +2,7 @@ import type { Env, AuthSession, OrgEntityRow } from "../types";
 import { jsonResponse, errorResponse } from "../middleware/error-handler";
 import { authenticate, requireRole } from "../middleware/auth";
 import { listOrgEntities, getOrgEntity } from "../db/queries";
+import { logAudit } from "../db/audit";
 
 const VALID_TYPES = ["directorate", "unit", "secretariat"] as const;
 
@@ -91,6 +92,18 @@ export async function createEntity(
     .run();
 
   const created = await getOrgEntity(env.DB, id);
+
+  try {
+    await logAudit(env.DB, {
+      actor_id: session.technician_id,
+      actor_name: session.name,
+      action: "create",
+      resource_type: "org_entity",
+      resource_id: id,
+      details: `Created ${name}`,
+    });
+  } catch { /* audit failure should not break main operation */ }
+
   return jsonResponse(formatEntity(created!), 201, request);
 }
 
@@ -147,6 +160,18 @@ export async function updateEntity(
     .run();
 
   const updated = await getOrgEntity(env.DB, id);
+
+  try {
+    await logAudit(env.DB, {
+      actor_id: session.technician_id,
+      actor_name: session.name,
+      action: "update",
+      resource_type: "org_entity",
+      resource_id: id,
+      details: `Updated ${name}`,
+    });
+  } catch { /* audit failure should not break main operation */ }
+
   return jsonResponse(formatEntity(updated!), 200, request);
 }
 
@@ -172,6 +197,17 @@ export async function deleteEntity(
   )
     .bind(new Date().toISOString(), id)
     .run();
+
+  try {
+    await logAudit(env.DB, {
+      actor_id: session.technician_id,
+      actor_name: session.name,
+      action: "delete",
+      resource_type: "org_entity",
+      resource_id: id,
+      details: `Deactivated ${existing.name}`,
+    });
+  } catch { /* audit failure should not break main operation */ }
 
   return jsonResponse({ success: true }, 200, request);
 }

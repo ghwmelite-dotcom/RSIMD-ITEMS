@@ -1,6 +1,7 @@
 import type { Env, AuthSession, EquipmentRow } from "../types";
 import { jsonResponse, errorResponse } from "../middleware/error-handler";
-import { authenticate } from "../middleware/auth";
+import { authenticate, requireRole } from "../middleware/auth";
+import { logAudit } from "../db/audit";
 import {
   listEquipment,
   getEquipmentById,
@@ -187,6 +188,18 @@ export async function createEquipmentHandler(
     .run();
 
   const created = await getEquipmentById(env.DB, id);
+
+  try {
+    await logAudit(env.DB, {
+      actor_id: sessionOrError.technician_id,
+      actor_name: sessionOrError.name,
+      action: "create",
+      resource_type: "equipment",
+      resource_id: id,
+      details: `Created ${type} (${asset_tag})`,
+    });
+  } catch { /* audit log failure should not break main operation */ }
+
   return jsonResponse(created, 201, request);
 }
 
@@ -275,6 +288,18 @@ export async function updateEquipmentHandler(
     .run();
 
   const updated = await getEquipmentById(env.DB, id);
+
+  try {
+    await logAudit(env.DB, {
+      actor_id: sessionOrError.technician_id,
+      actor_name: sessionOrError.name,
+      action: "update",
+      resource_type: "equipment",
+      resource_id: id,
+      details: `Updated equipment ${existing.asset_tag}`,
+    });
+  } catch { /* audit log failure should not break main operation */ }
+
   return jsonResponse(updated, 200, request);
 }
 
@@ -297,5 +322,107 @@ export async function deleteEquipmentHandler(
     .bind(new Date().toISOString(), id)
     .run();
 
+  try {
+    await logAudit(env.DB, {
+      actor_id: sessionOrError.technician_id,
+      actor_name: sessionOrError.name,
+      action: "delete",
+      resource_type: "equipment",
+      resource_id: id,
+      details: `Decommissioned equipment ${existing.asset_tag}`,
+    });
+  } catch { /* audit log failure should not break main operation */ }
+
   return jsonResponse({ success: true }, 200, request);
+}
+
+export async function bulkImportHandler(
+  request: Request,
+  env: Env
+): Promise<Response> {
+  const sessionOrError = await authenticate(request, env);
+  if (sessionOrError instanceof Response) return sessionOrError;
+  const roleError = requireRole(sessionOrError, request, "admin");
+  if (roleError) return roleError;
+
+  let body: {
+    items: Array<{
+      type: string;
+      make?: string;
+      model?: string;
+      processor?: string;
+      serial_number?: string;
+      org_entity_id: string;
+      room_number?: string;
+      installed_date?: string;
+      notes?: string;
+      os_version?: string;
+      processor_gen?: string;
+    }>;
+  };
+  try {
+    body = await request.json();
+  } catch {
+    return errorResponse("Invalid JSON", 400, request);
+  }
+
+  if (!Array.isArray(body.items)) {
+    return errorResponse("items array required", 400, request);
+  }
+
+  let imported = 0;
+  const errors: { row: number; message: string }[] = [];
+
+  for (let i = 0; i < body.items.length; i++) {
+    const item = body.items[i]!;
+    if (!item.type || !item.org_entity_id) {
+      errors.push({ row: i + 1, message: "type and org_entity_id are required" });
+      continue;
+    }
+
+    try {
+      const id = crypto.randomUUID();
+      const prefix = item.type.substring(0, 3).toUpperCase();
+      const assetTag = `OHCS-${prefix}-${Date.now().toString(36).toUpperCase()}${i}`;
+
+      await env.DB.prepare(
+        `INSERT INTO equipment (id, asset_tag, type, make, model, processor, serial_number, org_entity_id, room_number, status, installed_date, notes, os_version, processor_gen, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?, ?, ?, datetime('now'), datetime('now'))`
+      )
+        .bind(
+          id,
+          assetTag,
+          item.type,
+          item.make ?? null,
+          item.model ?? null,
+          item.processor ?? null,
+          item.serial_number ?? null,
+          item.org_entity_id,
+          item.room_number ?? null,
+          item.installed_date ?? null,
+          item.notes ?? null,
+          item.os_version ?? null,
+          item.processor_gen ?? null
+        )
+        .run();
+      imported++;
+    } catch (err) {
+      errors.push({
+        row: i + 1,
+        message: err instanceof Error ? err.message : "Insert failed",
+      });
+    }
+  }
+
+  try {
+    await logAudit(env.DB, {
+      actor_id: sessionOrError.technician_id,
+      actor_name: sessionOrError.name,
+      action: "create",
+      resource_type: "equipment",
+      details: `Bulk imported ${imported} equipment items (${errors.length} errors)`,
+    });
+  } catch { /* audit log failure should not break main operation */ }
+
+  return jsonResponse({ imported, errors }, 200, request);
 }

@@ -591,6 +591,66 @@ export async function detectAnomalies(
   return alerts;
 }
 
+// --- Technician workload ---
+
+export interface TechnicianWorkloadEntry {
+  id: string;
+  name: string;
+  total: number;
+  by_type: Record<string, number>;
+  entities: string[];
+}
+
+export async function getTechnicianWorkload(
+  db: D1Database,
+  year: number,
+  quarter: number
+): Promise<TechnicianWorkloadEntry[]> {
+  const [logCounts, entityCoverage] = await Promise.all([
+    db
+      .prepare(
+        `SELECT t.id, t.name, ml.maintenance_type, COUNT(*) as count
+         FROM maintenance_logs ml
+         JOIN technicians t ON t.id = ml.technician_id
+         WHERE ml.year = ? AND ml.quarter = ?
+         GROUP BY ml.technician_id, ml.maintenance_type`
+      )
+      .bind(year, quarter)
+      .all<{ id: string; name: string; maintenance_type: string; count: number }>(),
+
+    db
+      .prepare(
+        `SELECT ml.technician_id as id, oe.code
+         FROM maintenance_logs ml
+         JOIN org_entities oe ON oe.id = ml.org_entity_id
+         WHERE ml.year = ? AND ml.quarter = ?
+         GROUP BY ml.technician_id, ml.org_entity_id`
+      )
+      .bind(year, quarter)
+      .all<{ id: string; code: string }>(),
+  ]);
+
+  const techMap = new Map<string, TechnicianWorkloadEntry>();
+
+  for (const row of logCounts.results) {
+    if (!techMap.has(row.id)) {
+      techMap.set(row.id, { id: row.id, name: row.name, total: 0, by_type: {}, entities: [] });
+    }
+    const entry = techMap.get(row.id)!;
+    entry.total += row.count;
+    entry.by_type[row.maintenance_type] = row.count;
+  }
+
+  for (const row of entityCoverage.results) {
+    const entry = techMap.get(row.id);
+    if (entry && !entry.entities.includes(row.code)) {
+      entry.entities.push(row.code);
+    }
+  }
+
+  return Array.from(techMap.values()).sort((a, b) => b.total - a.total);
+}
+
 // --- Entity drill-down ---
 
 export interface EntityDetail {

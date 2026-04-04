@@ -7,6 +7,7 @@ import {
   getPreviousQuarterSummary,
   detectAnomalies,
   getEntityDetail,
+  getTechnicianWorkload,
 } from "../services/aggregator";
 
 export async function dashboardSummary(
@@ -66,6 +67,23 @@ export async function dashboardTrends(
     console.error("Dashboard trends error:", err);
     return errorResponse("Failed to load dashboard trends", 500, request);
   }
+}
+
+export async function workload(
+  request: Request,
+  env: Env
+): Promise<Response> {
+  const sessionOrError = await authenticate(request, env);
+  if (sessionOrError instanceof Response) return sessionOrError;
+
+  const url = new URL(request.url);
+  const now = new Date();
+  const year = Number(url.searchParams.get("year")) || now.getFullYear();
+  const quarter =
+    Number(url.searchParams.get("quarter")) || Math.ceil((now.getMonth() + 1) / 3);
+
+  const technicians = await getTechnicianWorkload(env.DB, year, quarter);
+  return jsonResponse({ technicians }, 200, request);
 }
 
 export async function entityDetail(

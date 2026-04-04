@@ -109,3 +109,16 @@ CREATE INDEX IF NOT EXISTS idx_logs_type ON maintenance_logs(maintenance_type);
 CREATE INDEX IF NOT EXISTS idx_logs_category ON maintenance_logs(category_id);
 CREATE INDEX IF NOT EXISTS idx_logs_date ON maintenance_logs(logged_date);
 CREATE INDEX IF NOT EXISTS idx_reports_quarter ON reports(year, quarter);
+
+-- Audit log
+CREATE TABLE IF NOT EXISTS audit_log (
+  id TEXT PRIMARY KEY,
+  actor_id TEXT NOT NULL,
+  actor_name TEXT NOT NULL,
+  action TEXT NOT NULL CHECK (action IN ('create', 'update', 'delete')),
+  resource_type TEXT NOT NULL,
+  resource_id TEXT,
+  details TEXT,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_log(created_at);

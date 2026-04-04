@@ -3,6 +3,7 @@ import type { Env, AuthSession, TechnicianRow } from "../types";
 import { jsonResponse, errorResponse } from "../middleware/error-handler";
 import { authenticate, requireRole } from "../middleware/auth";
 import { listTechnicians, getTechnicianById } from "../db/queries";
+import { logAudit } from "../db/audit";
 
 function sanitizeTechnician(row: TechnicianRow) {
   let assignedEntities: string[] = [];
@@ -103,6 +104,18 @@ export async function createTechnician(
     .run();
 
   const created = await getTechnicianById(env.DB, id);
+
+  try {
+    await logAudit(env.DB, {
+      actor_id: session.technician_id,
+      actor_name: session.name,
+      action: "create",
+      resource_type: "technician",
+      resource_id: id,
+      details: `Created technician ${name}`,
+    });
+  } catch { /* audit failure should not break main operation */ }
+
   return jsonResponse(sanitizeTechnician(created!), 201, request);
 }
 
@@ -171,5 +184,17 @@ export async function updateTechnician(
   }
 
   const updated = await getTechnicianById(env.DB, id);
+
+  try {
+    await logAudit(env.DB, {
+      actor_id: session.technician_id,
+      actor_name: session.name,
+      action: "update",
+      resource_type: "technician",
+      resource_id: id,
+      details: `Updated technician ${name}`,
+    });
+  } catch { /* audit failure should not break main operation */ }
+
   return jsonResponse(sanitizeTechnician(updated!), 200, request);
 }

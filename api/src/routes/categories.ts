@@ -2,6 +2,7 @@ import type { Env, AuthSession, MaintenanceCategoryRow } from "../types";
 import { jsonResponse, errorResponse } from "../middleware/error-handler";
 import { authenticate, requireRole } from "../middleware/auth";
 import { listCategories } from "../db/queries";
+import { logAudit } from "../db/audit";
 
 function formatCategory(row: MaintenanceCategoryRow) {
   return {
@@ -59,6 +60,17 @@ export async function createCategory(
     .bind(id)
     .first<MaintenanceCategoryRow>();
 
+  try {
+    await logAudit(env.DB, {
+      actor_id: session.technician_id,
+      actor_name: session.name,
+      action: "create",
+      resource_type: "category",
+      resource_id: id,
+      details: `Created category ${name}`,
+    });
+  } catch { /* audit failure should not break main operation */ }
+
   return jsonResponse(formatCategory(created!), 201, request);
 }
 
@@ -106,6 +118,17 @@ export async function updateCategory(
   )
     .bind(id)
     .first<MaintenanceCategoryRow>();
+
+  try {
+    await logAudit(env.DB, {
+      actor_id: session.technician_id,
+      actor_name: session.name,
+      action: "update",
+      resource_type: "category",
+      resource_id: id,
+      details: `Updated category ${name}`,
+    });
+  } catch { /* audit failure should not break main operation */ }
 
   return jsonResponse(formatCategory(updated!), 200, request);
 }
