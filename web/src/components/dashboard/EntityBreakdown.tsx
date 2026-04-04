@@ -9,6 +9,7 @@ import {
 import { Card } from "../ui/Card";
 
 interface EntityData {
+  entity_id?: string;
   entity_code: string;
   entity_name: string;
   count: number;
@@ -16,9 +17,10 @@ interface EntityData {
 
 interface EntityBreakdownProps {
   data: EntityData[];
+  onEntityClick?: (entityId: string) => void;
 }
 
-export function EntityBreakdown({ data }: EntityBreakdownProps) {
+export function EntityBreakdown({ data, onEntityClick }: EntityBreakdownProps) {
   const height = Math.max(200, data.length * 40);
 
   return (
@@ -44,6 +46,13 @@ export function EntityBreakdown({ data }: EntityBreakdownProps) {
             dataKey="count"
             fill="#006B3F"
             radius={[0, 4, 4, 0]}
+            cursor={onEntityClick ? "pointer" : undefined}
+            onClick={(barData: unknown) => {
+              const payload = barData as { entity_id?: string };
+              if (onEntityClick && payload?.entity_id) {
+                onEntityClick(payload.entity_id);
+              }
+            }}
           />
         </BarChart>
       </ResponsiveContainer>

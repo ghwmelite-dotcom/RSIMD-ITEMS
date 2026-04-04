@@ -13,6 +13,7 @@ import { MaintenancePage } from "./pages/MaintenancePage";
 import { ScanPage } from "./pages/ScanPage";
 import { ReportsPage } from "./pages/ReportsPage";
 import { AgingReportPage } from "./pages/AgingReportPage";
+import { EntityDetailPage } from "./pages/EntityDetailPage";
 
 function ProtectedRoutes() {
   const { user, isLoading } = useAuth();
@@ -33,6 +34,7 @@ function ProtectedRoutes() {
     <AppShell>
       <Routes>
         <Route index element={<DashboardPage />} />
+        <Route path="dashboard/entity/:id" element={<EntityDetailPage />} />
         <Route path="admin" element={<AdminPage />} />
         <Route path="equipment" element={<EquipmentPage />} />
         <Route path="equipment/aging" element={<AgingReportPage />} />

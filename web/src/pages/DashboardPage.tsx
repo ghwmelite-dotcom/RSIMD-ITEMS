@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { api } from "../lib/api-client";
 import { useToast } from "../hooks/useToast";
 import { Select } from "../components/ui/Select";
@@ -8,12 +9,15 @@ import { EntityBreakdown } from "../components/dashboard/EntityBreakdown";
 import { CategoryRanking } from "../components/dashboard/CategoryRanking";
 import { RecentActivity } from "../components/dashboard/RecentActivity";
 import { EquipmentHealth } from "../components/dashboard/EquipmentHealth";
+import { AlertCards } from "../components/dashboard/AlertCards";
+import { ReadinessWidget } from "../components/dashboard/ReadinessWidget";
+import { RiskSummary } from "../components/dashboard/RiskSummary";
 
 interface DashboardSummary {
   total: number;
   by_type: Record<string, number>;
   by_month: { month: number; by_type: Record<string, number> }[];
-  by_entity: { entity_code: string; entity_name: string; count: number }[];
+  by_entity: { entity_id?: string; entity_code: string; entity_name: string; count: number }[];
   top_categories: { category_name: string; count: number }[];
   recent_logs: {
     id: number;
@@ -25,6 +29,8 @@ interface DashboardSummary {
     technician_name: string | null;
   }[];
   equipment_status: Record<string, number>;
+  previous?: { total: number; by_type: Record<string, number> };
+  alerts?: { type: string; message: string; severity: "high" | "medium" }[];
 }
 
 function currentQuarter(): number {
@@ -44,6 +50,7 @@ const QUARTER_OPTIONS = [
 ];
 
 export function DashboardPage() {
+  const navigate = useNavigate();
   const { showToast } = useToast();
   const [year, setYear] = useState(String(new Date().getFullYear()));
   const [quarter, setQuarter] = useState(String(currentQuarter()));
@@ -98,17 +105,33 @@ export function DashboardPage() {
 
       {!loading && data && (
         <div className="space-y-6">
-          <SummaryCards total={data.total} byType={data.by_type} />
+          {data.alerts && data.alerts.length > 0 && (
+            <AlertCards alerts={data.alerts} />
+          )}
+
+          <SummaryCards
+            total={data.total}
+            byType={data.by_type}
+            previous={data.previous}
+          />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <TrendChart data={data.by_month} />
-            <EntityBreakdown data={data.by_entity} />
+            <EntityBreakdown
+              data={data.by_entity}
+              onEntityClick={(id) =>
+                navigate(
+                  `/dashboard/entity/${id}?year=${year}&quarter=${quarter}`
+                )
+              }
+            />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <CategoryRanking data={data.top_categories} />
             <RecentActivity data={data.recent_logs} />
-            <EquipmentHealth data={data.equipment_status} />
+            <ReadinessWidget />
+            <RiskSummary />
           </div>
         </div>
       )}

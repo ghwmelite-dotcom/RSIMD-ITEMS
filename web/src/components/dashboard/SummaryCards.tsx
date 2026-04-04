@@ -1,8 +1,10 @@
 import { Card } from "../ui/Card";
+import { DeltaBadge } from "./DeltaBadge";
 
 interface SummaryCardsProps {
   total: number;
   byType: Record<string, number>;
+  previous?: { total: number; by_type: Record<string, number> };
 }
 
 const TYPE_CONFIG: Record<string, { label: string; colorClass: string }> = {
@@ -13,12 +15,13 @@ const TYPE_CONFIG: Record<string, { label: string; colorClass: string }> = {
   predictive: { label: "Predictive", colorClass: "text-purple-600" },
 };
 
-export function SummaryCards({ total, byType }: SummaryCardsProps) {
+export function SummaryCards({ total, byType, previous }: SummaryCardsProps) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
       <Card padding="sm">
         <p className="text-sm text-gray-500">Total Logs</p>
         <p className="text-2xl font-bold text-gray-900">{total}</p>
+        {previous && <DeltaBadge current={total} previous={previous.total} />}
       </Card>
 
       {Object.entries(TYPE_CONFIG).map(([key, { label, colorClass }]) => (
@@ -27,6 +30,12 @@ export function SummaryCards({ total, byType }: SummaryCardsProps) {
           <p className={`text-2xl font-bold ${colorClass}`}>
             {byType[key] ?? 0}
           </p>
+          {previous && (
+            <DeltaBadge
+              current={byType[key] ?? 0}
+              previous={previous.by_type[key] ?? 0}
+            />
+          )}
         </Card>
       ))}
     </div>

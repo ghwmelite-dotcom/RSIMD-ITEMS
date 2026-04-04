@@ -2,7 +2,7 @@ import { Card } from "../ui/Card";
 import { StatusPill } from "../ui/StatusPill";
 
 interface ActivityItem {
-  id: number;
+  id: number | string;
   logged_date: string;
   maintenance_type: string;
   description: string;
