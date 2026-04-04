@@ -7,6 +7,8 @@ import { Select } from "../ui/Select";
 import { Table } from "../ui/Table";
 import { Button } from "../ui/Button";
 import { StatusPill } from "../ui/StatusPill";
+import { HealthScoreBar } from "./HealthScoreBar";
+import { BulkQRPrint } from "./BulkQRPrint";
 import type { Equipment, OrgEntity } from "../../types";
 
 interface EquipmentListProps {
@@ -22,6 +24,7 @@ export function EquipmentList({ refreshKey }: EquipmentListProps) {
   const [filterLocation, setFilterLocation] = useState("");
   const [filterType, setFilterType] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const loadEquipment = useCallback(async () => {
     setLoading(true);
@@ -61,6 +64,27 @@ export function EquipmentList({ refreshKey }: EquipmentListProps) {
 
   type Row = Record<string, unknown>;
   const columns = [
+    {
+      key: "select",
+      header: "",
+      render: (row: Row) => (
+        <input
+          type="checkbox"
+          checked={selected.has(String(row.id))}
+          onChange={(ev) => {
+            ev.stopPropagation();
+            const id = String(row.id);
+            setSelected((prev) => {
+              const next = new Set(prev);
+              next.has(id) ? next.delete(id) : next.add(id);
+              return next;
+            });
+          }}
+          className="h-4 w-4 rounded border-gray-300 dark:border-gray-600"
+          onClick={(ev) => ev.stopPropagation()}
+        />
+      ),
+    },
     { key: "asset_tag", header: "Asset Tag" },
     {
       key: "type",
@@ -83,6 +107,14 @@ export function EquipmentList({ refreshKey }: EquipmentListProps) {
       key: "status",
       header: "Status",
       render: (row: Row) => <StatusPill status={String(row.status)} />,
+    },
+    {
+      key: "health_score",
+      header: "Health",
+      render: (row: Row) => {
+        const score = row.health_score as number | undefined;
+        return score !== undefined ? <HealthScoreBar score={score} /> : "—";
+      },
     },
   ];
 
@@ -109,6 +141,11 @@ export function EquipmentList({ refreshKey }: EquipmentListProps) {
             placeholder="All Statuses"
           />
         </div>
+        {selected.size > 0 && (
+          <BulkQRPrint
+            equipment={equipment.filter((e) => selected.has(e.id))}
+          />
+        )}
         <Button
           variant="secondary"
           size="sm"
