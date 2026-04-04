@@ -30,7 +30,8 @@
       "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(f'Updated: status={d[\\\\\"status\\\\\"]} resolution={d[\\\\\"resolution\\\\\"]}'\\)\")",
       "Bash(python3 -c ':*)",
       "Bash(VITE_API_URL=https://rsimd-items-api.ghwmelite.workers.dev npx vite build)",
-      "Bash(pkill -f wrangler)"
+      "Bash(pkill -f wrangler)",
+      "Bash(node -e \"const bcrypt = require\\('bcryptjs'\\); bcrypt.hash\\('1234', 10, \\(e, h\\) => console.log\\(h\\)\\)\")"
     ]
   }
 }

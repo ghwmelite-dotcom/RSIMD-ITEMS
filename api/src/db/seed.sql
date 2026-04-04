@@ -35,6 +35,6 @@ INSERT OR IGNORE INTO maintenance_categories (id, name, description) VALUES
   ('cat-faulty-pc', 'Faulty desktop PCs', 'Desktop computer hardware failures'),
   ('cat-cctv', 'CCTV maintenance', 'Surveillance camera maintenance and configuration');
 
--- Default admin user (bcrypt hash of 'admin123')
+-- Default admin user (PIN: 1234)
 INSERT OR IGNORE INTO technicians (id, name, role, email, phone, assigned_entities, is_active, password_hash) VALUES
-  ('tech-admin', 'System Administrator', 'admin', 'admin@ohcs.gov.gh', '', '[]', 1, '$2a$10$KCoBLAiJU5I1/uin6JvkQ.kFQAjN7MSl3Tie4rXvur.SmlT..Mbf6');
+  ('tech-admin', 'System Administrator', 'admin', 'admin@ohcs.gov.gh', '', '[]', 1, '$2a$10$pf10K/wlN7t3ZLWYweVU.eMUzs2VH.0vTUzxTmBaeOmc/Jh5NNOSK');

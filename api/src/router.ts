@@ -1,6 +1,6 @@
 import { Router } from "itty-router";
 import type { Env } from "./types";
-import { login, logout, me } from "./routes/auth";
+import { login, logout, me, register } from "./routes/auth";
 import {
   listEntities,
   getEntity,
@@ -59,6 +59,7 @@ router.get("/api/health", () => {
 
 // Auth
 router.post("/api/auth/login", (request: Request, env: Env) => login(request, env));
+router.post("/api/auth/register", (request: Request, env: Env) => register(request, env));
 router.post("/api/auth/logout", (request: Request, env: Env) => logout(request, env));
 router.get("/api/auth/me", (request: Request, env: Env) => me(request, env));
 
