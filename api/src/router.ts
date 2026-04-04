@@ -34,6 +34,7 @@ import {
   updateLog,
   bulkSync,
 } from "./routes/maintenance";
+import { readinessReport, agingReport } from "./routes/equipment-analytics";
 import { dashboardSummary, dashboardTrends } from "./routes/dashboard";
 import { search } from "./routes/search";
 import {
@@ -98,6 +99,8 @@ router.get("/api/equipment/by-tag/:assetTag", (request: Request, env: Env) => {
   const assetTag = (request as unknown as { params: { assetTag: string } }).params.assetTag;
   return getEquipmentByTagHandler(request, env, assetTag);
 });
+router.get("/api/equipment/readiness", (request: Request, env: Env) => readinessReport(request, env));
+router.get("/api/equipment/aging", (request: Request, env: Env) => agingReport(request, env));
 router.get("/api/equipment", (request: Request, env: Env) => listEquipmentHandler(request, env));
 router.get("/api/equipment/:id", (request: Request, env: Env) => {
   const id = (request as unknown as { params: { id: string } }).params.id;
