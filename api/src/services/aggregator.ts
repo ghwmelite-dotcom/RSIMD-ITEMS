@@ -1,3 +1,6 @@
+import { calculateHealthScore, getWin11Readiness } from "./health-score";
+import { listEquipment, getAllEquipmentLogStats } from "../db/queries";
+
 interface MonthByType {
   month: number;
   count: number;
@@ -223,8 +226,9 @@ export async function getReportAggregation(
     emergencyResult,
     conditionBasedResult,
     predictiveResult,
-    challengesResult,
-    recommendationsResult,
+    highVolumeCategoriesResult,
+    roomHotspotsResult,
+    win10Result,
   ] = await Promise.all([
     // total
     db
@@ -308,30 +312,119 @@ export async function getReportAggregation(
       .bind(year, quarter)
       .first<{ count: number }>(),
 
-    // challenges from report_items
+    // categories with high log volume
     db
       .prepare(
-        `SELECT description FROM report_items
-         WHERE type = 'challenge'
-         ORDER BY created_at DESC
-         LIMIT 10`
+        `SELECT COALESCE(mc.name, 'Uncategorised') as category, COUNT(*) as count
+         FROM maintenance_logs ml
+         LEFT JOIN maintenance_categories mc ON ml.category_id = mc.id
+         WHERE ml.year = ? AND ml.quarter = ?
+         GROUP BY ml.category_id
+         HAVING count > 5
+         ORDER BY count DESC`
       )
-      .all<{ description: string }>(),
+      .bind(year, quarter)
+      .all<{ category: string; count: number }>(),
 
-    // recommendations from report_items
+    // rooms with recurring corrective/emergency logs
     db
       .prepare(
-        `SELECT description FROM report_items
-         WHERE type = 'recommendation'
-         ORDER BY created_at DESC
-         LIMIT 10`
+        `SELECT oe.name as entity, COALESCE(ml.room_number, 'N/A') as room, COUNT(*) as count
+         FROM maintenance_logs ml
+         JOIN org_entities oe ON oe.id = ml.org_entity_id
+         WHERE ml.year = ? AND ml.quarter = ?
+           AND ml.maintenance_type IN ('corrective', 'emergency')
+           AND ml.room_number IS NOT NULL
+         GROUP BY ml.org_entity_id, ml.room_number
+         HAVING count > 3
+         ORDER BY count DESC`
       )
-      .all<{ description: string }>(),
+      .bind(year, quarter)
+      .all<{ entity: string; room: string; count: number }>(),
+
+    // Win10 device count
+    db
+      .prepare(
+        `SELECT COUNT(*) as count FROM equipment
+         WHERE os_version LIKE '%Windows 10%' AND status != 'decommissioned'`
+      )
+      .first<{ count: number }>(),
   ]);
 
   const byType: Record<string, number> = {};
   for (const row of byTypeResult.results) {
     byType[row.maintenance_type] = row.count;
+  }
+
+  // --- Smart Challenges ---
+  const challenges: string[] = [];
+
+  // High-volume categories
+  const highVolumeCategories = highVolumeCategoriesResult.results;
+  for (const cat of highVolumeCategories) {
+    challenges.push(`High volume of ${cat.category} issues (${cat.count} this quarter)`);
+  }
+
+  // Recurring room issues
+  for (const room of roomHotspotsResult.results) {
+    challenges.push(`Recurring issues in Room ${room.room} at ${room.entity} (${room.count} corrective/emergency logs)`);
+  }
+
+  // Win10 EOL
+  const win10Count = win10Result?.count ?? 0;
+  if (win10Count > 0) {
+    challenges.push(`${win10Count} devices still running Windows 10 (end of life since October 2025, no security updates)`);
+  }
+
+  // --- Smart Recommendations ---
+  const recommendations: string[] = [];
+
+  // Compute health scores and Win11 readiness for equipment
+  const [allEquipment, logStatsMap] = await Promise.all([
+    listEquipment(db, {}),
+    getAllEquipmentLogStats(db),
+  ]);
+
+  let criticalHealthCount = 0;
+  let cannotUpgradeCount = 0;
+  let legacyProcessorCount = 0;
+  const LEGACY_PATTERN = /pentium|celeron/i;
+
+  for (const eq of allEquipment) {
+    const stats = logStatsMap.get(eq.id) ?? { corrective_emergency_count: 0, last_log_date: null };
+    const health = calculateHealthScore(eq, stats.corrective_emergency_count, stats.last_log_date);
+
+    if (health < 40) {
+      criticalHealthCount++;
+    }
+
+    const readiness = getWin11Readiness(eq.os_version, eq.processor_gen);
+    if (readiness === "cannot_upgrade") {
+      cannotUpgradeCount++;
+    }
+
+    if (eq.processor_gen && LEGACY_PATTERN.test(eq.processor_gen)) {
+      legacyProcessorCount++;
+    }
+  }
+
+  if (criticalHealthCount > 0) {
+    recommendations.push(`Replace ${criticalHealthCount} equipment items with critical health scores (below 40/100)`);
+  }
+
+  if (cannotUpgradeCount > 0) {
+    recommendations.push(`${cannotUpgradeCount} devices running Windows 10 cannot be upgraded to Windows 11 — replacement procurement recommended`);
+  }
+
+  // Categories with >10 logs
+  for (const cat of highVolumeCategories) {
+    if (cat.count > 10) {
+      recommendations.push(`Investigate root cause of frequent ${cat.category} issues to reduce recurring maintenance`);
+    }
+  }
+
+  if (legacyProcessorCount > 0) {
+    recommendations.push(`${legacyProcessorCount} devices with legacy processors (Pentium/Celeron) — recommend modern hardware for improved performance`);
   }
 
   return {
@@ -343,8 +436,8 @@ export async function getReportAggregation(
     emergencyByCategory: pivotCategoryByMonth(emergencyResult.results),
     conditionBasedCount: conditionBasedResult?.count ?? 0,
     predictiveCount: predictiveResult?.count ?? 0,
-    challenges: challengesResult.results.map((r) => r.description),
-    recommendations: recommendationsResult.results.map((r) => r.description),
+    challenges,
+    recommendations,
   };
 }
 

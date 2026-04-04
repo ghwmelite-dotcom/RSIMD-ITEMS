@@ -51,6 +51,59 @@ export async function getReport(
   }
 }
 
+export async function previewReport(
+  request: Request,
+  env: Env
+): Promise<Response> {
+  const sessionOrError = await authenticate(request, env);
+  if (sessionOrError instanceof Response) return sessionOrError;
+  const session = sessionOrError as AuthSession;
+
+  const roleError = requireRole(session, request, "lead", "admin");
+  if (roleError) return roleError;
+
+  let body: { year?: number; quarter?: number };
+  try {
+    body = await request.json();
+  } catch {
+    body = {};
+  }
+
+  const now = new Date();
+  const year = body.year ?? now.getFullYear();
+  const quarter = body.quarter ?? Math.ceil((now.getMonth() + 1) / 3);
+
+  if (quarter < 1 || quarter > 4) {
+    return errorResponse("Quarter must be between 1 and 4", 400, request);
+  }
+
+  try {
+    const aggregatedData = await getReportAggregation(env.DB, year, quarter);
+
+    const narratives = await generateAllNarratives(
+      env.AI,
+      quarter,
+      year,
+      aggregatedData
+    );
+
+    return jsonResponse(
+      {
+        narratives,
+        tables: aggregatedData,
+        year,
+        quarter,
+      },
+      200,
+      request
+    );
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : "Unknown error";
+    console.error("Report preview error:", err);
+    return errorResponse(`Report preview failed: ${errorMsg}`, 500, request);
+  }
+}
+
 export async function generateReport(
   request: Request,
   env: Env
@@ -63,7 +116,7 @@ export async function generateReport(
   const roleError = requireRole(session, request, "lead", "admin");
   if (roleError) return roleError;
 
-  let body: { year?: number; quarter?: number };
+  let body: { year?: number; quarter?: number; narratives?: Record<string, string> };
   try {
     body = await request.json();
   } catch {
@@ -99,13 +152,10 @@ export async function generateReport(
     // Step 2: Aggregate data
     const aggregatedData = await getReportAggregation(env.DB, year, quarter);
 
-    // Step 3: Generate AI narratives
-    const narratives = await generateAllNarratives(
-      env.AI,
-      quarter,
-      year,
-      aggregatedData
-    );
+    // Step 3: Use provided narratives or generate AI narratives
+    const narratives = body.narratives
+      ? (body.narratives as unknown as import("../services/ai-narrator").AllNarratives)
+      : await generateAllNarratives(env.AI, quarter, year, aggregatedData);
 
     // Step 4: Generate DOCX
     const docxBuffer = await generateDocx({

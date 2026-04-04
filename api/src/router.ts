@@ -41,6 +41,7 @@ import { uploadFile } from "./routes/upload";
 import {
   listReports,
   getReport,
+  previewReport,
   generateReport,
   downloadReport,
 } from "./routes/reports";
@@ -140,6 +141,7 @@ router.get("/api/dashboard/entity/:id", (request: Request, env: Env) => {
 
 // Reports (generate and download MUST be before :id)
 router.get("/api/reports", (request: Request, env: Env) => listReports(request, env));
+router.post("/api/reports/preview", (request: Request, env: Env) => previewReport(request, env));
 router.post("/api/reports/generate", (request: Request, env: Env) => generateReport(request, env));
 router.get("/api/reports/:id/download", (request: Request, env: Env) => {
   const id = (request as unknown as { params: { id: string } }).params.id;
