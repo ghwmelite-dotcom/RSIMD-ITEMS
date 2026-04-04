@@ -3,6 +3,7 @@ import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { ReportList } from "../components/reports/ReportList";
 import { ReportGenerator } from "../components/reports/ReportGenerator";
+import { ReportPreview } from "../components/reports/ReportPreview";
 import { api } from "../lib/api-client";
 import { useAuth } from "../hooks/useAuth";
 import type { Report } from "../types";
@@ -12,6 +13,7 @@ export function ReportsPage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [generatorOpen, setGeneratorOpen] = useState(false);
+  const [previewConfig, setPreviewConfig] = useState<{ year: number; quarter: number } | null>(null);
 
   const canGenerate = user?.role === "lead" || user?.role === "admin";
 
@@ -31,10 +33,24 @@ export function ReportsPage() {
     loadReports();
   }, []);
 
+  if (previewConfig) {
+    return (
+      <ReportPreview
+        year={previewConfig.year}
+        quarter={previewConfig.quarter}
+        onClose={() => setPreviewConfig(null)}
+        onGenerated={() => {
+          setPreviewConfig(null);
+          loadReports();
+        }}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Quarterly Reports</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Quarterly Reports</h1>
         {canGenerate && (
           <Button onClick={() => setGeneratorOpen(true)}>Generate Report</Button>
         )}
@@ -53,7 +69,7 @@ export function ReportsPage() {
       <ReportGenerator
         isOpen={generatorOpen}
         onClose={() => setGeneratorOpen(false)}
-        onGenerated={loadReports}
+        onPreview={(year, quarter) => setPreviewConfig({ year, quarter })}
       />
     </div>
   );
