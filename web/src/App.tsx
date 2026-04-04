@@ -12,6 +12,7 @@ import { EquipmentDetailPage } from "./pages/EquipmentDetailPage";
 import { MaintenancePage } from "./pages/MaintenancePage";
 import { ScanPage } from "./pages/ScanPage";
 import { ReportsPage } from "./pages/ReportsPage";
+import { AgingReportPage } from "./pages/AgingReportPage";
 
 function ProtectedRoutes() {
   const { user, isLoading } = useAuth();
@@ -34,6 +35,7 @@ function ProtectedRoutes() {
         <Route index element={<DashboardPage />} />
         <Route path="admin" element={<AdminPage />} />
         <Route path="equipment" element={<EquipmentPage />} />
+        <Route path="equipment/aging" element={<AgingReportPage />} />
         <Route path="equipment/:id" element={<EquipmentDetailPage />} />
         <Route path="maintenance" element={<MaintenancePage />} />
         <Route path="scan" element={<ScanPage />} />
