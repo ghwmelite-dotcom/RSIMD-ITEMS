@@ -19,6 +19,7 @@ import {
 interface OfflineContextValue {
   isOnline: boolean;
   pendingCount: number;
+  isSyncing: boolean;
   saveOfflineLog: (
     log: Omit<PendingLog, "id" | "created_at">
   ) => Promise<void>;
@@ -30,6 +31,7 @@ export const OfflineContext = createContext<OfflineContextValue | null>(null);
 export function OfflineProvider({ children }: { children: ReactNode }) {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [pendingCount, setPendingCount] = useState(0);
+  const [isSyncing, setIsSyncing] = useState(false);
   const syncing = useRef(false);
   const { showToast } = useToast();
 
@@ -68,6 +70,7 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
   const syncPending = useCallback(async () => {
     if (syncing.current) return;
     syncing.current = true;
+    setIsSyncing(true);
     try {
       const logs = await getPendingLogs();
       if (logs.length === 0) return;
@@ -96,6 +99,7 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
       showToast("error", "Sync failed — will retry when online");
     } finally {
       syncing.current = false;
+      setIsSyncing(false);
     }
   }, [showToast]);
 
@@ -108,7 +112,7 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
 
   return (
     <OfflineContext.Provider
-      value={{ isOnline, pendingCount, saveOfflineLog, syncPending }}
+      value={{ isOnline, pendingCount, isSyncing, saveOfflineLog, syncPending }}
     >
       {children}
     </OfflineContext.Provider>

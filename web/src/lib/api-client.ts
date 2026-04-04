@@ -1,4 +1,7 @@
 import { API_BASE } from "./constants";
+import { cacheApiResponse, getCachedResponse } from "./offline-store";
+
+const CACHEABLE_PATHS = ["/org-entities", "/categories", "/equipment"];
 
 class ApiClient {
   private token: string | null = null;
@@ -17,18 +20,43 @@ class ApiClient {
       headers["Authorization"] = `Bearer ${this.token}`;
     }
 
-    const response = await fetch(`${API_BASE}${path}`, {
-      ...options,
-      headers,
-    });
+    const method = options.method?.toUpperCase() ?? "GET";
 
-    const data = await response.json();
+    try {
+      const response = await fetch(`${API_BASE}${path}`, {
+        ...options,
+        headers,
+      });
 
-    if (!response.ok) {
-      throw new ApiError(data.error ?? "Request failed", response.status, data.details);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new ApiError(
+          data.error ?? "Request failed",
+          response.status,
+          data.details
+        );
+      }
+
+      // Cache successful GET responses for cacheable paths
+      if (
+        method === "GET" &&
+        CACHEABLE_PATHS.some((p) => path.startsWith(p))
+      ) {
+        cacheApiResponse(path, data).catch(() => {});
+      }
+
+      return data as T;
+    } catch (err) {
+      // Offline fallback for GET requests
+      if (method === "GET" && !navigator.onLine) {
+        const cached = await getCachedResponse<T>(path).catch(() => null);
+        if (cached) {
+          return cached.data;
+        }
+      }
+      throw err;
     }
-
-    return data as T;
   }
 
   get<T>(path: string) {

@@ -1,6 +1,7 @@
 const DB_NAME = "rsimd_items_offline";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE_NAME = "pending_logs";
+const CACHE_STORE = "cached_data";
 
 export interface PendingLog {
   id: string;
@@ -24,6 +25,9 @@ function openDB(): Promise<IDBDatabase> {
       const db = request.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME, { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains(CACHE_STORE)) {
+        db.createObjectStore(CACHE_STORE, { keyPath: "path" });
       }
     };
 
@@ -69,5 +73,52 @@ export async function getPendingCount(): Promise<number> {
     const request = tx.objectStore(STORE_NAME).count();
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
+  });
+}
+
+// --- Cached API responses ---
+
+export interface CachedResponse<T = unknown> {
+  path: string;
+  data: T;
+  cached_at: string;
+}
+
+export async function cacheApiResponse(
+  path: string,
+  data: unknown
+): Promise<void> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(CACHE_STORE, "readwrite");
+    tx.objectStore(CACHE_STORE).put({
+      path,
+      data,
+      cached_at: new Date().toISOString(),
+    });
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+export async function getCachedResponse<T>(
+  path: string
+): Promise<CachedResponse<T> | null> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(CACHE_STORE, "readonly");
+    const request = tx.objectStore(CACHE_STORE).get(path);
+    request.onsuccess = () => resolve(request.result ?? null);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function clearCache(): Promise<void> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(CACHE_STORE, "readwrite");
+    tx.objectStore(CACHE_STORE).clear();
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
   });
 }
