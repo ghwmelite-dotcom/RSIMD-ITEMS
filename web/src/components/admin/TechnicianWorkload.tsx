@@ -118,7 +118,7 @@ export function TechnicianWorkload() {
             <BarChart
               data={data}
               layout="vertical"
-              margin={{ left: 80 }}
+              margin={{ left: 60 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis type="number" allowDecimals={false} />

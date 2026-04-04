@@ -49,7 +49,7 @@ export function TrendChart({ data }: TrendChartProps) {
   return (
     <Card>
       <h3 className="font-display text-sm font-semibold text-surface-900 dark:text-surface-100 uppercase tracking-wider mb-3">Monthly Trend</h3>
-      <ResponsiveContainer width="100%" height={300}>
+      <ResponsiveContainer width="100%" height={250}>
         <BarChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="month" />

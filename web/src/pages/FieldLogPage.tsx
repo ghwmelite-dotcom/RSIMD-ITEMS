@@ -266,7 +266,7 @@ export function FieldLogPage() {
                 type="checkbox"
                 checked={item.checked}
                 onChange={(e) => updateChecklist(i, "checked", e.target.checked)}
-                className="mt-0.5 h-4 w-4 rounded border-surface-300 dark:border-surface-600 accent-neon-green"
+                className="mt-0.5 h-5 w-5 rounded border-surface-300 dark:border-surface-600 accent-neon-green"
               />
               <div className="flex-1 min-w-0">
                 <span className="text-sm text-surface-800 dark:text-surface-200">{item.category.name}</span>

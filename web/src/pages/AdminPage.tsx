@@ -32,7 +32,7 @@ export function AdminPage() {
 
       <Card padding="sm">
         <div className="border-b border-surface-200 dark:border-surface-700 mb-6">
-          <nav className="-mb-px flex gap-6 overflow-x-auto">
+          <nav className="-mb-px flex gap-1 sm:gap-6 overflow-x-auto pb-px -mb-px scrollbar-hide">
             {tabs.map((tab) => (
               <button
                 key={tab.key}

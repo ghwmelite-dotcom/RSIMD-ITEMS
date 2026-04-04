@@ -10,8 +10,8 @@ interface ModalProps {
 
 const sizes = {
   sm: "max-w-sm",
-  md: "max-w-lg",
-  lg: "max-w-2xl",
+  md: "max-w-md sm:max-w-lg",
+  lg: "max-w-md sm:max-w-lg lg:max-w-2xl",
 };
 
 export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalProps) {
@@ -29,7 +29,7 @@ export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalPr
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className={`relative bg-white dark:bg-surface-900 border border-surface-200 dark:border-surface-800/50 rounded-2xl shadow-warm-xl ${sizes[size]} w-full mx-4 max-h-[90vh] overflow-y-auto`}>
+      <div className={`relative bg-white dark:bg-surface-900 border border-surface-200 dark:border-surface-800/50 rounded-2xl shadow-warm-xl ${sizes[size]} w-full mx-4 max-h-[80vh] sm:max-h-[90vh] overflow-y-auto`}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-surface-200 dark:border-surface-700">
           <h2 className="text-lg font-semibold text-surface-900 dark:text-surface-100 font-display">{title}</h2>
           <button

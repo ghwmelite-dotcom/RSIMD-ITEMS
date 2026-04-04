@@ -22,7 +22,7 @@ export function Table<T extends Record<string, unknown>>({
   emptyMessage = "No data found",
 }: TableProps<T>) {
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto min-w-0">
       <table className="min-w-full divide-y divide-surface-200 dark:divide-surface-700">
         <thead className="bg-surface-50 dark:bg-surface-950">
           <tr>

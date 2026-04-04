@@ -32,7 +32,7 @@ export function EntityBreakdown({ data, onEntityClick }: EntityBreakdownProps) {
           <YAxis
             type="category"
             dataKey="entity_code"
-            width={80}
+            width={50}
             tick={{ fontSize: 12 }}
           />
           <Tooltip

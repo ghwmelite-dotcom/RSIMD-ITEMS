@@ -80,7 +80,7 @@ export function EquipmentList({ refreshKey }: EquipmentListProps) {
               return next;
             });
           }}
-          className="h-4 w-4 rounded border-gray-300 dark:border-gray-600"
+          className="h-5 w-5 rounded border-gray-300 dark:border-gray-600"
           onClick={(ev) => ev.stopPropagation()}
         />
       ),
@@ -120,8 +120,8 @@ export function EquipmentList({ refreshKey }: EquipmentListProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 flex-1">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 flex-1">
           <Select
             options={locationOptions}
             value={filterLocation}
@@ -141,6 +141,7 @@ export function EquipmentList({ refreshKey }: EquipmentListProps) {
             placeholder="All Statuses"
           />
         </div>
+        <div className="flex items-center gap-2">
         {selected.size > 0 && (
           <BulkQRPrint
             equipment={equipment.filter((e) => selected.has(e.id))}
@@ -172,6 +173,7 @@ export function EquipmentList({ refreshKey }: EquipmentListProps) {
         >
           Export CSV
         </Button>
+        </div>
       </div>
 
       {loading ? (
