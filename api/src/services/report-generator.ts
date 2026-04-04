@@ -57,7 +57,7 @@ function headerCell(text: string): TableCell {
     children: [
       new Paragraph({
         children: [
-          new TextRun({ text, bold: true, font: "Arial", size: 20 }),
+          new TextRun({ text, bold: true, font: "Bookman Old Style", size: 20 }),
         ],
       }),
     ],
@@ -69,7 +69,7 @@ function cell(text: string): TableCell {
   return new TableCell({
     children: [
       new Paragraph({
-        children: [new TextRun({ text, font: "Arial", size: 20 })],
+        children: [new TextRun({ text, font: "Bookman Old Style", size: 20 })],
       }),
     ],
   });
@@ -210,7 +210,7 @@ export async function generateDocx(
     styles: {
       default: {
         document: {
-          run: { font: "Arial", size: 24 },
+          run: { font: "Bookman Old Style", size: 24 },
         },
       },
     },
@@ -230,7 +230,7 @@ export async function generateDocx(
               new TextRun({
                 text: "RESEARCH, STATISTICS, AND INFORMATION MANAGEMENT DIRECTORATE (RSIMD)",
                 bold: true,
-                font: "Arial",
+                font: "Bookman Old Style",
                 size: 28,
               }),
             ],
@@ -242,7 +242,7 @@ export async function generateDocx(
               new TextRun({
                 text: `QUARTERLY ICT MAINTENANCE REPORT — Q${quarter} ${year}`,
                 bold: true,
-                font: "Arial",
+                font: "Bookman Old Style",
                 size: 26,
               }),
             ],
@@ -253,7 +253,7 @@ export async function generateDocx(
             children: [
               new TextRun({
                 text: dateRange(quarter, year),
-                font: "Arial",
+                font: "Bookman Old Style",
                 size: 22,
                 italics: true,
               }),
@@ -267,14 +267,14 @@ export async function generateDocx(
               new TextRun({
                 text: "1.0 Introduction",
                 bold: true,
-                font: "Arial",
+                font: "Bookman Old Style",
               }),
             ],
           }),
           new Paragraph({
             spacing: { after: 200 },
             children: [
-              new TextRun({ text: narratives.introduction, font: "Arial", size: 22 }),
+              new TextRun({ text: narratives.introduction, font: "Bookman Old Style", size: 22 }),
             ],
           }),
 
@@ -285,14 +285,14 @@ export async function generateDocx(
               new TextRun({
                 text: "2.0 Methodology",
                 bold: true,
-                font: "Arial",
+                font: "Bookman Old Style",
               }),
             ],
           }),
           new Paragraph({
             spacing: { after: 200 },
             children: [
-              new TextRun({ text: narratives.methodology, font: "Arial", size: 22 }),
+              new TextRun({ text: narratives.methodology, font: "Bookman Old Style", size: 22 }),
             ],
           }),
 
@@ -303,7 +303,7 @@ export async function generateDocx(
               new TextRun({
                 text: "3.0 Maintenance Activities",
                 bold: true,
-                font: "Arial",
+                font: "Bookman Old Style",
               }),
             ],
           }),
@@ -315,7 +315,7 @@ export async function generateDocx(
               new TextRun({
                 text: "3.1 Condition-Based Maintenance",
                 bold: true,
-                font: "Arial",
+                font: "Bookman Old Style",
               }),
             ],
           }),
@@ -324,7 +324,7 @@ export async function generateDocx(
             children: [
               new TextRun({
                 text: narratives.conditionBased,
-                font: "Arial",
+                font: "Bookman Old Style",
                 size: 22,
               }),
             ],
@@ -337,7 +337,7 @@ export async function generateDocx(
               new TextRun({
                 text: "3.2 Routine Maintenance",
                 bold: true,
-                font: "Arial",
+                font: "Bookman Old Style",
               }),
             ],
           }),
@@ -346,7 +346,7 @@ export async function generateDocx(
             children: [
               new TextRun({
                 text: narratives.routineNarrative,
-                font: "Arial",
+                font: "Bookman Old Style",
                 size: 22,
               }),
             ],
@@ -361,7 +361,7 @@ export async function generateDocx(
               new TextRun({
                 text: "3.3 Corrective Maintenance",
                 bold: true,
-                font: "Arial",
+                font: "Bookman Old Style",
               }),
             ],
           }),
@@ -370,7 +370,7 @@ export async function generateDocx(
             children: [
               new TextRun({
                 text: narratives.correctiveNarrative,
-                font: "Arial",
+                font: "Bookman Old Style",
                 size: 22,
               }),
             ],
@@ -382,7 +382,7 @@ export async function generateDocx(
                 text: "Table: Corrective Maintenance by Category",
                 bold: true,
                 italics: true,
-                font: "Arial",
+                font: "Bookman Old Style",
                 size: 20,
               }),
             ],
@@ -396,7 +396,7 @@ export async function generateDocx(
                 text: "Table: Corrective Maintenance by Entity/Room",
                 bold: true,
                 italics: true,
-                font: "Arial",
+                font: "Bookman Old Style",
                 size: 20,
               }),
             ],
@@ -411,7 +411,7 @@ export async function generateDocx(
               new TextRun({
                 text: "3.4 Emergency Maintenance",
                 bold: true,
-                font: "Arial",
+                font: "Bookman Old Style",
               }),
             ],
           }),
@@ -420,7 +420,7 @@ export async function generateDocx(
             children: [
               new TextRun({
                 text: narratives.emergencyNarrative,
-                font: "Arial",
+                font: "Bookman Old Style",
                 size: 22,
               }),
             ],
@@ -435,7 +435,7 @@ export async function generateDocx(
               new TextRun({
                 text: "3.5 Predictive Maintenance",
                 bold: true,
-                font: "Arial",
+                font: "Bookman Old Style",
               }),
             ],
           }),
@@ -444,7 +444,7 @@ export async function generateDocx(
             children: [
               new TextRun({
                 text: narratives.predictive,
-                font: "Arial",
+                font: "Bookman Old Style",
                 size: 22,
               }),
             ],
@@ -457,7 +457,7 @@ export async function generateDocx(
               new TextRun({
                 text: "4.0 Challenges",
                 bold: true,
-                font: "Arial",
+                font: "Bookman Old Style",
               }),
             ],
           }),
@@ -466,7 +466,7 @@ export async function generateDocx(
             children: [
               new TextRun({
                 text: narratives.challenges,
-                font: "Arial",
+                font: "Bookman Old Style",
                 size: 22,
               }),
             ],
@@ -479,7 +479,7 @@ export async function generateDocx(
               new TextRun({
                 text: "5.0 Recommendations",
                 bold: true,
-                font: "Arial",
+                font: "Bookman Old Style",
               }),
             ],
           }),
@@ -488,7 +488,7 @@ export async function generateDocx(
             children: [
               new TextRun({
                 text: narratives.recommendations,
-                font: "Arial",
+                font: "Bookman Old Style",
                 size: 22,
               }),
             ],
@@ -501,7 +501,7 @@ export async function generateDocx(
               new TextRun({
                 text: "6.0 Conclusion",
                 bold: true,
-                font: "Arial",
+                font: "Bookman Old Style",
               }),
             ],
           }),
@@ -510,7 +510,7 @@ export async function generateDocx(
             children: [
               new TextRun({
                 text: narratives.conclusion,
-                font: "Arial",
+                font: "Bookman Old Style",
                 size: 22,
               }),
             ],

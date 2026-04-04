@@ -38,7 +38,7 @@ export default {
       fontFamily: {
         display: ['"JetBrains Mono"', "monospace"],
         mono: ['"JetBrains Mono"', "Consolas", "monospace"],
-        sans: ['"Inter"', "system-ui", "sans-serif"],
+        sans: ['"Bookman Old Style"', "Bookman", '"URW Bookman L"', "Georgia", "serif"],
       },
       borderRadius: {
         "2xl": "16px",
