@@ -6,9 +6,10 @@ import { Input } from "../ui/Input";
 import { Select } from "../ui/Select";
 import { Button } from "../ui/Button";
 import { useToast } from "../../hooks/useToast";
+import { useOfflineSync } from "../../hooks/useOfflineSync";
 import { VoiceInput } from "./VoiceInput";
 import { PhotoCapture } from "./PhotoCapture";
-import type { OrgEntity, MaintenanceCategory } from "../../types";
+import type { OrgEntity, MaintenanceCategory, MaintenanceLog } from "../../types";
 
 interface LogFormProps {
   isOpen: boolean;
@@ -23,9 +24,11 @@ interface LogFormProps {
 
 export function LogForm({ isOpen, onClose, onSaved, prefill }: LogFormProps) {
   const { showToast } = useToast();
+  const { isOnline, pendingCount, saveOfflineLog } = useOfflineSync();
   const [entities, setEntities] = useState<OrgEntity[]>([]);
   const [categories, setCategories] = useState<MaintenanceCategory[]>([]);
   const [saving, setSaving] = useState(false);
+  const [lastLog, setLastLog] = useState<MaintenanceLog | null>(null);
 
   const [orgEntityId, setOrgEntityId] = useState("");
   const [maintenanceType, setMaintenanceType] = useState("");
@@ -67,10 +70,36 @@ export function LogForm({ isOpen, onClose, onSaved, prefill }: LogFormProps) {
     }
   }, [isOpen, prefill]);
 
+  useEffect(() => {
+    if (isOpen && prefill?.equipment_id) {
+      api.get<MaintenanceLog[]>(`/maintenance?equipment_id=${prefill.equipment_id}`)
+        .then((logs) => setLastLog(logs.length > 0 ? logs[0]! : null))
+        .catch(() => {});
+    } else {
+      setLastLog(null);
+    }
+  }, [isOpen, prefill?.equipment_id]);
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
+      if (!isOnline) {
+        await saveOfflineLog({
+          equipment_id: prefill?.equipment_id ?? null,
+          org_entity_id: orgEntityId,
+          maintenance_type: maintenanceType,
+          category_id: categoryId || null,
+          room_number: roomNumber || null,
+          description,
+          resolution: resolution || null,
+          status: "completed",
+          logged_date: date,
+        });
+        onSaved();
+        onClose();
+        return;
+      }
       await api.post("/maintenance", {
         equipment_id: prefill?.equipment_id || null,
         org_entity_id: orgEntityId,
@@ -101,6 +130,29 @@ export function LogForm({ isOpen, onClose, onSaved, prefill }: LogFormProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Log Maintenance Activity" size="lg">
       <form onSubmit={handleSubmit} className="space-y-4">
+        {!isOnline && (
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg px-4 py-2 text-sm text-yellow-800 dark:text-yellow-300">
+            You're offline — this log will sync when you reconnect
+            {pendingCount > 0 && <span className="ml-1">({pendingCount} pending)</span>}
+          </div>
+        )}
+
+        {lastLog && (
+          <button
+            type="button"
+            onClick={() => {
+              setMaintenanceType(lastLog.maintenance_type);
+              setCategoryId(lastLog.category_id ?? "");
+              setDescription(lastLog.description);
+              setResolution(lastLog.resolution ?? "");
+              showToast("info", "Filled from previous log");
+            }}
+            className="text-sm text-ghana-green hover:underline font-medium"
+          >
+            ↩ Repeat last: {lastLog.description.slice(0, 50)}...
+          </button>
+        )}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Select
             label="Location"
@@ -174,8 +226,8 @@ export function LogForm({ isOpen, onClose, onSaved, prefill }: LogFormProps) {
           <Button type="button" variant="secondary" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="submit" isLoading={saving}>
-            Log Activity
+          <Button type="submit" isLoading={saving} variant={isOnline ? "primary" : "secondary"}>
+            {isOnline ? "Log Activity" : "Save Offline"}
           </Button>
         </div>
       </form>

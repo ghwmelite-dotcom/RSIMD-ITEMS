@@ -46,6 +46,7 @@ export async function listLogs(
     maintenance_type: url.searchParams.get("maintenance_type") || undefined,
     org_entity_id: url.searchParams.get("org_entity_id") || undefined,
     category_id: url.searchParams.get("category_id") || undefined,
+    equipment_id: url.searchParams.get("equipment_id") || undefined,
   };
 
   const logs = await listMaintenanceLogs(env.DB, filters);

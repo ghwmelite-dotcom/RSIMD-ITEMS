@@ -145,6 +145,7 @@ export async function listMaintenanceLogs(
     maintenance_type?: string;
     org_entity_id?: string;
     category_id?: string;
+    equipment_id?: string;
   }
 ): Promise<MaintenanceLogRow[]> {
   let sql = "SELECT * FROM maintenance_logs WHERE 1=1";
@@ -169,6 +170,10 @@ export async function listMaintenanceLogs(
   if (filters.category_id) {
     sql += " AND category_id = ?";
     binds.push(filters.category_id);
+  }
+  if (filters.equipment_id) {
+    sql += " AND equipment_id = ?";
+    binds.push(filters.equipment_id);
   }
 
   sql += " ORDER BY logged_date DESC LIMIT 200";
