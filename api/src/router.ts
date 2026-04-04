@@ -35,7 +35,7 @@ import {
   bulkSync,
 } from "./routes/maintenance";
 import { readinessReport, agingReport } from "./routes/equipment-analytics";
-import { dashboardSummary, dashboardTrends } from "./routes/dashboard";
+import { dashboardSummary, dashboardTrends, entityDetail } from "./routes/dashboard";
 import { search } from "./routes/search";
 import {
   listReports,
@@ -132,6 +132,10 @@ router.put("/api/maintenance/:id", (request: Request, env: Env) => {
 // Dashboard
 router.get("/api/dashboard/summary", (request: Request, env: Env) => dashboardSummary(request, env));
 router.get("/api/dashboard/trends", (request: Request, env: Env) => dashboardTrends(request, env));
+router.get("/api/dashboard/entity/:id", (request: Request, env: Env) => {
+  const id = (request as unknown as { params: { id: string } }).params.id;
+  return entityDetail(request, env, id);
+});
 
 // Reports (generate and download MUST be before :id)
 router.get("/api/reports", (request: Request, env: Env) => listReports(request, env));
