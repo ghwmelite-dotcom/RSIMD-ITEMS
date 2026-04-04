@@ -1,7 +1,8 @@
 import { API_BASE } from "./constants";
 import { cacheApiResponse, getCachedResponse } from "./offline-store";
 
-const CACHEABLE_PATHS = ["/org-entities", "/categories", "/equipment"];
+// Paths to never cache (auth tokens, ephemeral searches)
+const SKIP_CACHE_PATHS = ["/auth/", "/search"];
 
 class ApiClient {
   private token: string | null = null;
@@ -21,6 +22,8 @@ class ApiClient {
     }
 
     const method = options.method?.toUpperCase() ?? "GET";
+    const isCacheableGet =
+      method === "GET" && !SKIP_CACHE_PATHS.some((p) => path.startsWith(p));
 
     try {
       const response = await fetch(`${API_BASE}${path}`, {
@@ -38,18 +41,17 @@ class ApiClient {
         );
       }
 
-      // Cache successful GET responses for cacheable paths
-      if (
-        method === "GET" &&
-        CACHEABLE_PATHS.some((p) => path.startsWith(p))
-      ) {
+      // Cache all successful GET responses (except auth/search)
+      if (isCacheableGet) {
         cacheApiResponse(path, data).catch(() => {});
       }
 
       return data as T;
     } catch (err) {
-      // Offline fallback for GET requests
-      if (method === "GET" && !navigator.onLine) {
+      // Aggressive offline fallback: try cache for any failed GET request.
+      // navigator.onLine is unreliable on some networks, so we attempt
+      // cache retrieval on ANY fetch failure, not just when offline.
+      if (isCacheableGet) {
         const cached = await getCachedResponse<T>(path).catch(() => null);
         if (cached) {
           return cached.data;

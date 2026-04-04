@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import { api } from "../lib/api-client";
+import { primeOfflineCache } from "../lib/cache-primer";
 import type { Technician, LoginResponse } from "../types";
 
 interface AuthState {
@@ -36,6 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .get<Technician>("/auth/me")
       .then((user) => {
         setState({ token: savedToken, user, isLoading: false });
+        primeOfflineCache().catch(() => {});
       })
       .catch(() => {
         localStorage.removeItem(TOKEN_KEY);
@@ -53,6 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(TOKEN_KEY, token);
     api.setToken(token);
     setState({ token, user: technician, isLoading: false });
+    primeOfflineCache().catch(() => {});
   }, []);
 
   const logout = useCallback(async () => {

@@ -122,3 +122,22 @@ export async function clearCache(): Promise<void> {
     tx.onerror = () => reject(tx.error);
   });
 }
+
+export async function getCacheInfo(): Promise<
+  { path: string; cached_at: string }[]
+> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(CACHE_STORE, "readonly");
+    const request = tx.objectStore(CACHE_STORE).getAll();
+    request.onsuccess = () => {
+      resolve(
+        request.result.map((r: CachedResponse) => ({
+          path: r.path,
+          cached_at: r.cached_at,
+        }))
+      );
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
