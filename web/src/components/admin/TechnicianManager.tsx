@@ -15,7 +15,7 @@ interface TechnicianForm {
   email: string;
   phone: string;
   role: "technician" | "lead" | "admin";
-  password: string;
+  pin: string;
 }
 
 const emptyForm: TechnicianForm = {
@@ -23,7 +23,7 @@ const emptyForm: TechnicianForm = {
   email: "",
   phone: "",
   role: "technician",
-  password: "",
+  pin: "",
 };
 
 const roleOptions = [
@@ -75,7 +75,7 @@ export function TechnicianManager() {
       email: tech.email ?? "",
       phone: tech.phone ?? "",
       role: tech.role,
-      password: "",
+      pin: "",
     });
     setEditingId(tech.id);
     setModalOpen(true);
@@ -98,8 +98,8 @@ export function TechnicianManager() {
       role: form.role,
     };
 
-    if (form.password) {
-      payload.password = form.password;
+    if (form.pin) {
+      payload.password = form.pin; // API still uses 'password' field internally
     }
 
     try {
@@ -107,8 +107,8 @@ export function TechnicianManager() {
         await api.put(`/technicians/${editingId}`, payload);
         showToast("success", "Technician updated successfully");
       } else {
-        if (!form.password) {
-          showToast("error", "Password is required for new technicians");
+        if (!form.pin) {
+          showToast("error", "PIN is required for new technicians");
           setSaving(false);
           return;
         }
@@ -227,13 +227,19 @@ export function TechnicianManager() {
               setForm({ ...form, role: e.target.value as TechnicianForm["role"] })
             }
           />
-          <Input
-            label={editingId ? "New Password (leave blank to keep)" : "Password"}
-            type="password"
-            value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
-            required={!editingId}
-          />
+          <div>
+            <Input
+              label={editingId ? "New PIN (leave blank to keep)" : "PIN"}
+              type="password"
+              inputMode="numeric"
+              maxLength={6}
+              value={form.pin}
+              onChange={(e) => setForm({ ...form, pin: e.target.value.replace(/\D/g, "") })}
+              required={!editingId}
+              placeholder="4-6 digits"
+            />
+            <p className="text-[10px] text-surface-500 mt-1 font-mono">4-6 digit PIN</p>
+          </div>
           <div className="flex justify-end gap-3 pt-2">
             <Button type="button" variant="secondary" onClick={closeModal}>
               Cancel
