@@ -50,16 +50,22 @@ export function ScanPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Scan Equipment QR Code</h1>
+      <div className="flex items-center gap-3">
+        <span className="led led-green" />
+        <h1 className="font-mono text-lg font-bold text-surface-900 dark:text-surface-100 uppercase tracking-wider">
+          QR Scanner
+        </h1>
+      </div>
 
       {loading && (
-        <div className="flex justify-center py-12">
-          <div className="animate-spin h-8 w-8 border-4 border-ghana-green border-t-transparent rounded-full" />
+        <div className="flex flex-col items-center justify-center py-12 gap-3">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-neon-green/30 border-t-neon-green" />
+          <span className="font-mono text-[10px] text-surface-500">Looking up equipment...</span>
         </div>
       )}
 
       {!loading && !equipment && (
-        <Card>
+        <Card padding="sm">
           <QRScanner onScan={handleScan} />
         </Card>
       )}

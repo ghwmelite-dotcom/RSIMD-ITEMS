@@ -211,7 +211,10 @@ export function FieldLogPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-mono text-lg font-bold text-surface-900 dark:text-surface-100 uppercase tracking-wider">Field Maintenance Log</h1>
+          <div className="flex items-center gap-3">
+            <span className="led led-green" />
+            <h1 className="font-mono text-lg font-bold text-surface-900 dark:text-surface-100 uppercase tracking-wider">Field Maintenance Log</h1>
+          </div>
           <p className="text-xs text-surface-500 mt-1">Fill in findings during your maintenance exercise</p>
         </div>
         <a

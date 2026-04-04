@@ -39,8 +39,9 @@ export function EquipmentDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center py-20">
-        <div className="animate-spin h-8 w-8 border-4 border-ghana-green border-t-transparent rounded-full" />
+      <div className="flex flex-col items-center justify-center py-20 gap-3">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-neon-green/30 border-t-neon-green" />
+        <span className="font-mono text-[10px] text-surface-500">Loading equipment...</span>
       </div>
     );
   }
@@ -55,16 +56,31 @@ export function EquipmentDetailPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <Button variant="secondary" onClick={() => navigate("/equipment")}>
-          &larr; Back
+        <div className="flex items-center gap-3">
+          <Button variant="secondary" onClick={() => navigate("/equipment")}>
+            &larr; Back
+          </Button>
+          <div className="flex items-center gap-3">
+            <span className="led led-green" />
+            <h1 className="font-mono text-lg font-bold text-surface-900 dark:text-surface-100 uppercase tracking-wider">
+              {equipment.asset_tag}
+            </h1>
+          </div>
+        </div>
+        <Button onClick={() => setEditOpen(true)}>
+          <svg className="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+          </svg>
+          Edit
         </Button>
-        <Button onClick={() => setEditOpen(true)}>Edit</Button>
       </div>
 
       <EquipmentDetail equipment={equipment} entityName={entityName} />
 
-      <Card>
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Maintenance History</h2>
+      <Card padding="sm">
+        <h2 className="font-mono text-xs font-bold text-surface-500 uppercase tracking-wider mb-4">
+          Maintenance History
+        </h2>
         <EquipmentTimeline
           history={history}
           registeredDate={equipment.installed_date ?? new Date().toISOString()}

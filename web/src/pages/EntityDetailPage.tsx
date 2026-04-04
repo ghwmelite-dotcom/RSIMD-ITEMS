@@ -78,8 +78,9 @@ export function EntityDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-ghana-green border-t-transparent" />
+      <div className="flex flex-col items-center justify-center py-20 gap-3">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-neon-green/30 border-t-neon-green" />
+        <span className="font-mono text-[10px] text-surface-500">Loading entity details...</span>
       </div>
     );
   }
@@ -92,10 +93,13 @@ export function EntityDetailPage() {
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-            {data.entity.name}
-          </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <div className="flex items-center gap-3">
+            <span className="led led-green" />
+            <h1 className="font-mono text-lg font-bold text-surface-900 dark:text-surface-100 uppercase tracking-wider">
+              {data.entity.name}
+            </h1>
+          </div>
+          <p className="font-mono text-[10px] text-surface-500 mt-1 ml-6">
             {data.entity.code} &middot; Q{quarter} {year}
           </p>
         </div>
@@ -108,8 +112,8 @@ export function EntityDetailPage() {
         <SummaryCards total={data.total} byType={data.by_type} />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          <Card padding="sm">
+            <h3 className="font-mono text-xs font-bold text-surface-500 uppercase tracking-wider mb-4">
               By Room
             </h3>
             <ResponsiveContainer width="100%" height={roomHeight}>
@@ -122,7 +126,7 @@ export function EntityDetailPage() {
                   tick={{ fontSize: 12 }}
                 />
                 <Tooltip formatter={(value) => [String(value), "Count"]} />
-                <Bar dataKey="count" fill="#006B3F" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="count" fill="#39FF14" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </Card>
@@ -131,24 +135,24 @@ export function EntityDetailPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          <Card padding="sm">
+            <h3 className="font-mono text-xs font-bold text-surface-500 uppercase tracking-wider mb-4">
               Top Equipment
             </h3>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-700 text-left">
-                    <th className="pb-2 font-medium text-gray-500 dark:text-gray-400">
+                  <tr className="border-b border-surface-200 dark:border-surface-700 text-left">
+                    <th className="pb-2 font-mono text-[10px] font-medium text-surface-500 uppercase tracking-wider">
                       Asset Tag
                     </th>
-                    <th className="pb-2 font-medium text-gray-500 dark:text-gray-400">
+                    <th className="pb-2 font-mono text-[10px] font-medium text-surface-500 uppercase tracking-wider">
                       Type
                     </th>
-                    <th className="pb-2 font-medium text-gray-500 dark:text-gray-400">
+                    <th className="pb-2 font-mono text-[10px] font-medium text-surface-500 uppercase tracking-wider">
                       Make / Model
                     </th>
-                    <th className="pb-2 font-medium text-gray-500 dark:text-gray-400 text-right">
+                    <th className="pb-2 font-mono text-[10px] font-medium text-surface-500 uppercase tracking-wider text-right">
                       Logs
                     </th>
                   </tr>
@@ -157,18 +161,18 @@ export function EntityDetailPage() {
                   {data.by_equipment.map((eq) => (
                     <tr
                       key={eq.asset_tag}
-                      className="border-b border-gray-100 dark:border-gray-700 last:border-0"
+                      className="border-b border-surface-100 dark:border-surface-700 last:border-0"
                     >
-                      <td className="py-2 font-mono text-xs text-gray-800 dark:text-gray-200">
+                      <td className="py-2 font-mono text-xs text-surface-800 dark:text-surface-200">
                         {eq.asset_tag}
                       </td>
-                      <td className="py-2 text-gray-700 dark:text-gray-300">
+                      <td className="py-2 text-surface-700 dark:text-surface-300">
                         {eq.type}
                       </td>
-                      <td className="py-2 text-gray-700 dark:text-gray-300">
+                      <td className="py-2 text-surface-700 dark:text-surface-300">
                         {[eq.make, eq.model].filter(Boolean).join(" ") || "---"}
                       </td>
-                      <td className="py-2 text-right font-semibold text-gray-900 dark:text-gray-100">
+                      <td className="py-2 text-right font-mono font-semibold text-surface-900 dark:text-surface-100">
                         {eq.count}
                       </td>
                     </tr>
@@ -177,7 +181,7 @@ export function EntityDetailPage() {
                     <tr>
                       <td
                         colSpan={4}
-                        className="py-4 text-center text-gray-400"
+                        className="py-4 text-center font-mono text-xs text-surface-400"
                       >
                         No equipment data
                       </td>

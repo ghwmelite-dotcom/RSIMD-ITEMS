@@ -104,8 +104,9 @@ export function AgingReportPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center py-24">
-        <div className="animate-spin h-8 w-8 border-4 border-ghana-green border-t-transparent rounded-full" />
+      <div className="flex flex-col items-center justify-center py-24 gap-3">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-neon-green/30 border-t-neon-green" />
+        <span className="font-mono text-[10px] text-surface-500">Loading aging report...</span>
       </div>
     );
   }
@@ -117,14 +118,22 @@ export function AgingReportPage() {
           <Button variant="secondary" onClick={() => navigate("/equipment")}>
             &larr; Back
           </Button>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Aging Fleet Report
-          </h1>
+          <div className="flex items-center gap-3">
+            <span className="led led-red" />
+            <h1 className="font-mono text-lg font-bold text-surface-900 dark:text-surface-100 uppercase tracking-wider">
+              Aging Fleet Report
+            </h1>
+          </div>
         </div>
-        <Card>
-          <p className="text-center text-gray-500 dark:text-gray-400 py-12">
-            Failed to load aging report data.
-          </p>
+        <Card padding="sm">
+          <div className="flex flex-col items-center justify-center py-12 gap-3">
+            <svg className="w-10 h-10 text-surface-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+            </svg>
+            <p className="font-mono text-xs text-surface-500">
+              Failed to load aging report data.
+            </p>
+          </div>
         </Card>
       </div>
     );
@@ -146,10 +155,13 @@ export function AgingReportPage() {
           &larr; Back
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Aging Fleet Report
-          </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <div className="flex items-center gap-3">
+            <span className="led led-green" />
+            <h1 className="font-mono text-lg font-bold text-surface-900 dark:text-surface-100 uppercase tracking-wider">
+              Aging Fleet Report
+            </h1>
+          </div>
+          <p className="font-mono text-[10px] text-surface-500 mt-1 ml-6">
             {data.total_equipment} total equipment
           </p>
         </div>
@@ -158,8 +170,8 @@ export function AgingReportPage() {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Age Distribution */}
-        <Card>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <Card padding="sm">
+          <h2 className="font-mono text-xs font-bold text-surface-500 uppercase tracking-wider mb-4">
             Age Distribution
           </h2>
           <div className="h-64">
@@ -169,19 +181,19 @@ export function AgingReportPage() {
                 layout="vertical"
                 margin={{ top: 0, right: 24, bottom: 0, left: 8 }}
               >
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
                 <XAxis type="number" allowDecimals={false} />
                 <YAxis type="category" dataKey="name" width={70} />
                 <Tooltip />
-                <Bar dataKey="value" fill="#006B3F" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="value" fill="#39FF14" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </Card>
 
         {/* OS Distribution */}
-        <Card>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <Card padding="sm">
+          <h2 className="font-mono text-xs font-bold text-surface-500 uppercase tracking-wider mb-4">
             OS Distribution
           </h2>
           <div className="h-64">
@@ -214,70 +226,78 @@ export function AgingReportPage() {
       </div>
 
       {/* Flagged Equipment */}
-      <Card>
+      <Card padding="sm">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <h2 className="font-mono text-xs font-bold text-surface-500 uppercase tracking-wider">
             Needs Replacement
           </h2>
           {data.flagged.length > 0 && (
-            <Button variant="secondary" size="sm" onClick={handleExport}>
-              Export CSV
-            </Button>
+            <button
+              onClick={handleExport}
+              className="font-mono text-[10px] text-surface-400 hover:text-neon-green uppercase tracking-wider transition-colors"
+            >
+              Export CSV &darr;
+            </button>
           )}
         </div>
 
         {data.flagged.length === 0 ? (
-          <p className="text-center text-gray-500 dark:text-gray-400 py-12">
-            No equipment flagged for replacement.
-          </p>
+          <div className="flex flex-col items-center justify-center py-12 gap-3">
+            <svg className="w-10 h-10 text-surface-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="font-mono text-xs text-surface-500">
+              No equipment flagged for replacement.
+            </p>
+          </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <table className="min-w-full divide-y divide-surface-200 dark:divide-surface-700">
               <thead>
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left font-mono text-[10px] font-medium text-surface-500 uppercase tracking-wider">
                     Asset Tag
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left font-mono text-[10px] font-medium text-surface-500 uppercase tracking-wider">
                     Type
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left font-mono text-[10px] font-medium text-surface-500 uppercase tracking-wider">
                     Make/Model
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left font-mono text-[10px] font-medium text-surface-500 uppercase tracking-wider">
                     OS
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left font-mono text-[10px] font-medium text-surface-500 uppercase tracking-wider">
                     Processor
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left font-mono text-[10px] font-medium text-surface-500 uppercase tracking-wider">
                     Health
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left font-mono text-[10px] font-medium text-surface-500 uppercase tracking-wider">
                     Issues
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              <tbody className="divide-y divide-surface-200 dark:divide-surface-700">
                 {data.flagged.map((item) => (
                   <tr
                     key={item.id}
                     onClick={() => navigate(`/equipment/${item.id}`)}
-                    className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                    className="cursor-pointer hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors"
                   >
-                    <td className="px-4 py-3 text-sm font-mono text-gray-900 dark:text-white whitespace-nowrap">
+                    <td className="px-4 py-3 text-sm font-mono text-surface-900 dark:text-surface-100 whitespace-nowrap">
                       {item.asset_tag}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 capitalize whitespace-nowrap">
+                    <td className="px-4 py-3 text-sm text-surface-700 dark:text-surface-300 capitalize whitespace-nowrap">
                       {item.type}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                    <td className="px-4 py-3 text-sm text-surface-700 dark:text-surface-300 whitespace-nowrap">
                       {item.make} {item.model}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                    <td className="px-4 py-3 text-sm font-mono text-surface-700 dark:text-surface-300 whitespace-nowrap">
                       {item.os_version}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                    <td className="px-4 py-3 text-sm font-mono text-surface-700 dark:text-surface-300 whitespace-nowrap">
                       {item.processor_gen}
                     </td>
                     <td className="px-4 py-3 w-32">

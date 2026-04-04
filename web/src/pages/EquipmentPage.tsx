@@ -13,14 +13,30 @@ export function EquipmentPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Equipment Registry</h1>
+        <div className="flex items-center gap-3">
+          <span className="led led-green" />
+          <h1 className="font-mono text-lg font-bold text-surface-900 dark:text-surface-100 uppercase tracking-wider">
+            Equipment Registry
+          </h1>
+        </div>
         <div className="flex items-center gap-2">
-          <Button variant="secondary" onClick={() => navigate("/equipment/aging")}>Fleet Report</Button>
-          <Button onClick={() => setFormOpen(true)}>Register Equipment</Button>
+          <Button
+            variant="secondary"
+            onClick={() => navigate("/equipment/aging")}
+            className="!bg-blue-500/10 !text-blue-400 !border-blue-500/30 hover:!bg-blue-500/20"
+          >
+            Fleet Report
+          </Button>
+          <Button onClick={() => setFormOpen(true)}>
+            <svg className="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Register Equipment
+          </Button>
         </div>
       </div>
 
-      <Card>
+      <Card padding="sm">
         <EquipmentList refreshKey={refreshKey} />
       </Card>
 
