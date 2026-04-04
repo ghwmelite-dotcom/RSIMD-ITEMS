@@ -14,27 +14,27 @@ export function CategoryRanking({ data }: CategoryRankingProps) {
 
   return (
     <Card>
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Issue Categories</h3>
+      <h3 className="font-display text-lg text-surface-900 dark:text-surface-100 mb-4">Top Issue Categories</h3>
       <div className="space-y-3">
         {data.map((item, index) => (
           <div key={item.category_name}>
             <div className="flex items-center justify-between text-sm mb-1">
-              <span className="text-gray-700">
-                <span className="font-medium text-gray-500 mr-2">{index + 1}.</span>
+              <span className="text-surface-700 dark:text-surface-300">
+                <span className="font-medium text-surface-500 mr-2">{index + 1}.</span>
                 {item.category_name}
               </span>
-              <span className="font-semibold text-gray-900">{item.count}</span>
+              <span className="font-semibold text-surface-900 dark:text-surface-100">{item.count}</span>
             </div>
-            <div className="w-full bg-gray-100 rounded-full h-2">
+            <div className="w-full bg-surface-100 dark:bg-surface-800 rounded-full h-2">
               <div
-                className="bg-ghana-green rounded-full h-2 transition-all"
+                className="bg-ghana-gold rounded-full h-2 transition-all"
                 style={{ width: `${(item.count / maxCount) * 100}%` }}
               />
             </div>
           </div>
         ))}
         {data.length === 0 && (
-          <p className="text-sm text-gray-400">No data available</p>
+          <p className="text-sm text-surface-400">No data available</p>
         )}
       </div>
     </Card>

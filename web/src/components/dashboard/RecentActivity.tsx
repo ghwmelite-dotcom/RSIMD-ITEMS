@@ -30,23 +30,23 @@ function truncate(text: string, maxLen: number): string {
 export function RecentActivity({ data }: RecentActivityProps) {
   return (
     <Card>
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+      <h3 className="font-display text-lg text-surface-900 dark:text-surface-100 mb-4">Recent Activity</h3>
       <div className="space-y-3">
         {data.map((item) => (
           <div
             key={item.id}
-            className="border-b border-gray-100 pb-3 last:border-0 last:pb-0"
+            className="border-b border-surface-100 dark:border-surface-800 pb-3 last:border-0 last:pb-0"
           >
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-surface-500 dark:text-surface-400">
                 {new Date(item.logged_date).toLocaleDateString()} &middot; {item.org_entity_code}
               </span>
               <StatusPill status={item.status} />
             </div>
-            <p className="text-sm text-gray-800 mb-1">
+            <p className="text-sm text-surface-700 dark:text-surface-300 mb-1">
               {truncate(item.description, 80)}
             </p>
-            <div className="flex items-center gap-2 text-xs text-gray-500">
+            <div className="flex items-center gap-2 text-xs text-surface-500 dark:text-surface-400">
               <span>{TYPE_LABELS[item.maintenance_type] ?? item.maintenance_type}</span>
               {item.technician_name && (
                 <>
@@ -58,7 +58,7 @@ export function RecentActivity({ data }: RecentActivityProps) {
           </div>
         ))}
         {data.length === 0 && (
-          <p className="text-sm text-gray-400">No recent activity</p>
+          <p className="text-sm text-surface-400">No recent activity</p>
         )}
       </div>
     </Card>

@@ -41,27 +41,27 @@ export function RiskSummary() {
 
   return (
     <Card>
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+      <h3 className="font-display text-lg text-surface-900 dark:text-surface-100 mb-4">
         Equipment Risk
       </h3>
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-600 dark:text-gray-400">
+          <span className="text-sm text-surface-500 dark:text-surface-400">
             Critical Health (&lt;40)
           </span>
           <span className="text-lg font-bold text-ghana-red">{counts.critical}</span>
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-600 dark:text-gray-400">
+          <span className="text-sm text-surface-500 dark:text-surface-400">
             Windows 10 EOL
           </span>
           <span className="text-lg font-bold text-ghana-red">{counts.eol}</span>
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-600 dark:text-gray-400">
+          <span className="text-sm text-surface-500 dark:text-surface-400">
             Flagged Total
           </span>
           <span className="text-lg font-bold text-yellow-600">{counts.flagged}</span>

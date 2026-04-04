@@ -53,7 +53,7 @@ export function ReadinessWidget() {
 
   return (
     <Card>
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+      <h3 className="font-display text-lg text-surface-900 dark:text-surface-100 mb-4">
         Win11 Readiness
       </h3>
 
@@ -77,7 +77,7 @@ export function ReadinessWidget() {
 
       <div className="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-1">
         {KEYS.map((k) => (
-          <div key={k} className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
+          <div key={k} className="flex items-center gap-1.5 text-xs text-surface-500 dark:text-surface-400">
             <span
               className="inline-block h-2.5 w-2.5 rounded-full"
               style={{ backgroundColor: COLORS[k] }}

@@ -78,7 +78,7 @@ export function DashboardPage() {
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <h2 className="text-xl font-bold text-gray-900">Dashboard</h2>
+        <h2 className="font-display text-2xl text-surface-900 dark:text-surface-100">Dashboard</h2>
         <div className="flex items-center gap-3">
           <div className="w-28">
             <Select
@@ -99,12 +99,12 @@ export function DashboardPage() {
 
       {loading && (
         <div className="flex items-center justify-center py-20">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-ghana-green border-t-transparent" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-ghana-gold border-t-transparent" />
         </div>
       )}
 
       {!loading && data && (
-        <div className="space-y-6">
+        <div className="space-y-8">
           {data.alerts && data.alerts.length > 0 && (
             <AlertCards alerts={data.alerts} />
           )}
@@ -115,7 +115,7 @@ export function DashboardPage() {
             previous={data.previous}
           />
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="opacity-0 animate-fade-in grid grid-cols-1 lg:grid-cols-2 gap-8">
             <TrendChart data={data.by_month} />
             <EntityBreakdown
               data={data.by_entity}
@@ -127,7 +127,7 @@ export function DashboardPage() {
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="opacity-0 animate-fade-in grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             <CategoryRanking data={data.top_categories} />
             <RecentActivity data={data.recent_logs} />
             <ReadinessWidget />

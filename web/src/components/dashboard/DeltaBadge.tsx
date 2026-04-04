@@ -18,7 +18,7 @@ export function DeltaBadge({ current, previous }: DeltaBadgeProps) {
 
   if (pct === 0) {
     return (
-      <span className="text-xs font-medium text-gray-400 dark:text-gray-500">
+      <span className="text-xs font-medium text-surface-400 dark:text-surface-500">
         &mdash;
       </span>
     );
