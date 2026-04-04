@@ -20,11 +20,12 @@ export function LoginPage() {
       "[OK] R2 file storage mounted",
       "[OK] System ready — awaiting authentication",
     ];
-    let i = 0;
+    let idx = 0;
     const interval = setInterval(() => {
-      if (i < lines.length) {
-        setBootLines((prev) => [...prev, lines[i]!]);
-        i++;
+      if (idx < lines.length) {
+        const line = lines[idx]!;
+        setBootLines((prev) => [...prev, line]);
+        idx++;
       } else {
         setSystemReady(true);
         clearInterval(interval);
@@ -80,12 +81,12 @@ export function LoginPage() {
               </span>
             </div>
             <div className="font-mono text-[11px] leading-relaxed space-y-0.5 max-h-32 overflow-hidden">
-              {bootLines.map((line, i) => (
+              {bootLines.map((line, i) => line ? (
                 <div key={i} className="animate-fade-in" style={{ animationDelay: `${i * 0.05}s` }}>
                   <span className="text-neon-green/70">{line.slice(0, 4)}</span>
                   <span className="text-surface-400">{line.slice(4)}</span>
                 </div>
-              ))}
+              ) : null)}
               {!systemReady && <span className="text-neon-green animate-blink">_</span>}
             </div>
           </div>
