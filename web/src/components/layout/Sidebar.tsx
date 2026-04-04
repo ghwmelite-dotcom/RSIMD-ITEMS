@@ -80,6 +80,9 @@ export function Sidebar() {
           <span className="font-mono text-[10px] text-surface-500">System Online</span>
         </div>
         <p className="font-mono text-[9px] text-surface-600">OHCS-NET // {new Date().getFullYear()}</p>
+        <a href="/guide" target="_blank" className="font-mono text-[9px] text-neon-green/50 hover:text-neon-green transition-colors uppercase tracking-widest">
+          User Guide →
+        </a>
       </div>
     </aside>
   );

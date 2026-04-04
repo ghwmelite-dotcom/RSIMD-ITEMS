@@ -163,6 +163,14 @@ export function BottomNav() {
                     Admin
                   </NavLink>
                 )}
+                <a
+                  href="/guide"
+                  target="_blank"
+                  onClick={() => setMoreOpen(false)}
+                  className="block px-4 py-2.5 text-sm font-medium text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors"
+                >
+                  User Guide
+                </a>
               </div>
             </>
           )}

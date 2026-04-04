@@ -334,10 +334,10 @@
     <div class="header-led"></div>
     <div>
       <div class="header-title">RSIMD-ITEMS</div>
-      <div class="header-subtitle">User Guide v1.0</div>
+      <div class="header-subtitle">User Guide v2.0</div>
     </div>
   </div>
-  <a href="/" class="header-back">← Back to System</a>
+  <a href="/" class="header-back">&larr; Back to System</a>
 </div>
 
 <!-- HERO -->
@@ -348,10 +348,10 @@
       Official Documentation
     </div>
     <h1>System User Guide</h1>
-    <p>Complete guide to the OHCS IT Equipment Maintenance Management System built by the Research, Statistics & Information Management Directorate</p>
+    <p>Complete guide to the OHCS IT Equipment Maintenance Management System built by the Research, Statistics &amp; Information Management Directorate</p>
     <div class="hero-stats">
       <div class="hero-stat">
-        <div class="hero-stat-value">7</div>
+        <div class="hero-stat-value">9</div>
         <div class="hero-stat-label">Modules</div>
       </div>
       <div class="hero-stat">
@@ -359,7 +359,7 @@
         <div class="hero-stat-label">User Roles</div>
       </div>
       <div class="hero-stat">
-        <div class="hero-stat-value">30+</div>
+        <div class="hero-stat-value">35+</div>
         <div class="hero-stat-label">API Endpoints</div>
       </div>
       <div class="hero-stat">
@@ -379,17 +379,20 @@
     <a href="#getting-started" class="toc-item"><span class="toc-num">01</span><span class="toc-label">Getting Started</span></a>
     <a href="#dashboard" class="toc-item"><span class="toc-num">02</span><span class="toc-label">Dashboard</span></a>
     <a href="#equipment" class="toc-item"><span class="toc-num">03</span><span class="toc-label">Equipment Registry</span></a>
-    <a href="#maintenance" class="toc-item"><span class="toc-num">04</span><span class="toc-label">Maintenance Logging</span></a>
-    <a href="#qr-scan" class="toc-item"><span class="toc-num">05</span><span class="toc-label">QR Scan-to-Log</span></a>
-    <a href="#reports" class="toc-item"><span class="toc-num">06</span><span class="toc-label">Quarterly Reports</span></a>
-    <a href="#admin" class="toc-item"><span class="toc-num">07</span><span class="toc-label">Admin Panel</span></a>
-    <a href="#roles" class="toc-item"><span class="toc-num">08</span><span class="toc-label">Roles & Permissions</span></a>
-    <a href="#offline" class="toc-item"><span class="toc-num">09</span><span class="toc-label">Offline Mode</span></a>
-    <a href="#shortcuts" class="toc-item"><span class="toc-num">10</span><span class="toc-label">Keyboard Shortcuts</span></a>
+    <a href="#field-log" class="toc-item"><span class="toc-num">04</span><span class="toc-label">Field Log</span></a>
+    <a href="#maintenance" class="toc-item"><span class="toc-num">05</span><span class="toc-label">Maintenance Logging</span></a>
+    <a href="#qr-scan" class="toc-item"><span class="toc-num">06</span><span class="toc-label">QR Scan-to-Log</span></a>
+    <a href="#reports" class="toc-item"><span class="toc-num">07</span><span class="toc-label">Quarterly Reports</span></a>
+    <a href="#admin" class="toc-item"><span class="toc-num">08</span><span class="toc-label">Admin Panel</span></a>
+    <a href="#roles" class="toc-item"><span class="toc-num">09</span><span class="toc-label">Roles &amp; Permissions</span></a>
+    <a href="#offline" class="toc-item"><span class="toc-num">10</span><span class="toc-label">Offline Mode</span></a>
+    <a href="#dark-mode" class="toc-item"><span class="toc-num">11</span><span class="toc-label">Dark Mode &amp; Theme</span></a>
+    <a href="#data-export" class="toc-item"><span class="toc-num">12</span><span class="toc-label">Data Export</span></a>
+    <a href="#shortcuts" class="toc-item"><span class="toc-num">13</span><span class="toc-label">Keyboard Shortcuts</span></a>
   </div>
 </div>
 
-<!-- SECTION 1: GETTING STARTED -->
+<!-- SECTION 01: GETTING STARTED -->
 <div class="section" id="getting-started">
   <div class="section-header">
     <div class="section-num">01</div>
@@ -398,7 +401,7 @@
 
   <div class="subsection">
     <h3>Registration</h3>
-    <p>New users can self-register with an OHCS email address. Only <strong>@ohcs.gov.gh</strong> domain emails are accepted.</p>
+    <p>New users can self-register with an OHCS email address. Only <strong>@ohcs.gov.gh</strong> domain emails are accepted. Authentication uses a <strong>4&ndash;6 digit PIN</strong> (not a password).</p>
     <div class="steps">
       <div class="step">
         <div class="step-num">1</div>
@@ -418,35 +421,35 @@
         <div class="step-num">3</div>
         <div class="step-content">
           <div class="step-title">Fill Your Details</div>
-          <div class="step-desc">Enter your full name, OHCS email (must end with @ohcs.gov.gh), and create a 4-6 digit PIN. Phone is optional.</div>
+          <div class="step-desc">Enter your full name, OHCS email (must end with @ohcs.gov.gh), and create a <strong>4&ndash;6 digit PIN</strong>. Phone number is optional.</div>
         </div>
       </div>
       <div class="step">
         <div class="step-num">4</div>
         <div class="step-content">
           <div class="step-title">Create Account</div>
-          <div class="step-desc">Click "Create Account". You'll be automatically logged in and taken to the Dashboard.</div>
+          <div class="step-desc">Click "Create Account". You will be automatically logged in and taken to the Dashboard.</div>
         </div>
       </div>
     </div>
     <div class="info-box warning">
-      <span class="info-box-icon">⚠</span>
-      <div><strong>Remember your PIN.</strong> There is no PIN recovery yet. If you forget it, contact the System Administrator.</div>
+      <span class="info-box-icon">&#9888;</span>
+      <div><strong>Remember your PIN.</strong> There is no PIN recovery yet. If you forget it, contact the System Administrator to reset it from the Admin panel.</div>
     </div>
   </div>
 
   <div class="subsection">
     <h3>Signing In</h3>
-    <p>Enter your OHCS email and 4-6 digit PIN on the Sign In tab. New accounts start as <strong>Technician</strong> role. An admin can upgrade you to Lead or Admin.</p>
+    <p>Enter your OHCS email and 4&ndash;6 digit PIN on the Sign In tab. New accounts start as <strong>Technician</strong> role. An admin can upgrade you to Lead or Admin.</p>
   </div>
 
   <div class="subsection">
     <h3>Installing as App (PWA)</h3>
-    <p>On mobile, you may see an "Install RSIMD-ITEMS" banner. Tap <strong>Install</strong> to add it to your home screen for quick access — it works like a native app with offline capability.</p>
+    <p>On mobile, you may see an "Install RSIMD-ITEMS" banner. Tap <strong>Install</strong> to add it to your home screen for quick access &mdash; it works like a native app with offline capability.</p>
   </div>
 </div>
 
-<!-- SECTION 2: DASHBOARD -->
+<!-- SECTION 02: DASHBOARD -->
 <div class="section" id="dashboard">
   <div class="section-header">
     <div class="section-num">02</div>
@@ -457,44 +460,44 @@
 
   <div class="feature-grid">
     <div class="feature-card">
-      <div class="feature-card-icon">📊</div>
+      <div class="feature-card-icon">&#128202;</div>
       <div class="feature-card-title">Summary Cards</div>
-      <div class="feature-card-desc">Total logs + breakdown by type with quarter-over-quarter comparison arrows</div>
+      <div class="feature-card-desc">Total logs + breakdown by type with quarter-over-quarter delta arrows showing increase or decrease</div>
     </div>
     <div class="feature-card">
-      <div class="feature-card-icon">📈</div>
+      <div class="feature-card-icon">&#128200;</div>
       <div class="feature-card-title">Trend Chart</div>
-      <div class="feature-card-desc">Stacked bar chart showing monthly maintenance distribution</div>
+      <div class="feature-card-desc">Stacked bar chart showing monthly maintenance distribution across all types</div>
     </div>
     <div class="feature-card">
-      <div class="feature-card-icon">🏢</div>
+      <div class="feature-card-icon">&#127970;</div>
       <div class="feature-card-title">Entity Breakdown</div>
-      <div class="feature-card-desc">Click any directorate bar to drill down into room and category details</div>
+      <div class="feature-card-desc">Click any directorate bar to drill down into room-level and category-level details</div>
     </div>
     <div class="feature-card">
-      <div class="feature-card-icon">⚠️</div>
+      <div class="feature-card-icon">&#9888;&#65039;</div>
       <div class="feature-card-title">Anomaly Alerts</div>
-      <div class="feature-card-desc">Auto-detected issues — hotspot rooms, overloaded entities, Win10 EOL warnings</div>
+      <div class="feature-card-desc">Auto-detected hotspot rooms, overloaded entities, Win10 EOL warnings &mdash; dismissible</div>
     </div>
     <div class="feature-card">
-      <div class="feature-card-icon">🖥️</div>
+      <div class="feature-card-icon">&#128421;&#65039;</div>
       <div class="feature-card-title">Win11 Readiness</div>
-      <div class="feature-card-desc">Pie chart showing how many devices can upgrade to Windows 11</div>
+      <div class="feature-card-desc">Pie chart showing how many devices are Ready, Can Upgrade, or Cannot Upgrade to Windows 11</div>
     </div>
     <div class="feature-card">
-      <div class="feature-card-icon">🔴</div>
+      <div class="feature-card-icon">&#128308;</div>
       <div class="feature-card-title">Equipment Risk</div>
-      <div class="feature-card-desc">Count of critical health devices and Windows 10 EOL machines</div>
+      <div class="feature-card-desc">Count of critical-health devices and Windows 10 EOL machines &mdash; links to Fleet Report</div>
     </div>
   </div>
 
   <div class="info-box tip">
-    <span class="info-box-icon">💡</span>
-    <div>Use the <strong>Year</strong> and <strong>Quarter</strong> dropdowns at the top right to view data for any period. Delta arrows compare against the previous quarter automatically.</div>
+    <span class="info-box-icon">&#128161;</span>
+    <div>Use the <strong>Year</strong> and <strong>Quarter</strong> dropdowns at the top right to view data for any period. Delta arrows compare against the previous quarter automatically. The <strong>"Field Log"</strong> button provides quick access to the online field log form.</div>
   </div>
 </div>
 
-<!-- SECTION 3: EQUIPMENT -->
+<!-- SECTION 03: EQUIPMENT -->
 <div class="section" id="equipment">
   <div class="section-header">
     <div class="section-num">03</div>
@@ -515,7 +518,7 @@
         <div class="step-num">2</div>
         <div class="step-content">
           <div class="step-title">Fill Device Details</div>
-          <div class="step-desc">Select type (desktop, laptop, printer, etc.), enter make/model, processor, serial number, OS version, and processor generation. Select the directorate/unit location and room number.</div>
+          <div class="step-desc">Select type (desktop, laptop, printer, etc.), enter make/model, processor, serial number, <strong>OS version</strong>, and <strong>processor generation</strong> (for Win11 readiness tracking). Select the directorate/unit location and room number.</div>
         </div>
       </div>
       <div class="step">
@@ -530,17 +533,31 @@
 
   <div class="subsection">
     <h3>Health Scores</h3>
-    <p>Every device gets a <strong>0-100 health score</strong> computed from:</p>
+    <p>Every device gets a <strong>0&ndash;100 health score</strong> computed from:</p>
     <ul style="margin: 12px 0; padding-left: 24px; color: var(--text);">
       <li>Age of the device (years since installation)</li>
       <li>Number of corrective/emergency maintenance logs</li>
       <li>Time since last maintenance</li>
-      <li>Windows 10 EOL penalty (-20 points)</li>
-      <li>Legacy processor penalty (Pentium/Celeron: -10 points)</li>
+      <li>Windows 10 EOL penalty (&minus;20 points)</li>
+      <li>Legacy processor penalty (Pentium/Celeron: &minus;10 points)</li>
     </ul>
+  </div>
+
+  <div class="subsection">
+    <h3>Win11 Readiness Badges</h3>
+    <p>Each device displays a badge based on its processor generation and OS version:</p>
+    <ul style="margin: 12px 0; padding-left: 24px; color: var(--text);">
+      <li><strong style="color:var(--green)">Ready</strong> &mdash; Already running Windows 11</li>
+      <li><strong style="color:var(--blue)">Can Upgrade</strong> &mdash; Hardware supports Win11 (8th gen+ Intel or Zen 2+ AMD)</li>
+      <li><strong style="color:var(--red)">Cannot Upgrade</strong> &mdash; Hardware does not meet Win11 requirements</li>
+    </ul>
+  </div>
+
+  <div class="subsection">
+    <h3>Aging Fleet Report</h3>
     <div class="info-box important">
-      <span class="info-box-icon">ℹ</span>
-      <div><strong>Aging Fleet Report:</strong> Click "Fleet Report" on the Equipment page to see age distribution, OS breakdown, and a list of all equipment flagged for replacement — exportable as CSV for procurement requests.</div>
+      <span class="info-box-icon">&#8505;</span>
+      <div>Click <strong>"Fleet Report"</strong> on the Equipment page to see age distribution, OS breakdown, and a list of all equipment flagged for replacement &mdash; exportable as CSV for procurement requests.</div>
     </div>
   </div>
 
@@ -551,14 +568,73 @@
 
   <div class="subsection">
     <h3>Bulk Import (Admin)</h3>
-    <p>In the Admin panel, upload a CSV file to register multiple devices at once. The CSV should have columns: type, make, model, processor, serial_number, org_entity_id, room_number, os_version, processor_gen.</p>
+    <p>In the Admin panel's Bulk Import tab, upload a CSV file to register multiple devices at once. The CSV should have columns: type, make, model, processor, serial_number, org_entity_id, room_number, os_version, processor_gen.</p>
   </div>
 </div>
 
-<!-- SECTION 4: MAINTENANCE -->
-<div class="section" id="maintenance">
+<!-- SECTION 04: FIELD LOG -->
+<div class="section" id="field-log">
   <div class="section-header">
     <div class="section-num">04</div>
+    <div class="section-title">Field Log</div>
+  </div>
+
+  <p>The online fillable field log form at <code style="color:var(--green);background:var(--bg3);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">/field-log</code> lets you record maintenance visits in a structured checklist format. Access it from the Dashboard's <strong>"Field Log"</strong> button.</p>
+
+  <div class="subsection">
+    <h3>How It Works</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">Select Location</div>
+          <div class="step-desc">Choose the directorate/unit and room number you are visiting. The technician name is auto-filled from your account.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">Tick Issue Checklist</div>
+          <div class="step-desc">All 14 maintenance categories appear as checkboxes. Tick each category you worked on. For each checked item, enter the count of issues found and a brief resolution note.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Complete Additional Fields</div>
+          <div class="step-desc">Fill in the equipment inspection table (optional), additional notes, and any challenges encountered during the visit.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-title">Submit All at Once</div>
+          <div class="step-desc">Each checked category creates a <strong>separate maintenance log</strong> automatically. Five checked categories = five logs created in one submission.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-box tip">
+    <span class="info-box-icon">&#128161;</span>
+    <div><strong>One checked category = one maintenance log.</strong> 5 checked = 5 logs created automatically. This is the fastest way to record a multi-issue field visit.</div>
+  </div>
+
+  <div class="subsection">
+    <h3>Offline Support</h3>
+    <p>The field log works offline &mdash; data saves to IndexedDB and syncs automatically when your connection is restored.</p>
+  </div>
+
+  <div class="subsection">
+    <h3>Printable Version</h3>
+    <p>A printable paper field form is still available at <code style="color:var(--green);background:var(--bg3);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">/field-form</code>. A link to it appears on the field log page for technicians who prefer paper forms.</p>
+  </div>
+</div>
+
+<!-- SECTION 05: MAINTENANCE -->
+<div class="section" id="maintenance">
+  <div class="section-header">
+    <div class="section-num">05</div>
     <div class="section-title">Maintenance Logging</div>
   </div>
 
@@ -569,13 +645,13 @@
         <div class="step-num">1</div>
         <div class="step-content">
           <div class="step-title">Click "Log Activity" or press <span class="kbd">N</span></div>
-          <div class="step-desc">Opens the maintenance log form from any page.</div>
+          <div class="step-desc">Opens the maintenance log form (single-entry) from any page. This is different from the Field Log checklist &mdash; use this for individual one-off maintenance entries.</div>
         </div>
       </div>
       <div class="step">
         <div class="step-num">2</div>
         <div class="step-content">
-          <div class="step-title">Select Location & Type</div>
+          <div class="step-title">Select Location &amp; Type</div>
           <div class="step-desc">Choose the directorate/unit, maintenance type (routine, corrective, emergency, etc.), and category (internet, printer, etc.).</div>
         </div>
       </div>
@@ -583,7 +659,7 @@
         <div class="step-num">3</div>
         <div class="step-content">
           <div class="step-title">Describe the Work</div>
-          <div class="step-desc">Type a description — or tap the <strong>microphone icon</strong> to dictate using voice input. The system transcribes your speech.</div>
+          <div class="step-desc">Type a description &mdash; or tap the <strong>microphone icon</strong> to dictate using voice input. The system transcribes your speech.</div>
         </div>
       </div>
       <div class="step">
@@ -597,7 +673,7 @@
         <div class="step-num">5</div>
         <div class="step-content">
           <div class="step-title">Submit</div>
-          <div class="step-desc">The system auto-calculates the quarter and month from the date. If you're offline, it saves locally and syncs when you reconnect.</div>
+          <div class="step-desc">The system auto-calculates the quarter and month from the date. If you are offline, it saves locally and syncs when you reconnect.</div>
         </div>
       </div>
     </div>
@@ -605,7 +681,7 @@
 
   <div class="subsection">
     <h3>Quick Repeat</h3>
-    <p>When logging via QR scan, if the equipment has previous maintenance records, a <strong>"Repeat last"</strong> button appears. One tap fills in the previous description, resolution, category, and type — ideal for recurring issues.</p>
+    <p>When logging via QR scan, if the equipment has previous maintenance records, a <strong>"Repeat last"</strong> button appears. One tap fills in the previous description, resolution, category, and type &mdash; ideal for recurring issues.</p>
   </div>
 
   <div class="subsection">
@@ -614,14 +690,14 @@
   </div>
 </div>
 
-<!-- SECTION 5: QR SCAN -->
+<!-- SECTION 06: QR SCAN -->
 <div class="section" id="qr-scan">
   <div class="section-header">
-    <div class="section-num">05</div>
+    <div class="section-num">06</div>
     <div class="section-title">QR Scan-to-Log</div>
   </div>
 
-  <p>The fastest way to log maintenance — scan the QR sticker on any registered device.</p>
+  <p>The fastest way to log maintenance &mdash; scan the QR sticker on any registered device.</p>
 
   <div class="steps">
     <div class="step">
@@ -648,19 +724,19 @@
   </div>
 
   <div class="info-box tip">
-    <span class="info-box-icon">💡</span>
+    <span class="info-box-icon">&#128161;</span>
     <div>You can also access equipment directly by URL: <code style="color:var(--green);background:var(--bg3);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">/scan/OHCS-DES-XXXX</code></div>
   </div>
 </div>
 
-<!-- SECTION 6: REPORTS -->
+<!-- SECTION 07: REPORTS -->
 <div class="section" id="reports">
   <div class="section-header">
-    <div class="section-num">06</div>
+    <div class="section-num">07</div>
     <div class="section-title">Quarterly Reports</div>
   </div>
 
-  <p>Auto-generate the quarterly DOCX maintenance report matching OHCS's exact format — complete with AI-written narratives and data tables.</p>
+  <p>Auto-generate the quarterly DOCX maintenance report matching OHCS's exact format &mdash; complete with AI-written narratives and data tables.</p>
 
   <div class="subsection">
     <h3>Two-Step Generation</h3>
@@ -669,13 +745,13 @@
         <div class="step-num">1</div>
         <div class="step-content">
           <div class="step-title">Generate Preview</div>
-          <div class="step-desc">Select year and quarter, click "Generate Preview". The system aggregates all data and generates AI narratives (30-60 seconds). A full preview appears with all sections.</div>
+          <div class="step-desc">Select year and quarter, click "Generate Preview". The system aggregates all data and generates AI narratives (30&ndash;60 seconds). A full preview appears with all sections.</div>
         </div>
       </div>
       <div class="step">
         <div class="step-num">2</div>
         <div class="step-content">
-          <div class="step-title">Review & Edit Narratives</div>
+          <div class="step-title">Review &amp; Edit Narratives</div>
           <div class="step-desc">Each section shows the AI-generated text in an editable box. Fix any errors, add context, or rewrite sections before finalizing.</div>
         </div>
       </div>
@@ -690,40 +766,53 @@
   </div>
 
   <div class="subsection">
+    <h3>Report Format</h3>
+    <p>The generated DOCX follows the official OHCS report template:</p>
+    <ul style="margin: 12px 0; padding-left: 24px; color: var(--text);">
+      <li><strong>Bookman Old Style</strong> font throughout</li>
+      <li>OHCS-formatted tables with proper borders and shading</li>
+      <li>Table of Contents with clickable section links</li>
+      <li>Headers and footers with OHCS branding</li>
+      <li>Page numbers on every page</li>
+      <li>Numbered table captions (Table 1: Summary, Table 2: Routine, etc.)</li>
+    </ul>
+  </div>
+
+  <div class="subsection">
     <h3>Report Structure</h3>
     <div class="accordion">
       <div class="accordion-item">
         <button class="accordion-trigger" onclick="toggleAccordion(this)">
-          <span>1.0 Introduction & Objectives</span>
-          <span class="accordion-arrow">▸</span>
+          <span>1.0 Introduction &amp; Objectives</span>
+          <span class="accordion-arrow">&#9656;</span>
         </button>
         <div class="accordion-body"><div class="accordion-body-inner">AI-generated introduction referencing the exact quarter, year, and total maintenance count. Objectives section describes RSIMD's mandate.</div></div>
       </div>
       <div class="accordion-item">
         <button class="accordion-trigger" onclick="toggleAccordion(this)">
           <span>2.0 Methodology</span>
-          <span class="accordion-arrow">▸</span>
+          <span class="accordion-arrow">&#9656;</span>
         </button>
         <div class="accordion-body"><div class="accordion-body-inner">Describes the 5 maintenance types used by OHCS: condition-based, routine, corrective, emergency, and predictive.</div></div>
       </div>
       <div class="accordion-item">
         <button class="accordion-trigger" onclick="toggleAccordion(this)">
-          <span>3.0 Details of Maintenance & Servicing</span>
-          <span class="accordion-arrow">▸</span>
+          <span>3.0 Details of Maintenance &amp; Servicing</span>
+          <span class="accordion-arrow">&#9656;</span>
         </button>
-        <div class="accordion-body"><div class="accordion-body-inner">Five sub-sections (3.1-3.5) each with AI narratives and data tables. Routine and emergency include monthly breakdown tables. Corrective includes summary + directorate/room breakdown tables.</div></div>
+        <div class="accordion-body"><div class="accordion-body-inner">Five sub-sections (3.1&ndash;3.5) each with AI narratives and data tables. Routine and emergency include monthly breakdown tables. Corrective includes summary + directorate/room breakdown tables.</div></div>
       </div>
       <div class="accordion-item">
         <button class="accordion-trigger" onclick="toggleAccordion(this)">
           <span>4.0 Challenges</span>
-          <span class="accordion-arrow">▸</span>
+          <span class="accordion-arrow">&#9656;</span>
         </button>
-        <div class="accordion-body"><div class="accordion-body-inner"><strong>Smart-generated</strong> from data: recurring issues, Windows 10 EOL risk, high-volume categories. Not a generic template — real findings from your data.</div></div>
+        <div class="accordion-body"><div class="accordion-body-inner"><strong>Smart-generated</strong> from data patterns: recurring issues, Windows 10 EOL risk, high-volume categories, aging fleet warnings. Not a generic template &mdash; real findings from your data.</div></div>
       </div>
       <div class="accordion-item">
         <button class="accordion-trigger" onclick="toggleAccordion(this)">
-          <span>5.0 Recommendations & 6.0 Conclusion</span>
-          <span class="accordion-arrow">▸</span>
+          <span>5.0 Recommendations &amp; 6.0 Conclusion</span>
+          <span class="accordion-arrow">&#9656;</span>
         </button>
         <div class="accordion-body"><div class="accordion-body-inner"><strong>Smart-generated</strong> recommendations: equipment replacement counts, Win11 upgrade blockers, root cause investigations. Conclusion summarizes the quarter's impact.</div></div>
       </div>
@@ -731,15 +820,15 @@
   </div>
 
   <div class="info-box warning">
-    <span class="info-box-icon">⚠</span>
-    <div>Only <strong>Lead</strong> and <strong>Admin</strong> roles can generate reports. The generated DOCX uses Bookman Old Style font.</div>
+    <span class="info-box-icon">&#9888;</span>
+    <div>Only <strong>Lead</strong> and <strong>Admin</strong> roles can generate reports.</div>
   </div>
 </div>
 
-<!-- SECTION 7: ADMIN -->
+<!-- SECTION 08: ADMIN -->
 <div class="section" id="admin">
   <div class="section-header">
-    <div class="section-num">07</div>
+    <div class="section-num">08</div>
     <div class="section-title">Admin Panel</div>
   </div>
 
@@ -747,43 +836,43 @@
 
   <div class="feature-grid">
     <div class="feature-card">
-      <div class="feature-card-icon">🏛️</div>
+      <div class="feature-card-icon">&#127963;&#65039;</div>
       <div class="feature-card-title">Org Entities</div>
       <div class="feature-card-desc">Add, edit, or deactivate directorates, units, and secretariats</div>
     </div>
     <div class="feature-card">
-      <div class="feature-card-icon">🏷️</div>
+      <div class="feature-card-icon">&#127991;&#65039;</div>
       <div class="feature-card-title">Categories</div>
       <div class="feature-card-desc">Manage maintenance issue categories (internet, printer, etc.)</div>
     </div>
     <div class="feature-card">
-      <div class="feature-card-icon">👥</div>
+      <div class="feature-card-icon">&#128101;</div>
       <div class="feature-card-title">Technicians</div>
       <div class="feature-card-desc">Create accounts, assign roles (technician/lead/admin), reset PINs</div>
     </div>
     <div class="feature-card">
-      <div class="feature-card-icon">📊</div>
+      <div class="feature-card-icon">&#128202;</div>
       <div class="feature-card-title">Workload</div>
-      <div class="feature-card-desc">See logs per technician per quarter — balance team assignments</div>
+      <div class="feature-card-desc">Chart + table showing logs per technician per quarter &mdash; balance team assignments</div>
     </div>
     <div class="feature-card">
-      <div class="feature-card-icon">📋</div>
+      <div class="feature-card-icon">&#128203;</div>
       <div class="feature-card-title">Audit Log</div>
-      <div class="feature-card-desc">Every admin action tracked: who created, modified, or deleted what</div>
+      <div class="feature-card-desc">Every admin action tracked: who created, modified, or deleted what, with timestamps</div>
     </div>
     <div class="feature-card">
-      <div class="feature-card-icon">📤</div>
+      <div class="feature-card-icon">&#128228;</div>
       <div class="feature-card-title">Bulk Import</div>
-      <div class="feature-card-desc">Upload CSV to register multiple equipment items at once</div>
+      <div class="feature-card-desc">Upload CSV to register multiple equipment items at once &mdash; validates and reports errors</div>
     </div>
   </div>
 </div>
 
-<!-- SECTION 8: ROLES -->
+<!-- SECTION 09: ROLES -->
 <div class="section" id="roles">
   <div class="section-header">
-    <div class="section-num">08</div>
-    <div class="section-title">Roles & Permissions</div>
+    <div class="section-num">09</div>
+    <div class="section-title">Roles &amp; Permissions</div>
   </div>
 
   <table class="role-table">
@@ -796,54 +885,102 @@
       </tr>
     </thead>
     <tbody>
-      <tr><td>View Dashboard</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
-      <tr><td>Browse Equipment</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
-      <tr><td>Log Maintenance</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
-      <tr><td>Scan QR Codes</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
-      <tr><td>Register Equipment</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
-      <tr><td>Export CSV Data</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
-      <tr><td>View Reports</td><td class="cross">—</td><td class="check">✓</td><td class="check">✓</td></tr>
-      <tr><td>Generate Reports</td><td class="cross">—</td><td class="check">✓</td><td class="check">✓</td></tr>
-      <tr><td>Manage Org Entities</td><td class="cross">—</td><td class="cross">—</td><td class="check">✓</td></tr>
-      <tr><td>Manage Categories</td><td class="cross">—</td><td class="cross">—</td><td class="check">✓</td></tr>
-      <tr><td>Manage Technicians</td><td class="cross">—</td><td class="cross">—</td><td class="check">✓</td></tr>
-      <tr><td>View Audit Log</td><td class="cross">—</td><td class="cross">—</td><td class="check">✓</td></tr>
-      <tr><td>Bulk Import</td><td class="cross">—</td><td class="cross">—</td><td class="check">✓</td></tr>
+      <tr><td>View Dashboard</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+      <tr><td>Browse Equipment</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+      <tr><td>Log Maintenance</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+      <tr><td>Submit Field Log</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+      <tr><td>Scan QR Codes</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+      <tr><td>Register Equipment</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+      <tr><td>Export CSV Data</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+      <tr><td>View Reports</td><td class="cross">&mdash;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+      <tr><td>Generate Reports</td><td class="cross">&mdash;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+      <tr><td>Manage Org Entities</td><td class="cross">&mdash;</td><td class="cross">&mdash;</td><td class="check">&#10003;</td></tr>
+      <tr><td>Manage Categories</td><td class="cross">&mdash;</td><td class="cross">&mdash;</td><td class="check">&#10003;</td></tr>
+      <tr><td>Manage Technicians</td><td class="cross">&mdash;</td><td class="cross">&mdash;</td><td class="check">&#10003;</td></tr>
+      <tr><td>View Audit Log</td><td class="cross">&mdash;</td><td class="cross">&mdash;</td><td class="check">&#10003;</td></tr>
+      <tr><td>Bulk Import</td><td class="cross">&mdash;</td><td class="cross">&mdash;</td><td class="check">&#10003;</td></tr>
     </tbody>
   </table>
 </div>
 
-<!-- SECTION 9: OFFLINE -->
+<!-- SECTION 10: OFFLINE -->
 <div class="section" id="offline">
   <div class="section-header">
-    <div class="section-num">09</div>
+    <div class="section-num">10</div>
     <div class="section-title">Offline Mode</div>
   </div>
 
-  <p>RSIMD-ITEMS works without internet — critical for field technicians in areas with poor connectivity.</p>
+  <p>RSIMD-ITEMS works without internet &mdash; critical for field technicians in areas with poor connectivity.</p>
 
   <div class="subsection">
     <h3>How It Works</h3>
     <ul style="margin: 12px 0; padding-left: 24px; color: var(--text); line-height: 2;">
-      <li>Equipment lists, org entities, and categories are <strong>cached in IndexedDB</strong> on first load</li>
-      <li>When offline, cached data is served automatically</li>
-      <li>Maintenance logs are <strong>saved locally</strong> and queued for sync</li>
-      <li>The header shows a red <strong>"Offline"</strong> badge and pending log count</li>
-      <li>When you reconnect, logs <strong>auto-sync</strong> via bulk upload</li>
+      <li><strong>Eager cache priming</strong> &mdash; all reference data (equipment, org entities, categories) is cached in IndexedDB on login</li>
+      <li><strong>All GET responses cached</strong> &mdash; not just a few paths; every API read is available offline</li>
+      <li>Maintenance logs and field logs are <strong>saved locally</strong> and queued for sync</li>
+      <li><strong>Photo queue</strong> &mdash; photos are saved as base64 offline and uploaded when connectivity returns</li>
+      <li>The header shows a <strong>"Offline &mdash; showing cached data from 5m ago"</strong> stale-data banner</li>
+      <li>When you reconnect, logs <strong>auto-sync</strong> with retry and <strong>exponential backoff</strong> (30s, 60s, 120s)</li>
       <li>The submit button changes to <strong>"Save Offline"</strong> when disconnected</li>
+      <li><strong>Network-first navigation</strong> &mdash; always fetches the latest app version when online</li>
     </ul>
   </div>
 
   <div class="info-box tip">
-    <span class="info-box-icon">💡</span>
+    <span class="info-box-icon">&#128161;</span>
     <div>Install the PWA (Add to Home Screen) for the best offline experience. The app shell loads instantly from cache even without internet.</div>
   </div>
 </div>
 
-<!-- SECTION 10: SHORTCUTS -->
+<!-- SECTION 11: DARK MODE -->
+<div class="section" id="dark-mode">
+  <div class="section-header">
+    <div class="section-num">11</div>
+    <div class="section-title">Dark Mode &amp; Theme</div>
+  </div>
+
+  <p>RSIMD-ITEMS supports both light and dark themes for comfortable viewing in any environment.</p>
+
+  <div class="subsection">
+    <h3>Toggling Theme</h3>
+    <ul style="margin: 12px 0; padding-left: 24px; color: var(--text); line-height: 2;">
+      <li>Click the <strong>sun/moon icon</strong> in the header to switch between light and dark mode</li>
+      <li>On first visit, the system <strong>respects your OS/browser preference</strong> (prefers-color-scheme)</li>
+      <li>Your choice is <strong>persisted in localStorage</strong> and remembered across sessions</li>
+      <li>All pages, modals, charts, and the Field Log form adapt to the selected theme</li>
+    </ul>
+  </div>
+</div>
+
+<!-- SECTION 12: DATA EXPORT -->
+<div class="section" id="data-export">
+  <div class="section-header">
+    <div class="section-num">12</div>
+    <div class="section-title">Data Export</div>
+  </div>
+
+  <p>Export your data from any table in the system for use in spreadsheets or external analysis.</p>
+
+  <div class="subsection">
+    <h3>CSV Export</h3>
+    <ul style="margin: 12px 0; padding-left: 24px; color: var(--text); line-height: 2;">
+      <li>Available on <strong>all data tables</strong>: equipment registry, maintenance logs, and admin tabs (workload, audit log)</li>
+      <li>Exports the <strong>currently filtered data</strong> &mdash; apply year, quarter, or location filters first to narrow your export</li>
+      <li>Click the <strong>"Export CSV"</strong> button above each table to download</li>
+      <li>Files open directly in Excel, Google Sheets, or LibreOffice Calc</li>
+    </ul>
+  </div>
+
+  <div class="info-box tip">
+    <span class="info-box-icon">&#128161;</span>
+    <div>The Fleet Report also exports as CSV &mdash; useful for sending procurement replacement lists to management.</div>
+  </div>
+</div>
+
+<!-- SECTION 13: SHORTCUTS -->
 <div class="section" id="shortcuts">
   <div class="section-header">
-    <div class="section-num">10</div>
+    <div class="section-num">13</div>
     <div class="section-title">Keyboard Shortcuts</div>
   </div>
 
@@ -854,7 +991,7 @@
       <tr><th>Key</th><th>Action</th></tr>
     </thead>
     <tbody>
-      <tr><td><span class="kbd">N</span></td><td>Open new maintenance log form</td></tr>
+      <tr><td><span class="kbd">N</span></td><td>Open new maintenance log form (single-entry &mdash; not the Field Log checklist)</td></tr>
       <tr><td><span class="kbd">S</span></td><td>Navigate to QR Scanner page</td></tr>
       <tr><td><span class="kbd">/</span></td><td>Focus the global search bar</td></tr>
       <tr><td><span class="kbd">?</span></td><td>Show keyboard shortcuts help</td></tr>
@@ -862,9 +999,14 @@
     </tbody>
   </table>
 
+  <div class="info-box important">
+    <span class="info-box-icon">&#8505;</span>
+    <div>The <span class="kbd">N</span> shortcut opens the <strong>single-entry maintenance log</strong> modal. To access the <strong>Field Log</strong> checklist (multi-category batch form), use the "Field Log" button on the Dashboard or navigate to <code style="color:var(--green);background:var(--bg3);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">/field-log</code> directly.</div>
+  </div>
+
   <div class="subsection" style="margin-top: 32px;">
     <h3>Global Search</h3>
-    <p>The search bar in the header (press <span class="kbd">/</span>) searches across equipment (asset tags, make, model), maintenance logs (descriptions), and org entities (names, codes). Results appear in a categorized dropdown — click any result to navigate directly.</p>
+    <p>The search bar in the header (press <span class="kbd">/</span>) searches across equipment (asset tags, make, model), maintenance logs (descriptions), and org entities (names, codes). Results appear in a categorized dropdown &mdash; click any result to navigate directly.</p>
   </div>
 </div>
 
@@ -872,9 +1014,9 @@
 
 <!-- FOOTER -->
 <div class="footer">
-  <p>RSIMD-ITEMS v1.0 — Built by the Research, Statistics & Information Management Directorate</p>
+  <p>RSIMD-ITEMS v2.0 &mdash; Built by the Research, Statistics &amp; Information Management Directorate</p>
   <p style="margin-top: 8px;">Office of the Head of Civil Service, Ghana</p>
-  <p style="margin-top: 16px;"><a href="/">← Return to System</a></p>
+  <p style="margin-top: 16px;"><a href="/">&larr; Return to System</a></p>
 </div>
 
 <script>
