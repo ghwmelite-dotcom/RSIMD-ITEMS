@@ -3,9 +3,7 @@ import { api } from "../../lib/api-client";
 import { MAINTENANCE_TYPES } from "../../lib/constants";
 import { exportToCsv } from "../../lib/export-csv";
 import { Select } from "../ui/Select";
-import { Table } from "../ui/Table";
-import { Button } from "../ui/Button";
-import { StatusPill } from "../ui/StatusPill";
+import { Badge } from "../ui/Badge";
 import type { MaintenanceLog, OrgEntity, MaintenanceCategory } from "../../types";
 
 interface LogListProps {
@@ -33,6 +31,18 @@ const TYPE_OPTIONS = [
   ...MAINTENANCE_TYPES.map((t) => ({ value: t.value, label: t.label })),
 ];
 
+const TYPE_BADGE: Record<string, { label: string; variant: "green" | "gold" | "red" | "gray" }> = {
+  routine: { label: "RTN", variant: "green" },
+  corrective: { label: "COR", variant: "gold" },
+  emergency: { label: "EMR", variant: "red" },
+  condition_based: { label: "CND", variant: "gray" },
+  predictive: { label: "PRD", variant: "gray" },
+};
+
+function stripHtml(text: string): string {
+  return text.replace(/<[^>]*>/g, "").trim();
+}
+
 export function LogList({ refreshKey }: LogListProps) {
   const [logs, setLogs] = useState<MaintenanceLog[]>([]);
   const [entities, setEntities] = useState<OrgEntity[]>([]);
@@ -49,10 +59,7 @@ export function LogList({ refreshKey }: LogListProps) {
       api.get<OrgEntity[]>("/org-entities"),
       api.get<MaintenanceCategory[]>("/categories"),
     ])
-      .then(([ents, cats]) => {
-        setEntities(ents);
-        setCategories(cats);
-      })
+      .then(([ents, cats]) => { setEntities(ents); setCategories(cats); })
       .catch(() => {});
   }, []);
 
@@ -68,15 +75,13 @@ export function LogList({ refreshKey }: LogListProps) {
       const data = await api.get<MaintenanceLog[]>(`/maintenance${qs ? `?${qs}` : ""}`);
       setLogs(data);
     } catch {
-      // empty table on failure
+      setLogs([]);
     } finally {
       setLoading(false);
     }
   }, [filterYear, filterQuarter, filterType, filterLocation]);
 
-  useEffect(() => {
-    loadLogs();
-  }, [loadLogs, refreshKey]);
+  useEffect(() => { loadLogs(); }, [loadLogs, refreshKey]);
 
   const entityMap = new Map(entities.map((e) => [e.id, e]));
   const categoryMap = new Map(categories.map((c) => [c.id, c]));
@@ -87,118 +92,121 @@ export function LogList({ refreshKey }: LogListProps) {
     ...entities.map((e) => ({ value: e.id, label: `${e.code} — ${e.name}` })),
   ];
 
-  type Row = Record<string, unknown>;
-  const columns = [
-    {
-      key: "logged_date",
-      header: "Date",
-      render: (row: Row) => {
-        const d = String(row.logged_date ?? "");
-        return d ? new Date(d).toLocaleDateString() : "—";
-      },
-    },
-    {
-      key: "maintenance_type",
-      header: "Type",
-      render: (row: Row) => typeMap.get(String(row.maintenance_type)) ?? String(row.maintenance_type),
-    },
-    {
-      key: "category_id",
-      header: "Category",
-      render: (row: Row) => {
-        const catId = row.category_id as string | null;
-        return catId ? categoryMap.get(catId)?.name ?? "—" : "—";
-      },
-    },
-    {
-      key: "org_entity_id",
-      header: "Location",
-      render: (row: Row) => entityMap.get(String(row.org_entity_id))?.code ?? "—",
-    },
-    { key: "room_number", header: "Room" },
-    {
-      key: "description",
-      header: "Description",
-      render: (row: Row) => {
-        const desc = String(row.description ?? "");
-        return desc.length > 60 ? `${desc.slice(0, 60)}...` : desc;
-      },
-    },
-    {
-      key: "status",
-      header: "Status",
-      render: (row: Row) => <StatusPill status={String(row.status)} />,
-    },
-  ];
+  function handleExport() {
+    const exportData = logs.map((log) => ({
+      logged_date: log.logged_date ? new Date(log.logged_date).toLocaleDateString() : "",
+      maintenance_type: typeMap.get(log.maintenance_type) ?? log.maintenance_type,
+      category: log.category_id ? categoryMap.get(log.category_id)?.name ?? "" : "",
+      location: entityMap.get(log.org_entity_id)?.code ?? "",
+      room_number: log.room_number ?? "",
+      description: log.description ?? "",
+      status: log.status,
+    }));
+    exportToCsv("maintenance-logs", [
+      { key: "logged_date", header: "Date" },
+      { key: "maintenance_type", header: "Type" },
+      { key: "category", header: "Category" },
+      { key: "location", header: "Location" },
+      { key: "room_number", header: "Room" },
+      { key: "description", header: "Description" },
+      { key: "status", header: "Status" },
+    ], exportData);
+  }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 flex-1">
-          <Select
-            options={YEAR_OPTIONS}
-            value={filterYear}
-            onChange={(e) => setFilterYear(e.target.value)}
-          />
-          <Select
-            options={QUARTER_OPTIONS}
-            value={filterQuarter}
-            onChange={(e) => setFilterQuarter(e.target.value)}
-          />
-          <Select
-            options={TYPE_OPTIONS}
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-          />
-          <Select
-            options={locationOptions}
-            value={filterLocation}
-            onChange={(e) => setFilterLocation(e.target.value)}
-          />
+    <div>
+      {/* Filters */}
+      <div className="px-4 py-3 border-b border-surface-200 dark:border-surface-800/50">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2 flex-wrap flex-1">
+            <Select options={YEAR_OPTIONS} value={filterYear} onChange={(e) => setFilterYear(e.target.value)} />
+            <Select options={QUARTER_OPTIONS} value={filterQuarter} onChange={(e) => setFilterQuarter(e.target.value)} />
+            <Select options={TYPE_OPTIONS} value={filterType} onChange={(e) => setFilterType(e.target.value)} />
+            <Select options={locationOptions} value={filterLocation} onChange={(e) => setFilterLocation(e.target.value)} />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-[10px] text-surface-500">{logs.length} logs</span>
+            <button
+              onClick={handleExport}
+              className="font-mono text-[10px] text-surface-400 hover:text-neon-green uppercase tracking-wider transition-colors"
+            >
+              Export CSV
+            </button>
+          </div>
         </div>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => {
-            const exportData = logs.map((log) => ({
-              logged_date: log.logged_date
-                ? new Date(log.logged_date).toLocaleDateString()
-                : "",
-              maintenance_type: typeMap.get(log.maintenance_type) ?? log.maintenance_type,
-              category: log.category_id
-                ? categoryMap.get(log.category_id)?.name ?? ""
-                : "",
-              location: entityMap.get(log.org_entity_id)?.code ?? "",
-              room_number: log.room_number ?? "",
-              description: log.description ?? "",
-              status: log.status,
-            }));
-            exportToCsv("maintenance-logs", [
-              { key: "logged_date", header: "Date" },
-              { key: "maintenance_type", header: "Type" },
-              { key: "category", header: "Category" },
-              { key: "location", header: "Location" },
-              { key: "room_number", header: "Room" },
-              { key: "description", header: "Description" },
-              { key: "status", header: "Status" },
-            ], exportData);
-          }}
-        >
-          Export CSV
-        </Button>
       </div>
 
+      {/* Loading */}
       {loading ? (
-        <div className="flex justify-center py-12">
-          <div className="animate-spin h-8 w-8 border-4 border-ghana-green border-t-transparent rounded-full" />
+        <div className="flex flex-col items-center justify-center py-16 gap-3">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-neon-green/30 border-t-neon-green" />
+          <span className="font-mono text-[10px] text-surface-500">Loading logs...</span>
+        </div>
+      ) : logs.length === 0 ? (
+        <div className="py-16 text-center">
+          <svg className="w-10 h-10 mx-auto text-surface-600 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <p className="font-mono text-xs text-surface-500">No maintenance logs found</p>
+          <p className="text-[10px] text-surface-600 mt-1">Try adjusting your filters or log a new activity</p>
         </div>
       ) : (
-        <Table
-          columns={columns}
-          data={logs as unknown as Record<string, unknown>[]}
-          keyField="id"
-          emptyMessage="No maintenance logs found"
-        />
+        /* Log entries */
+        <div className="divide-y divide-surface-100 dark:divide-surface-800/30">
+          {logs.map((log) => {
+            const entity = entityMap.get(log.org_entity_id);
+            const category = log.category_id ? categoryMap.get(log.category_id) : null;
+            const typeCfg = TYPE_BADGE[log.maintenance_type];
+            const desc = stripHtml(log.description);
+
+            return (
+              <div key={log.id} className="px-4 py-3 hover:bg-surface-50 dark:hover:bg-surface-800/20 transition-colors">
+                <div className="flex items-start gap-3">
+                  {/* Type badge */}
+                  <Badge variant={typeCfg?.variant ?? "gray"} className="mt-0.5 flex-shrink-0">
+                    {typeCfg?.label ?? "???"}
+                  </Badge>
+
+                  {/* Main content */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-surface-900 dark:text-surface-100 leading-snug">
+                      {desc.length > 80 ? desc.slice(0, 80) + "..." : desc}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
+                      <span className="font-mono text-[10px] text-surface-500">
+                        {new Date(log.logged_date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
+                      </span>
+                      {entity && (
+                        <span className="font-mono text-[10px] text-neon-green/70">{entity.code}</span>
+                      )}
+                      {log.room_number && (
+                        <span className="font-mono text-[10px] text-surface-400">Rm {log.room_number}</span>
+                      )}
+                      {category && (
+                        <span className="text-[10px] text-surface-400">{category.name}</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Status */}
+                  <div className="flex-shrink-0 flex items-center gap-2">
+                    <span className={`led ${log.status === "completed" ? "led-green" : log.status === "in_progress" ? "led-amber" : log.status === "escalated" ? "led-red" : "led-blue"}`} />
+                    <span className="font-mono text-[10px] text-surface-500 hidden sm:inline">
+                      {log.status.replace(/_/g, " ")}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Resolution (if exists) */}
+                {log.resolution && (
+                  <div className="ml-11 mt-1.5 text-[11px] text-surface-400 italic">
+                    Resolution: {log.resolution.length > 100 ? log.resolution.slice(0, 100) + "..." : log.resolution}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       )}
     </div>
   );
