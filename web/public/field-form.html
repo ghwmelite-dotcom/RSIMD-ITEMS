@@ -261,7 +261,7 @@
     </div>
   </div>
   <div class="info-row">
-    <div class="info-field" style="max-width:200px">
+    <div class="info-field" style="max-width:250px">
       <label>Quarter:</label>
       <div style="display:flex;gap:12px;font-size:9pt;">
         <span><span class="cb"></span> Q1</span>
@@ -271,24 +271,29 @@
       </div>
     </div>
     <div class="info-field">
-      <label>Directorate/Unit:</label>
-      <div class="line"></div>
-    </div>
-    <div class="info-field" style="max-width:130px">
-      <label>Room No:</label>
+      <label>Year:</label>
       <div class="line"></div>
     </div>
   </div>
 
-  <!-- Maintenance Type -->
+  <!-- Location 1 -->
   <div class="section">
-    <div class="section-title">Maintenance Type (tick one)</div>
-    <div style="padding:8px 10px;border:1px solid #999;border-top:none;display:flex;gap:20px;flex-wrap:wrap;font-size:9pt;">
-      <span><span class="cb"></span> Routine</span>
-      <span><span class="cb"></span> Corrective</span>
-      <span><span class="cb"></span> Emergency</span>
-      <span><span class="cb"></span> Condition-Based</span>
-      <span><span class="cb"></span> Predictive</span>
+    <div class="section-title">Location 1</div>
+    <div style="padding:8px 10px;border:1px solid #999;border-top:none;">
+      <div class="info-row" style="margin-bottom:6px">
+        <div class="info-field"><label>Directorate/Unit:</label><div class="line"></div></div>
+        <div class="info-field" style="max-width:100px"><label>Room:</label><div class="line"></div></div>
+        <div class="info-field" style="max-width:280px">
+          <label>Type:</label>
+          <div style="font-size:8pt;display:flex;gap:8px">
+            <span><span class="cb"></span> Routine</span>
+            <span><span class="cb"></span> Corrective</span>
+            <span><span class="cb"></span> Emergency</span>
+            <span><span class="cb"></span> Condition-Based</span>
+            <span><span class="cb"></span> Predictive</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -327,7 +332,7 @@
 
   <!-- Equipment Inspection -->
   <div class="section">
-    <div class="section-title">Equipment Inspected</div>
+    <div class="section-title">Equipment Inspected (write QR asset tag from sticker on device)</div>
     <table>
       <thead>
         <tr>
@@ -349,7 +354,8 @@
       </tbody>
     </table>
     <div style="font-size:7pt;color:#888;margin-top:3px;font-style:italic;">
-      Status: A = Active &nbsp;|&nbsp; F = Faulty &nbsp;|&nbsp; R = Under Repair &nbsp;|&nbsp; D = Decommissioned
+      Status: A = Active &nbsp;|&nbsp; F = Faulty &nbsp;|&nbsp; R = Under Repair &nbsp;|&nbsp; D = Decommissioned<br/>
+      <b>QR Tip:</b> Write the asset tag from the QR sticker (e.g., OHCS-DES-A1B2C). When entering data later, scan this code with your phone to auto-fill equipment details.
     </div>
   </div>
 
