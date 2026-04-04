@@ -1,13 +1,15 @@
 import { useState, useRef } from "react";
 import { useToast } from "../../hooks/useToast";
+import { savePendingPhoto } from "../../lib/offline-store";
 
 interface PhotoCaptureProps {
   photoUrls: string[];
   onPhotosChange: (urls: string[]) => void;
   maxPhotos?: number;
+  offlineLogId?: string;
 }
 
-export function PhotoCapture({ photoUrls, onPhotosChange, maxPhotos = 3 }: PhotoCaptureProps) {
+export function PhotoCapture({ photoUrls, onPhotosChange, maxPhotos = 3, offlineLogId }: PhotoCaptureProps) {
   const { showToast } = useToast();
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -23,6 +25,27 @@ export function PhotoCapture({ photoUrls, onPhotosChange, maxPhotos = 3 }: Photo
 
     if (photoUrls.length >= maxPhotos) {
       showToast("error", `Maximum ${maxPhotos} photos allowed`);
+      return;
+    }
+
+    if (!navigator.onLine) {
+      // Offline: store as base64 in IndexedDB
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const id = crypto.randomUUID();
+        await savePendingPhoto({
+          id,
+          logId: offlineLogId ?? "unassigned",
+          data: reader.result as string,
+          fileName: file.name,
+          mimeType: file.type,
+          created_at: new Date().toISOString(),
+        });
+        onPhotosChange([...photoUrls, `offline::${id}`]);
+        showToast("info", "Photo saved offline");
+      };
+      reader.readAsDataURL(file);
+      if (inputRef.current) inputRef.current.value = "";
       return;
     }
 
@@ -65,7 +88,11 @@ export function PhotoCapture({ photoUrls, onPhotosChange, maxPhotos = 3 }: Photo
       <div className="flex flex-wrap gap-2 mb-2">
         {photoUrls.map((url, i) => (
           <div key={i} className="relative w-16 h-16 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center">
-            <span className="text-xs text-gray-500 dark:text-gray-400">Photo {i + 1}</span>
+            {url.startsWith("offline::") ? (
+              <span className="text-[9px] text-neon-amber text-center leading-tight">Saved offline</span>
+            ) : (
+              <span className="text-xs text-gray-500 dark:text-gray-400">Photo {i + 1}</span>
+            )}
             <button
               type="button"
               onClick={() => removePhoto(i)}
