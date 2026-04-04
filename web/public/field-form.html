@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RSIMD-ITEMS — Maintenance Field Form</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 12mm 15mm;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Bookman Old Style', Bookman, Georgia, serif;
+      font-size: 10pt;
+      color: #111;
+      background: #fff;
+      line-height: 1.4;
+    }
+
+    .page {
+      max-width: 210mm;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    @media print {
+      .page { padding: 0; max-width: none; }
+      .no-print { display: none !important; }
+      .page-break { page-break-before: always; }
+    }
+
+    @media screen {
+      body { background: #e5e5e5; }
+      .page {
+        background: #fff;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.15);
+        margin: 20px auto;
+        padding: 30px;
+      }
+    }
+
+    /* Header */
+    .form-header {
+      text-align: center;
+      border-bottom: 2px solid #111;
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+    }
+    .form-header h1 {
+      font-size: 13pt;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .form-header h2 {
+      font-size: 11pt;
+      font-weight: normal;
+      margin-top: 3px;
+    }
+    .form-header .subtitle {
+      font-size: 9pt;
+      color: #555;
+      margin-top: 2px;
+    }
+    .form-id {
+      font-family: 'Courier New', monospace;
+      font-size: 8pt;
+      color: #888;
+      text-align: right;
+      margin-top: 5px;
+    }
+
+    /* Info row */
+    .info-row {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 12px;
+    }
+    .info-field {
+      flex: 1;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+    .info-field label {
+      font-size: 8pt;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #555;
+      white-space: nowrap;
+      font-weight: bold;
+    }
+    .info-field .line {
+      flex: 1;
+      border-bottom: 1px solid #999;
+      min-height: 16px;
+    }
+
+    /* Section */
+    .section {
+      margin-bottom: 14px;
+    }
+    .section-title {
+      font-size: 9pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      background: #1F4E79;
+      color: #fff;
+      padding: 5px 10px;
+      margin-bottom: 0;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9pt;
+    }
+    th, td {
+      border: 1px solid #999;
+      padding: 4px 6px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #D6E4F0;
+      font-size: 8pt;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: bold;
+      text-align: center;
+    }
+    td { min-height: 22px; }
+    .td-center { text-align: center; }
+    .td-sm { width: 30px; text-align: center; }
+    .td-md { width: 60px; }
+    .td-lg { width: 120px; }
+
+    /* Checkbox */
+    .cb {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 1.5px solid #333;
+      border-radius: 2px;
+      vertical-align: middle;
+      margin-right: 3px;
+    }
+
+    /* Write lines */
+    .write-area {
+      border: 1px solid #ccc;
+      min-height: 40px;
+      padding: 4px;
+      background: #FAFAFA;
+    }
+    .write-lines {
+      background: repeating-linear-gradient(
+        transparent, transparent 19px, #ddd 19px, #ddd 20px
+      );
+      min-height: 60px;
+      border: 1px solid #ccc;
+      padding: 4px 6px;
+    }
+
+    /* Equipment rows */
+    .equip-row td:first-child {
+      font-family: 'Courier New', monospace;
+      font-size: 8pt;
+    }
+
+    /* Footer */
+    .form-footer {
+      margin-top: 15px;
+      padding-top: 10px;
+      border-top: 1px solid #ccc;
+      display: flex;
+      justify-content: space-between;
+      font-size: 8pt;
+      color: #888;
+    }
+
+    /* Signature */
+    .sig-row {
+      display: flex;
+      gap: 30px;
+      margin-top: 20px;
+    }
+    .sig-block {
+      flex: 1;
+    }
+    .sig-block label {
+      font-size: 8pt;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #555;
+      display: block;
+      margin-bottom: 30px;
+    }
+    .sig-block .sig-line {
+      border-top: 1px solid #333;
+      padding-top: 4px;
+      font-size: 8pt;
+    }
+
+    /* Print button */
+    .print-bar {
+      max-width: 210mm;
+      margin: 0 auto 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+    }
+    .print-bar button {
+      background: #1F4E79;
+      color: #fff;
+      border: none;
+      padding: 10px 24px;
+      font-size: 13px;
+      font-family: inherit;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .print-bar button:hover { background: #163a5c; }
+    .print-bar a {
+      color: #1F4E79;
+      text-decoration: none;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Print Controls -->
+<div class="print-bar no-print">
+  <a href="/">&larr; Back to System</a>
+  <button onclick="window.print()">Print Form</button>
+</div>
+
+<!-- ===== PAGE 1: MAINTENANCE LOG ===== -->
+<div class="page">
+  <div class="form-header">
+    <h1>Research, Statistics & Information Management Directorate (RSIMD)</h1>
+    <h2>IT Equipment Maintenance Field Form</h2>
+    <div class="subtitle">Office of the Head of Civil Service — Ghana</div>
+  </div>
+
+  <!-- Technician info -->
+  <div class="info-row">
+    <div class="info-field">
+      <label>Technician:</label>
+      <div class="line"></div>
+    </div>
+    <div class="info-field" style="max-width:180px">
+      <label>Date:</label>
+      <div class="line"></div>
+    </div>
+  </div>
+  <div class="info-row">
+    <div class="info-field" style="max-width:200px">
+      <label>Quarter:</label>
+      <div style="display:flex;gap:12px;font-size:9pt;">
+        <span><span class="cb"></span> Q1</span>
+        <span><span class="cb"></span> Q2</span>
+        <span><span class="cb"></span> Q3</span>
+        <span><span class="cb"></span> Q4</span>
+      </div>
+    </div>
+    <div class="info-field">
+      <label>Directorate/Unit:</label>
+      <div class="line"></div>
+    </div>
+    <div class="info-field" style="max-width:130px">
+      <label>Room No:</label>
+      <div class="line"></div>
+    </div>
+  </div>
+
+  <!-- Maintenance Type -->
+  <div class="section">
+    <div class="section-title">Maintenance Type (tick one)</div>
+    <div style="padding:8px 10px;border:1px solid #999;border-top:none;display:flex;gap:20px;flex-wrap:wrap;font-size:9pt;">
+      <span><span class="cb"></span> Routine</span>
+      <span><span class="cb"></span> Corrective</span>
+      <span><span class="cb"></span> Emergency</span>
+      <span><span class="cb"></span> Condition-Based</span>
+      <span><span class="cb"></span> Predictive</span>
+    </div>
+  </div>
+
+  <!-- Routine Maintenance Checklist -->
+  <div class="section">
+    <div class="section-title">Routine Maintenance Checklist</div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:30px">S/N</th>
+          <th>Item Description</th>
+          <th style="width:50px">Issues Found</th>
+          <th style="width:40px">Count</th>
+          <th>Action Taken / Resolution</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="td-center">1</td><td>Internet Connection</td><td class="td-center"><span class="cb"></span></td><td></td><td></td></tr>
+        <tr><td class="td-center">2</td><td>AD / Active Directory Authentication</td><td class="td-center"><span class="cb"></span></td><td></td><td></td></tr>
+        <tr><td class="td-center">3</td><td>MS Office Installation</td><td class="td-center"><span class="cb"></span></td><td></td><td></td></tr>
+        <tr><td class="td-center">4</td><td>Ethernet Cable Installation</td><td class="td-center"><span class="cb"></span></td><td></td><td></td></tr>
+        <tr><td class="td-center">5</td><td>Internet Cable Re-termination</td><td class="td-center"><span class="cb"></span></td><td></td><td></td></tr>
+        <tr><td class="td-center">6</td><td>Printer Connection / Re-configuration</td><td class="td-center"><span class="cb"></span></td><td></td><td></td></tr>
+        <tr><td class="td-center">7</td><td>Ethernet Cable Replacement</td><td class="td-center"><span class="cb"></span></td><td></td><td></td></tr>
+        <tr><td class="td-center">8</td><td>Network Connectivity (General)</td><td class="td-center"><span class="cb"></span></td><td></td><td></td></tr>
+        <tr><td class="td-center">9</td><td>Hardware Installation</td><td class="td-center"><span class="cb"></span></td><td></td><td></td></tr>
+        <tr><td class="td-center">10</td><td>Software Installation</td><td class="td-center"><span class="cb"></span></td><td></td><td></td></tr>
+        <tr><td class="td-center">11</td><td>Router Configuration</td><td class="td-center"><span class="cb"></span></td><td></td><td></td></tr>
+        <tr><td class="td-center">12</td><td>RAM Capacity Issues</td><td class="td-center"><span class="cb"></span></td><td></td><td></td></tr>
+        <tr><td class="td-center">13</td><td>Faulty Desktop PCs</td><td class="td-center"><span class="cb"></span></td><td></td><td></td></tr>
+        <tr><td class="td-center">14</td><td>CCTV Maintenance</td><td class="td-center"><span class="cb"></span></td><td></td><td></td></tr>
+        <tr><td class="td-center">15</td><td style="border-bottom-style:dotted"><i>Other: _________________________</i></td><td class="td-center"><span class="cb"></span></td><td></td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Equipment Inspection -->
+  <div class="section">
+    <div class="section-title">Equipment Inspected</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Asset Tag / QR Code</th>
+          <th>Type</th>
+          <th>Make / Model</th>
+          <th>OS Version</th>
+          <th>Status</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="equip-row"><td style="height:22px"></td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr class="equip-row"><td style="height:22px"></td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr class="equip-row"><td style="height:22px"></td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr class="equip-row"><td style="height:22px"></td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr class="equip-row"><td style="height:22px"></td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr class="equip-row"><td style="height:22px"></td><td></td><td></td><td></td><td></td><td></td></tr>
+      </tbody>
+    </table>
+    <div style="font-size:7pt;color:#888;margin-top:3px;font-style:italic;">
+      Status: A = Active &nbsp;|&nbsp; F = Faulty &nbsp;|&nbsp; R = Under Repair &nbsp;|&nbsp; D = Decommissioned
+    </div>
+  </div>
+
+  <!-- Description -->
+  <div class="section">
+    <div class="section-title">Detailed Description of Activities</div>
+    <div class="write-lines" style="min-height:70px"></div>
+  </div>
+
+  <!-- Challenges -->
+  <div class="section">
+    <div class="section-title">Challenges / Issues Observed</div>
+    <div class="write-lines" style="min-height:50px"></div>
+  </div>
+
+  <!-- Signature -->
+  <div class="sig-row">
+    <div class="sig-block">
+      <label>Technician Signature:</label>
+      <div class="sig-line">Name: _____________________</div>
+    </div>
+    <div class="sig-block">
+      <label>Supervisor / IT Lead:</label>
+      <div class="sig-line">Name: _____________________</div>
+    </div>
+  </div>
+
+  <div class="form-footer">
+    <span>RSIMD-ITEMS Field Form v1.0</span>
+    <span>Form ID: MF-________</span>
+    <span>Page 1 of 2</span>
+  </div>
+</div>
+
+<!-- ===== PAGE 2: ADDITIONAL ROOMS ===== -->
+<div class="page page-break">
+  <div class="form-header">
+    <h1 style="font-size:11pt">RSIMD — Maintenance Field Form (Continuation Sheet)</h1>
+    <div class="subtitle">Use this page for additional rooms visited during the same exercise</div>
+  </div>
+
+  <div class="info-row">
+    <div class="info-field">
+      <label>Technician:</label>
+      <div class="line"></div>
+    </div>
+    <div class="info-field" style="max-width:180px">
+      <label>Date:</label>
+      <div class="line"></div>
+    </div>
+  </div>
+
+  <!-- Room Block 1 -->
+  <div class="section">
+    <div class="section-title">Location 2</div>
+    <div style="padding:6px 10px;border:1px solid #999;border-top:none;">
+      <div class="info-row" style="margin-bottom:6px">
+        <div class="info-field"><label>Directorate/Unit:</label><div class="line"></div></div>
+        <div class="info-field" style="max-width:100px"><label>Room:</label><div class="line"></div></div>
+        <div class="info-field" style="max-width:200px">
+          <label>Type:</label>
+          <div style="font-size:8pt;display:flex;gap:8px">
+            <span><span class="cb"></span>RTN</span>
+            <span><span class="cb"></span>COR</span>
+            <span><span class="cb"></span>EMR</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr><th style="width:30px">S/N</th><th>Issue Category</th><th style="width:40px">Count</th><th>Action / Resolution</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="td-center">1</td><td></td><td></td><td></td></tr>
+        <tr><td class="td-center">2</td><td></td><td></td><td></td></tr>
+        <tr><td class="td-center">3</td><td></td><td></td><td></td></tr>
+        <tr><td class="td-center">4</td><td></td><td></td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Room Block 2 -->
+  <div class="section">
+    <div class="section-title">Location 3</div>
+    <div style="padding:6px 10px;border:1px solid #999;border-top:none;">
+      <div class="info-row" style="margin-bottom:6px">
+        <div class="info-field"><label>Directorate/Unit:</label><div class="line"></div></div>
+        <div class="info-field" style="max-width:100px"><label>Room:</label><div class="line"></div></div>
+        <div class="info-field" style="max-width:200px">
+          <label>Type:</label>
+          <div style="font-size:8pt;display:flex;gap:8px">
+            <span><span class="cb"></span>RTN</span>
+            <span><span class="cb"></span>COR</span>
+            <span><span class="cb"></span>EMR</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr><th style="width:30px">S/N</th><th>Issue Category</th><th style="width:40px">Count</th><th>Action / Resolution</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="td-center">1</td><td></td><td></td><td></td></tr>
+        <tr><td class="td-center">2</td><td></td><td></td><td></td></tr>
+        <tr><td class="td-center">3</td><td></td><td></td><td></td></tr>
+        <tr><td class="td-center">4</td><td></td><td></td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Room Block 3 -->
+  <div class="section">
+    <div class="section-title">Location 4</div>
+    <div style="padding:6px 10px;border:1px solid #999;border-top:none;">
+      <div class="info-row" style="margin-bottom:6px">
+        <div class="info-field"><label>Directorate/Unit:</label><div class="line"></div></div>
+        <div class="info-field" style="max-width:100px"><label>Room:</label><div class="line"></div></div>
+        <div class="info-field" style="max-width:200px">
+          <label>Type:</label>
+          <div style="font-size:8pt;display:flex;gap:8px">
+            <span><span class="cb"></span>RTN</span>
+            <span><span class="cb"></span>COR</span>
+            <span><span class="cb"></span>EMR</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr><th style="width:30px">S/N</th><th>Issue Category</th><th style="width:40px">Count</th><th>Action / Resolution</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="td-center">1</td><td></td><td></td><td></td></tr>
+        <tr><td class="td-center">2</td><td></td><td></td><td></td></tr>
+        <tr><td class="td-center">3</td><td></td><td></td><td></td></tr>
+        <tr><td class="td-center">4</td><td></td><td></td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Data Entry Guide -->
+  <div class="section">
+    <div class="section-title">System Data Entry Guide</div>
+    <div style="padding:8px 10px;border:1px solid #999;border-top:none;font-size:8pt;color:#333;">
+      <p style="margin-bottom:6px"><b>After completing fieldwork, enter findings into RSIMD-ITEMS:</b></p>
+      <table style="font-size:8pt;border:none">
+        <tr style="border:none">
+          <td style="border:none;padding:2px 8px;vertical-align:top;width:20px;font-weight:bold">1.</td>
+          <td style="border:none;padding:2px 0">Open <b>rsimd-items.pages.dev</b> or tap the app icon on your phone</td>
+        </tr>
+        <tr style="border:none">
+          <td style="border:none;padding:2px 8px;vertical-align:top;font-weight:bold">2.</td>
+          <td style="border:none;padding:2px 0"><b>Scan QR</b> on equipment (or tap Maintenance → Log Activity)</td>
+        </tr>
+        <tr style="border:none">
+          <td style="border:none;padding:2px 8px;vertical-align:top;font-weight:bold">3.</td>
+          <td style="border:none;padding:2px 0">Select <b>Location</b> (directorate/unit) and <b>Room Number</b> from this form</td>
+        </tr>
+        <tr style="border:none">
+          <td style="border:none;padding:2px 8px;vertical-align:top;font-weight:bold">4.</td>
+          <td style="border:none;padding:2px 0">Choose <b>Maintenance Type</b> (RTN = Routine, COR = Corrective, EMR = Emergency)</td>
+        </tr>
+        <tr style="border:none">
+          <td style="border:none;padding:2px 8px;vertical-align:top;font-weight:bold">5.</td>
+          <td style="border:none;padding:2px 0">Select <b>Category</b> matching the "Issue Category" column from this form</td>
+        </tr>
+        <tr style="border:none">
+          <td style="border:none;padding:2px 8px;vertical-align:top;font-weight:bold">6.</td>
+          <td style="border:none;padding:2px 0">Copy the <b>Description</b> and <b>Resolution</b> from your notes (or use voice input 🎤)</td>
+        </tr>
+        <tr style="border:none">
+          <td style="border:none;padding:2px 8px;vertical-align:top;font-weight:bold">7.</td>
+          <td style="border:none;padding:2px 0">Attach photos if taken. Submit. <b>Works offline</b> — logs sync when back online.</td>
+        </tr>
+      </table>
+      <p style="margin-top:6px;color:#888"><i>Tip: Create one log entry per issue category per room. Multiple issues in the same room = multiple logs.</i></p>
+    </div>
+  </div>
+
+  <div class="form-footer">
+    <span>RSIMD-ITEMS Field Form v1.0</span>
+    <span>Form ID: MF-________</span>
+    <span>Page 2 of 2</span>
+  </div>
+</div>
+
+</body>
+</html>
