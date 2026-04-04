@@ -6,6 +6,8 @@ import { Input } from "../ui/Input";
 import { Select } from "../ui/Select";
 import { Button } from "../ui/Button";
 import { useToast } from "../../hooks/useToast";
+import { VoiceInput } from "./VoiceInput";
+import { PhotoCapture } from "./PhotoCapture";
 import type { OrgEntity, MaintenanceCategory } from "../../types";
 
 interface LogFormProps {
@@ -32,6 +34,7 @@ export function LogForm({ isOpen, onClose, onSaved, prefill }: LogFormProps) {
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [description, setDescription] = useState("");
   const [resolution, setResolution] = useState("");
+  const [photoUrls, setPhotoUrls] = useState<string[]>([]);
 
   useEffect(() => {
     if (isOpen) {
@@ -60,6 +63,7 @@ export function LogForm({ isOpen, onClose, onSaved, prefill }: LogFormProps) {
       setDate(new Date().toISOString().slice(0, 10));
       setDescription("");
       setResolution("");
+      setPhotoUrls([]);
     }
   }, [isOpen, prefill]);
 
@@ -76,6 +80,7 @@ export function LogForm({ isOpen, onClose, onSaved, prefill }: LogFormProps) {
         logged_date: date,
         description,
         resolution: resolution || null,
+        photo_urls: photoUrls,
       });
       showToast("success", "Maintenance log created successfully");
       onSaved();
@@ -136,29 +141,34 @@ export function LogForm({ isOpen, onClose, onSaved, prefill }: LogFormProps) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Description <span className="text-ghana-red">*</span>
-          </label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Description <span className="text-ghana-red">*</span>
+            </label>
+            <VoiceInput onTranscript={(text) => setDescription((prev) => prev + (prev ? " " : "") + text)} />
+          </div>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
             required
-            className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-ghana-green focus:outline-none focus:ring-1 focus:ring-ghana-green"
+            className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-ghana-green focus:outline-none focus:ring-1 focus:ring-ghana-green"
             placeholder="Describe the maintenance activity..."
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Resolution</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Resolution</label>
           <textarea
             value={resolution}
             onChange={(e) => setResolution(e.target.value)}
             rows={2}
-            className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-ghana-green focus:outline-none focus:ring-1 focus:ring-ghana-green"
+            className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-ghana-green focus:outline-none focus:ring-1 focus:ring-ghana-green"
             placeholder="Resolution or outcome..."
           />
         </div>
+
+        <PhotoCapture photoUrls={photoUrls} onPhotosChange={setPhotoUrls} />
 
         <div className="flex justify-end gap-3 pt-2">
           <Button type="button" variant="secondary" onClick={onClose}>

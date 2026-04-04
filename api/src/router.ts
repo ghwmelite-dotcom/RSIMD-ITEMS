@@ -37,6 +37,7 @@ import {
 import { readinessReport, agingReport } from "./routes/equipment-analytics";
 import { dashboardSummary, dashboardTrends, entityDetail } from "./routes/dashboard";
 import { search } from "./routes/search";
+import { uploadFile } from "./routes/upload";
 import {
   listReports,
   getReport,
@@ -151,6 +152,9 @@ router.get("/api/reports/:id", (request: Request, env: Env) => {
 
 // Search
 router.get("/api/search", (request: Request, env: Env) => search(request, env));
+
+// Upload
+router.post("/api/upload", (request: Request, env: Env) => uploadFile(request, env));
 
 // 404 catch-all
 router.all("*", () => {
