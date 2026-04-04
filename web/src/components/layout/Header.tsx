@@ -7,7 +7,7 @@ import { SearchBar } from "./SearchBar";
 
 export function Header() {
   const { user, logout } = useAuth();
-  const { isOnline, pendingCount, syncPending } = useOfflineSync();
+  const { isOnline, pendingCount, isSyncing, syncPending } = useOfflineSync();
   const { theme, toggleTheme } = useTheme();
 
   return (
@@ -33,7 +33,15 @@ export function Header() {
           </svg>
         </button>
         {!isOnline && <Badge variant="red">Offline</Badge>}
-        {pendingCount > 0 && (
+        {isSyncing ? (
+          <span className="flex items-center gap-1.5 text-xs font-medium text-ghana-green">
+            <svg className="animate-spin h-3 w-3" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            Syncing...
+          </span>
+        ) : pendingCount > 0 ? (
           <button
             type="button"
             onClick={syncPending}
@@ -42,7 +50,7 @@ export function Header() {
             <span className="inline-block h-2 w-2 rounded-full bg-yellow-500" />
             {pendingCount} pending
           </button>
-        )}
+        ) : null}
         <div className="text-right">
           <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{user?.name}</p>
           <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user?.role}</p>

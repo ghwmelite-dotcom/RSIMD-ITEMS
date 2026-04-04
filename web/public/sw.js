@@ -1,7 +1,6 @@
-const CACHE_NAME = "rsimd-items-v1";
-const PRECACHE = ["/", "/index.html"];
+const CACHE_NAME = "rsimd-items-v2";
+const PRECACHE = ["/", "/index.html", "/manifest.json"];
 
-// Install: cache shell assets, skip waiting
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE))
@@ -9,46 +8,47 @@ self.addEventListener("install", (event) => {
   self.skipWaiting();
 });
 
-// Activate: clean old caches, claim clients
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(
-        keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
-      )
+      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
     )
   );
   self.clients.claim();
 });
 
-// Fetch: let API requests pass through, cache-first for static assets
 self.addEventListener("fetch", (event) => {
-  const { request } = event;
-  const url = new URL(request.url);
+  const url = new URL(event.request.url);
 
-  // Skip API requests — the app handles offline via IndexedDB
-  if (url.pathname.startsWith("/api")) return;
+  // Skip API calls and non-GET requests
+  if (url.pathname.startsWith("/api") || event.request.method !== "GET") {
+    return;
+  }
 
-  // Only handle GET requests
-  if (request.method !== "GET") return;
+  // For navigation requests (SPA), serve index.html from cache
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      caches.match("/index.html").then((cached) => {
+        return cached || fetch(event.request);
+      })
+    );
+    return;
+  }
 
+  // Static assets: stale-while-revalidate
   event.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) return cached;
-
-      return fetch(request)
+    caches.match(event.request).then((cached) => {
+      const fetchPromise = fetch(event.request)
         .then((response) => {
-          // Cache successful responses for static assets
-          if (response.ok && response.type === "basic") {
+          if (response.ok) {
             const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
           }
           return response;
         })
-        .catch(() =>
-          // Network failure: fallback to cached index.html for navigation
-          caches.match("/index.html")
-        );
+        .catch(() => cached);
+
+      return cached || fetchPromise;
     })
   );
 });

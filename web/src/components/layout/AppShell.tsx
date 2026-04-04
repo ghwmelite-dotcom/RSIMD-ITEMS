@@ -5,6 +5,7 @@ import { Header } from "./Header";
 import { BottomNav } from "./BottomNav";
 import { ShortcutHelp } from "../ui/ShortcutHelp";
 import { LogForm } from "../maintenance/LogForm";
+import { InstallBanner } from "./InstallBanner";
 import { useKeyboardShortcuts } from "../../hooks/useKeyboardShortcuts";
 import type { ReactNode } from "react";
 
@@ -18,7 +19,9 @@ export function AppShell({ children }: { children?: ReactNode }) {
   });
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+    <>
+      <InstallBanner />
+      <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar />
       <div className="flex flex-col flex-1 min-w-0">
         <Header />
@@ -34,5 +37,6 @@ export function AppShell({ children }: { children?: ReactNode }) {
         onSaved={() => setShowLogForm(false)}
       />
     </div>
+    </>
   );
 }
