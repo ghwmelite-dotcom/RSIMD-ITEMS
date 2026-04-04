@@ -20,8 +20,9 @@ function ProtectedRoutes() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin h-8 w-8 border-4 border-ghana-green border-t-transparent rounded-full" />
+      <div className="min-h-screen flex flex-col items-center justify-center bg-surface-950 gap-3">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-neon-green/30 border-t-neon-green" />
+        <span className="font-mono text-xs text-surface-500">Loading system...</span>
       </div>
     );
   }
@@ -51,7 +52,15 @@ function ProtectedRoutes() {
 function LoginRoute() {
   const { user, isLoading } = useAuth();
 
-  if (isLoading) return null;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-surface-950 gap-3">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-neon-green/30 border-t-neon-green" />
+        <span className="font-mono text-xs text-surface-500">Validating session...</span>
+      </div>
+    );
+  }
+
   if (user) return <Navigate to="/" replace />;
 
   return <LoginPage />;
