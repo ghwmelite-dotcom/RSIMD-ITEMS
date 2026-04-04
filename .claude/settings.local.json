@@ -31,7 +31,9 @@
       "Bash(python3 -c ':*)",
       "Bash(VITE_API_URL=https://rsimd-items-api.ghwmelite.workers.dev npx vite build)",
       "Bash(pkill -f wrangler)",
-      "Bash(node -e \"const bcrypt = require\\('bcryptjs'\\); bcrypt.hash\\('1234', 10, \\(e, h\\) => console.log\\(h\\)\\)\")"
+      "Bash(node -e \"const bcrypt = require\\('bcryptjs'\\); bcrypt.hash\\('1234', 10, \\(e, h\\) => console.log\\(h\\)\\)\")",
+      "Bash(node -e ':*)",
+      "Bash(npm ls:*)"
     ]
   }
 }
