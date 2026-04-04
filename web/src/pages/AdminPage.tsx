@@ -3,11 +3,17 @@ import { Card } from "../components/ui/Card";
 import { OrgEntityManager } from "../components/admin/OrgEntityManager";
 import { CategoryManager } from "../components/admin/CategoryManager";
 import { TechnicianManager } from "../components/admin/TechnicianManager";
+import { TechnicianWorkload } from "../components/admin/TechnicianWorkload";
+import { AuditLog } from "../components/admin/AuditLog";
+import { BulkImport } from "../components/admin/BulkImport";
 
 const tabs = [
   { key: "entities", label: "Org Entities" },
   { key: "categories", label: "Categories" },
   { key: "technicians", label: "Technicians" },
+  { key: "workload", label: "Workload" },
+  { key: "audit", label: "Audit Log" },
+  { key: "import", label: "Bulk Import" },
 ] as const;
 
 type TabKey = (typeof tabs)[number]["key"];
@@ -41,6 +47,9 @@ export function AdminPage() {
         {activeTab === "entities" && <OrgEntityManager />}
         {activeTab === "categories" && <CategoryManager />}
         {activeTab === "technicians" && <TechnicianManager />}
+        {activeTab === "workload" && <TechnicianWorkload />}
+        {activeTab === "audit" && <AuditLog />}
+        {activeTab === "import" && <BulkImport />}
       </Card>
     </div>
   );
