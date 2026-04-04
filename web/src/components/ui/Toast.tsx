@@ -14,7 +14,7 @@ interface ToastProps {
 const typeStyles = {
   success: "bg-ghana-green text-white",
   error: "bg-ghana-red text-white",
-  info: "bg-gray-800 dark:bg-gray-700 text-white",
+  info: "bg-surface-800 dark:bg-surface-700 text-white",
 };
 
 export function Toast({ toast, onDismiss }: ToastProps) {
@@ -24,7 +24,7 @@ export function Toast({ toast, onDismiss }: ToastProps) {
   }, [toast.id, onDismiss]);
 
   return (
-    <div className={`rounded-lg px-4 py-3 shadow-lg text-sm font-medium ${typeStyles[toast.type]}`}>
+    <div className={`rounded-xl px-4 py-3 shadow-warm text-sm font-medium ${typeStyles[toast.type]}`}>
       {toast.message}
     </div>
   );
