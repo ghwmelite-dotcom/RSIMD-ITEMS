@@ -1,5 +1,8 @@
-const CACHE_NAME = "rsimd-items-v3";
+const CACHE_NAME = "rsimd-items-v4";
 const PRECACHE = ["/", "/index.html", "/manifest.json", "/icons/icon-192.png", "/icons/icon-512.png"];
+
+// Standalone HTML pages — serve directly, don't redirect to SPA
+const STANDALONE_PAGES = ["/field-form", "/guide", "/field-form.html", "/guide.html"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -25,7 +28,12 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // For navigation requests (SPA), serve index.html from cache
+  // Standalone HTML pages — let them through to the network, don't serve SPA
+  if (event.request.mode === "navigate" && STANDALONE_PAGES.some((p) => url.pathname.startsWith(p))) {
+    return;
+  }
+
+  // For SPA navigation requests, serve index.html from cache
   if (event.request.mode === "navigate") {
     event.respondWith(
       caches.match("/index.html").then((cached) => {

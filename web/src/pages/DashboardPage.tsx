@@ -84,7 +84,7 @@ export function DashboardPage() {
         </div>
         <div className="flex items-center gap-3">
           <a
-            href="/field-form.html"
+            href="/field-form"
             target="_blank"
             className="inline-flex items-center gap-2 px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider bg-neon-green/10 text-neon-green border border-neon-green/30 rounded-lg hover:bg-neon-green/20 hover:shadow-neon-green transition-all"
           >
