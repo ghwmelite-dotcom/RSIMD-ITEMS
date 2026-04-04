@@ -31,6 +31,8 @@ export interface Equipment {
   notes: string | null;
   os_version: string | null;
   processor_gen: string | null;
+  health_score?: number;
+  win11_readiness?: "ready" | "can_upgrade" | "cannot_upgrade" | "unknown" | "n/a";
 }
 
 export interface MaintenanceCategory {
