@@ -3,14 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../lib/api-client";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
-import { Table } from "../components/ui/Table";
-import { StatusPill } from "../components/ui/StatusPill";
 import { EquipmentDetail } from "../components/equipment/EquipmentDetail";
 import { EquipmentForm } from "../components/equipment/EquipmentForm";
-import { MAINTENANCE_TYPES } from "../lib/constants";
+import { EquipmentTimeline } from "../components/equipment/EquipmentTimeline";
 import type { Equipment, MaintenanceLog, OrgEntity } from "../types";
-
-const maintenanceTypeMap = new Map<string, string>(MAINTENANCE_TYPES.map((t) => [t.value, t.label]));
 
 export function EquipmentDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -56,26 +52,6 @@ export function EquipmentDetailPage() {
     ? `${entityMap.get(equipment.org_entity_id)!.code} — ${entityMap.get(equipment.org_entity_id)!.name}`
     : "—";
 
-  type Row = Record<string, unknown>;
-  const historyColumns = [
-    {
-      key: "logged_date",
-      header: "Date",
-      render: (row: Row) => new Date(String(row.logged_date)).toLocaleDateString(),
-    },
-    {
-      key: "maintenance_type",
-      header: "Type",
-      render: (row: Row) => maintenanceTypeMap.get(String(row.maintenance_type)) ?? String(row.maintenance_type),
-    },
-    { key: "description", header: "Description" },
-    {
-      key: "status",
-      header: "Status",
-      render: (row: Row) => <StatusPill status={String(row.status)} />,
-    },
-  ];
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -88,12 +64,10 @@ export function EquipmentDetailPage() {
       <EquipmentDetail equipment={equipment} entityName={entityName} />
 
       <Card>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Maintenance History</h2>
-        <Table
-          columns={historyColumns}
-          data={history as unknown as Record<string, unknown>[]}
-          keyField="id"
-          emptyMessage="No maintenance records yet"
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Maintenance History</h2>
+        <EquipmentTimeline
+          history={history}
+          registeredDate={equipment.installed_date ?? new Date().toISOString()}
         />
       </Card>
 
