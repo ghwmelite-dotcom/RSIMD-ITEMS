@@ -21,7 +21,7 @@ export function AppShell({ children }: { children?: ReactNode }) {
   return (
     <>
       <InstallBanner />
-      <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="flex h-screen bg-surface-50 dark:bg-surface-950">
       <Sidebar />
       <div className="flex flex-col flex-1 min-w-0">
         <Header />

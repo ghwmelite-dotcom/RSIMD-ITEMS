@@ -16,8 +16,8 @@ export function BottomNav() {
     user &&
     (user.role === "lead" || user.role === "admin");
 
-  const activeClass = "text-ghana-green";
-  const inactiveClass = "text-gray-500 dark:text-gray-400";
+  const activeClass = "text-ghana-gold";
+  const inactiveClass = "text-surface-500 dark:text-surface-500";
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     `flex flex-col items-center justify-center gap-0.5 flex-1 py-2 ${
@@ -25,7 +25,7 @@ export function BottomNav() {
     }`;
 
   return (
-    <div className="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 pb-[env(safe-area-inset-bottom)]">
+    <div className="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-white/90 dark:bg-surface-950/90 backdrop-blur-xl border-t border-surface-200 dark:border-surface-800/50 pb-[env(safe-area-inset-bottom)]">
       <nav className="flex items-stretch">
         {/* Dashboard */}
         <NavLink to="/" end className={linkClass}>
@@ -132,7 +132,7 @@ export function BottomNav() {
               />
 
               {/* Dropdown menu */}
-              <div className="absolute bottom-full mb-2 right-0 z-50 min-w-[160px] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1">
+              <div className="absolute bottom-full mb-2 right-0 z-50 min-w-[160px] bg-white dark:bg-surface-900 rounded-xl shadow-warm-lg border border-surface-200 dark:border-surface-700 py-1">
                 {hasMoreItems && (
                   <NavLink
                     to="/reports"
@@ -140,8 +140,8 @@ export function BottomNav() {
                     className={({ isActive }) =>
                       `block px-4 py-2.5 text-sm font-medium transition-colors ${
                         isActive
-                          ? "text-ghana-green bg-ghana-green/5"
-                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          ? "text-ghana-gold bg-ghana-gold/10"
+                          : "text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-800"
                       }`
                     }
                   >
@@ -155,8 +155,8 @@ export function BottomNav() {
                     className={({ isActive }) =>
                       `block px-4 py-2.5 text-sm font-medium transition-colors ${
                         isActive
-                          ? "text-ghana-green bg-ghana-green/5"
-                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          ? "text-ghana-gold bg-ghana-gold/10"
+                          : "text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-800"
                       }`
                     }
                   >

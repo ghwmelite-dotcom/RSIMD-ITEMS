@@ -1,7 +1,36 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git -C \"C:/Users/USER/OneDrive - Smart Workplace/Desktop/Projects/RSIMD-ITEMS\" log --oneline -5)"
+      "Bash(git -C \"C:/Users/USER/OneDrive - Smart Workplace/Desktop/Projects/RSIMD-ITEMS\" log --oneline -5)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm list:*)",
+      "Bash(npm run:*)",
+      "Bash(echo \"EXIT_CODE: $?\")",
+      "Bash(npx wrangler:*)",
+      "Bash(curl -s http://localhost:8787/api/health)",
+      "Bash(curl -s -o - -w \"\\\\nHTTP_STATUS:%{http_code}\" http://localhost:8787/api/nonexistent)",
+      "Bash(curl -s -o /dev/null -w \"HTTP_STATUS:%{http_code}\" -X OPTIONS http://localhost:8787/api/health -H \"Origin: http://localhost:5173\" -D -)",
+      "Bash(echo \"PID: $!\")",
+      "Read(//tmp/**)",
+      "Bash(curl -s -w \"\\\\nHTTP_STATUS:%{http_code}\" http://localhost:8787/api/nonexistent)",
+      "Bash(curl -s -D - -o /dev/null -w \"\\\\nHTTP_STATUS:%{http_code}\" -X OPTIONS http://localhost:8787/api/health -H \"Origin: http://localhost:5173\")",
+      "Bash(echo \"exit: $?\")",
+      "Bash(curl:*)",
+      "Bash(node -e 'const bcrypt = require\\('\\\\''bcryptjs'\\\\''\\); bcrypt.compare\\('\\\\''admin123'\\\\'', '\\\\''$2a$10$rQEY1f3wOrpOhLFcKXwSIeKlGj6rqFqBmkaT6HODWqbjsxVml3fKa'\\\\''\\).then\\(r => console.log\\('\\\\''match:'\\\\'', r\\)\\)')",
+      "Bash(node -e \"const bcrypt = require\\('bcryptjs'\\); bcrypt.hash\\('admin123', 10\\).then\\(h => console.log\\(h\\)\\)\")",
+      "Bash(pkill -f \"wrangler dev\")",
+      "Bash(rm:*)",
+      "Bash(taskkill //F //IM \"workerd.exe\")",
+      "Bash(rm -rf .wrangler)",
+      "Bash(node -e 'const bcrypt = require\\('\\\\''bcryptjs'\\\\''\\); bcrypt.compare\\('\\\\''admin123'\\\\'', '\\\\''$2a$10$KCoBLAiJU5I1/uin6JvkQ.kFQAjN7MSl3Tie4rXvur.SmlT..Mbf6'\\\\''\\).then\\(r => console.log\\('\\\\''match:'\\\\'', r\\)\\)')",
+      "Bash(mkdir:*)",
+      "Bash(npx vite:*)",
+      "Bash(python3 -c \"import sys,json; data=json.load\\(sys.stdin\\); [print\\(d['id'], d['name']\\) for d in data[:3]]\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(f'Updated: status={d[\\\\\"status\\\\\"]} resolution={d[\\\\\"resolution\\\\\"]}'\\)\")",
+      "Bash(python3 -c ':*)",
+      "Bash(VITE_API_URL=https://rsimd-items-api.ghwmelite.workers.dev npx vite build)",
+      "Bash(pkill -f wrangler)"
     ]
   }
 }

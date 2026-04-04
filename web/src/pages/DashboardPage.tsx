@@ -78,7 +78,10 @@ export function DashboardPage() {
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <h2 className="font-display text-2xl text-surface-900 dark:text-surface-100">Dashboard</h2>
+        <div className="flex items-center gap-3">
+          <span className="led led-green animate-pulse-slow" />
+          <h2 className="font-mono text-lg font-bold text-surface-900 dark:text-surface-100 uppercase tracking-wider">System Dashboard</h2>
+        </div>
         <div className="flex items-center gap-3">
           <div className="w-28">
             <Select
@@ -98,8 +101,9 @@ export function DashboardPage() {
       </div>
 
       {loading && (
-        <div className="flex items-center justify-center py-20">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-ghana-gold border-t-transparent" />
+        <div className="flex flex-col items-center justify-center py-20 gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-neon-green/30 border-t-neon-green" />
+          <span className="font-mono text-xs text-surface-500 animate-pulse">Loading telemetry...</span>
         </div>
       )}
 

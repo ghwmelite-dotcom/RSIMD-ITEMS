@@ -1,3 +1,99 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Tech scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 3px; }
+  .dark ::-webkit-scrollbar-thumb { background: #1E293B; }
+  ::-webkit-scrollbar-thumb:hover { background: #00E676; }
+
+  /* Green accent focus */
+  *:focus-visible {
+    outline: 1px solid #00E676;
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: rgba(0, 230, 118, 0.2);
+    color: inherit;
+  }
+}
+
+@layer components {
+  /* Stagger delays */
+  .stagger-1 { animation-delay: 0.06s; }
+  .stagger-2 { animation-delay: 0.12s; }
+  .stagger-3 { animation-delay: 0.18s; }
+  .stagger-4 { animation-delay: 0.24s; }
+  .stagger-5 { animation-delay: 0.3s; }
+  .stagger-6 { animation-delay: 0.36s; }
+
+  /* Terminal cursor blink */
+  .cursor-blink::after {
+    content: "_";
+    animation: blink 1.5s step-end infinite;
+  }
+
+  /* Scanline overlay */
+  .scanline::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 230, 118, 0.015) 2px,
+      rgba(0, 230, 118, 0.015) 4px
+    );
+    pointer-events: none;
+    border-radius: inherit;
+  }
+
+  /* LED status indicator */
+  .led {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .led-green {
+    background: #00E676;
+    box-shadow: 0 0 6px rgba(0, 230, 118, 0.6);
+  }
+  .led-red {
+    background: #FF1744;
+    box-shadow: 0 0 6px rgba(255, 23, 68, 0.6);
+  }
+  .led-amber {
+    background: #FFD600;
+    box-shadow: 0 0 6px rgba(255, 214, 0, 0.6);
+  }
+  .led-blue {
+    background: #00B0FF;
+    box-shadow: 0 0 6px rgba(0, 176, 255, 0.6);
+  }
+
+  /* Data grid background */
+  .data-grid {
+    background-image:
+      linear-gradient(rgba(0, 230, 118, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 230, 118, 0.03) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  /* Tech border glow */
+  .border-glow-green {
+    border: 1px solid rgba(0, 230, 118, 0.2);
+    box-shadow: inset 0 0 20px rgba(0, 230, 118, 0.03);
+  }
+}
