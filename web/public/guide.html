@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RSIMD-ITEMS — User Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Bookman+Old+Style&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #080F1C;
+      --bg2: #0D1526;
+      --bg3: #152031;
+      --border: rgba(30, 41, 59, 0.5);
+      --text: #C4CDD6;
+      --text-dim: #64748B;
+      --text-bright: #EFF2F5;
+      --green: #00E676;
+      --green-dim: rgba(0, 230, 118, 0.15);
+      --blue: #00B0FF;
+      --blue-dim: rgba(0, 176, 255, 0.15);
+      --amber: #FFD600;
+      --red: #FF1744;
+      --mono: 'JetBrains Mono', monospace;
+      --serif: 'Bookman Old Style', Bookman, Georgia, serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--serif);
+      font-size: 15px;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    ::selection { background: rgba(0, 230, 118, 0.2); }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--green); }
+
+    /* ===== HEADER ===== */
+    .header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(8, 15, 28, 0.9); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px; height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .header-logo {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .header-led {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px rgba(0, 230, 118, 0.6);
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+    .header-title {
+      font-family: var(--mono); font-size: 14px; font-weight: 700;
+      color: var(--text-bright); letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .header-subtitle {
+      font-family: var(--mono); font-size: 10px; color: var(--text-dim);
+      letter-spacing: 0.15em; text-transform: uppercase;
+    }
+    .header-back {
+      font-family: var(--mono); font-size: 12px; color: var(--green);
+      text-decoration: none; padding: 6px 16px; border: 1px solid rgba(0,230,118,0.3);
+      border-radius: 8px; transition: all 0.2s;
+    }
+    .header-back:hover { background: var(--green-dim); }
+
+    /* ===== HERO ===== */
+    .hero {
+      padding: 120px 24px 60px; text-align: center; position: relative;
+      background: linear-gradient(180deg, var(--bg2) 0%, var(--bg) 100%);
+      overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,230,118,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,230,118,0.03) 1px, transparent 1px);
+      background-size: 30px 30px;
+      animation: grid-move 20s linear infinite;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--mono); font-size: 11px; color: var(--green);
+      background: var(--green-dim); border: 1px solid rgba(0,230,118,0.2);
+      padding: 6px 16px; border-radius: 20px; margin-bottom: 24px;
+      text-transform: uppercase; letter-spacing: 0.15em;
+    }
+    .hero h1 {
+      font-family: var(--mono); font-size: clamp(28px, 5vw, 48px);
+      font-weight: 700; color: var(--text-bright);
+      letter-spacing: 0.05em; margin-bottom: 16px;
+      text-transform: uppercase; position: relative;
+    }
+    .hero p {
+      font-size: 17px; color: var(--text-dim); max-width: 600px; margin: 0 auto 40px;
+    }
+    .hero-stats {
+      display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;
+    }
+    .hero-stat {
+      text-align: center;
+    }
+    .hero-stat-value {
+      font-family: var(--mono); font-size: 32px; font-weight: 700; color: var(--green);
+    }
+    .hero-stat-label {
+      font-family: var(--mono); font-size: 10px; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: 0.15em;
+    }
+
+    /* ===== LAYOUT ===== */
+    .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+
+    /* ===== TABLE OF CONTENTS ===== */
+    .toc {
+      padding: 40px 0; border-bottom: 1px solid var(--border);
+    }
+    .toc-title {
+      font-family: var(--mono); font-size: 11px; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 20px;
+    }
+    .toc-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px;
+    }
+    .toc-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px; border-radius: 10px; text-decoration: none;
+      color: var(--text); border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+    .toc-item:hover {
+      background: var(--bg2); border-color: var(--border); color: var(--green);
+    }
+    .toc-num {
+      font-family: var(--mono); font-size: 11px; color: var(--green);
+      background: var(--green-dim); width: 28px; height: 28px;
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .toc-label { font-size: 14px; }
+
+    /* ===== SECTIONS ===== */
+    .section {
+      padding: 60px 0; border-bottom: 1px solid var(--border);
+      opacity: 0; transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .section.visible { opacity: 1; transform: translateY(0); }
+
+    .section-header {
+      display: flex; align-items: center; gap: 16px; margin-bottom: 32px;
+    }
+    .section-num {
+      font-family: var(--mono); font-size: 13px; font-weight: 700;
+      color: var(--bg); background: var(--green);
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .section-title {
+      font-family: var(--mono); font-size: 22px; font-weight: 700;
+      color: var(--text-bright); text-transform: uppercase; letter-spacing: 0.05em;
+    }
+
+    .subsection { margin-bottom: 32px; }
+    .subsection h3 {
+      font-family: var(--mono); font-size: 14px; font-weight: 600;
+      color: var(--green); margin-bottom: 12px;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .subsection h3::before {
+      content: '▸'; font-size: 12px;
+    }
+
+    /* ===== STEPS ===== */
+    .steps { margin: 20px 0; }
+    .step {
+      display: flex; gap: 16px; padding: 16px 0;
+      border-bottom: 1px solid rgba(30,41,59,0.3);
+      position: relative;
+    }
+    .step:last-child { border-bottom: none; }
+    .step-num {
+      font-family: var(--mono); font-size: 12px; font-weight: 700;
+      color: var(--bg); background: var(--blue);
+      width: 28px; height: 28px; min-width: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .step-content { flex: 1; }
+    .step-title {
+      font-weight: 700; color: var(--text-bright); margin-bottom: 4px;
+    }
+    .step-desc { font-size: 14px; color: var(--text); }
+
+    /* ===== ACCORDION ===== */
+    .accordion { margin: 20px 0; }
+    .accordion-item {
+      border: 1px solid var(--border); border-radius: 10px;
+      margin-bottom: 8px; overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .accordion-item.open { border-color: rgba(0, 230, 118, 0.3); }
+    .accordion-trigger {
+      width: 100%; padding: 16px 20px;
+      background: var(--bg2); border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between;
+      font-family: var(--serif); font-size: 15px; color: var(--text-bright);
+      transition: background 0.2s;
+    }
+    .accordion-trigger:hover { background: var(--bg3); }
+    .accordion-arrow {
+      font-family: var(--mono); font-size: 14px; color: var(--green);
+      transition: transform 0.3s;
+    }
+    .accordion-item.open .accordion-arrow { transform: rotate(90deg); }
+    .accordion-body {
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    .accordion-body-inner { padding: 16px 20px; }
+
+    /* ===== ROLE MATRIX ===== */
+    .role-table {
+      width: 100%; border-collapse: collapse; margin: 20px 0;
+      font-size: 13px;
+    }
+    .role-table th {
+      font-family: var(--mono); font-size: 11px; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: 0.1em;
+      padding: 12px 16px; text-align: left;
+      background: var(--bg2); border-bottom: 1px solid var(--border);
+    }
+    .role-table td {
+      padding: 10px 16px; border-bottom: 1px solid rgba(30,41,59,0.3);
+      color: var(--text);
+    }
+    .role-table tr:hover td { background: rgba(0,230,118,0.03); }
+    .check { color: var(--green); font-size: 16px; }
+    .cross { color: var(--text-dim); font-size: 14px; }
+
+    /* ===== SHORTCUT TABLE ===== */
+    .kbd {
+      font-family: var(--mono); font-size: 12px;
+      background: var(--bg3); border: 1px solid var(--border);
+      padding: 3px 10px; border-radius: 6px; color: var(--green);
+      display: inline-block;
+    }
+
+    /* ===== INFO BOXES ===== */
+    .info-box {
+      padding: 16px 20px; border-radius: 10px; margin: 16px 0;
+      font-size: 14px; display: flex; gap: 12px; align-items: flex-start;
+    }
+    .info-box.tip {
+      background: var(--green-dim); border: 1px solid rgba(0,230,118,0.2); color: var(--green);
+    }
+    .info-box.warning {
+      background: rgba(255,214,0,0.08); border: 1px solid rgba(255,214,0,0.2); color: var(--amber);
+    }
+    .info-box.important {
+      background: rgba(0,176,255,0.08); border: 1px solid rgba(0,176,255,0.2); color: var(--blue);
+    }
+    .info-box-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+
+    /* ===== FEATURE CARD ===== */
+    .feature-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;
+      margin: 20px 0;
+    }
+    .feature-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px;
+      transition: all 0.3s;
+    }
+    .feature-card:hover {
+      border-color: rgba(0,230,118,0.3); transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+    .feature-card-icon {
+      font-size: 24px; margin-bottom: 12px;
+    }
+    .feature-card-title {
+      font-family: var(--mono); font-size: 12px; font-weight: 600;
+      color: var(--text-bright); text-transform: uppercase; letter-spacing: 0.1em;
+      margin-bottom: 6px;
+    }
+    .feature-card-desc { font-size: 13px; color: var(--text-dim); }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      padding: 40px 24px; text-align: center;
+      font-family: var(--mono); font-size: 11px; color: var(--text-dim);
+    }
+    .footer a { color: var(--green); text-decoration: none; }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 5px rgba(0,230,118,0.3); }
+      50% { box-shadow: 0 0 15px rgba(0,230,118,0.6); }
+    }
+    @keyframes grid-move {
+      from { transform: translate(0, 0); }
+      to { transform: translate(30px, 30px); }
+    }
+
+    @media (max-width: 640px) {
+      .hero-stats { gap: 24px; }
+      .section-title { font-size: 18px; }
+      .toc-grid { grid-template-columns: 1fr; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .role-table { font-size: 11px; }
+      .role-table th, .role-table td { padding: 8px 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-logo">
+    <div class="header-led"></div>
+    <div>
+      <div class="header-title">RSIMD-ITEMS</div>
+      <div class="header-subtitle">User Guide v1.0</div>
+    </div>
+  </div>
+  <a href="/" class="header-back">← Back to System</a>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div style="position:relative">
+    <div class="hero-badge">
+      <span style="width:6px;height:6px;border-radius:50%;background:var(--green)"></span>
+      Official Documentation
+    </div>
+    <h1>System User Guide</h1>
+    <p>Complete guide to the OHCS IT Equipment Maintenance Management System built by the Research, Statistics & Information Management Directorate</p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-value">7</div>
+        <div class="hero-stat-label">Modules</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value">3</div>
+        <div class="hero-stat-label">User Roles</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value">30+</div>
+        <div class="hero-stat-label">API Endpoints</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value">PWA</div>
+        <div class="hero-stat-label">Offline Ready</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- TABLE OF CONTENTS -->
+<div class="toc">
+  <div class="toc-title">Table of Contents</div>
+  <div class="toc-grid">
+    <a href="#getting-started" class="toc-item"><span class="toc-num">01</span><span class="toc-label">Getting Started</span></a>
+    <a href="#dashboard" class="toc-item"><span class="toc-num">02</span><span class="toc-label">Dashboard</span></a>
+    <a href="#equipment" class="toc-item"><span class="toc-num">03</span><span class="toc-label">Equipment Registry</span></a>
+    <a href="#maintenance" class="toc-item"><span class="toc-num">04</span><span class="toc-label">Maintenance Logging</span></a>
+    <a href="#qr-scan" class="toc-item"><span class="toc-num">05</span><span class="toc-label">QR Scan-to-Log</span></a>
+    <a href="#reports" class="toc-item"><span class="toc-num">06</span><span class="toc-label">Quarterly Reports</span></a>
+    <a href="#admin" class="toc-item"><span class="toc-num">07</span><span class="toc-label">Admin Panel</span></a>
+    <a href="#roles" class="toc-item"><span class="toc-num">08</span><span class="toc-label">Roles & Permissions</span></a>
+    <a href="#offline" class="toc-item"><span class="toc-num">09</span><span class="toc-label">Offline Mode</span></a>
+    <a href="#shortcuts" class="toc-item"><span class="toc-num">10</span><span class="toc-label">Keyboard Shortcuts</span></a>
+  </div>
+</div>
+
+<!-- SECTION 1: GETTING STARTED -->
+<div class="section" id="getting-started">
+  <div class="section-header">
+    <div class="section-num">01</div>
+    <div class="section-title">Getting Started</div>
+  </div>
+
+  <div class="subsection">
+    <h3>Registration</h3>
+    <p>New users can self-register with an OHCS email address. Only <strong>@ohcs.gov.gh</strong> domain emails are accepted.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">Open the System</div>
+          <div class="step-desc">Navigate to the RSIMD-ITEMS URL. The system boot sequence will play, then the login screen appears.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">Click "Register" Tab</div>
+          <div class="step-desc">Switch from the Sign In tab to the Register tab at the top of the form.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Fill Your Details</div>
+          <div class="step-desc">Enter your full name, OHCS email (must end with @ohcs.gov.gh), and create a 4-6 digit PIN. Phone is optional.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-title">Create Account</div>
+          <div class="step-desc">Click "Create Account". You'll be automatically logged in and taken to the Dashboard.</div>
+        </div>
+      </div>
+    </div>
+    <div class="info-box warning">
+      <span class="info-box-icon">⚠</span>
+      <div><strong>Remember your PIN.</strong> There is no PIN recovery yet. If you forget it, contact the System Administrator.</div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3>Signing In</h3>
+    <p>Enter your OHCS email and 4-6 digit PIN on the Sign In tab. New accounts start as <strong>Technician</strong> role. An admin can upgrade you to Lead or Admin.</p>
+  </div>
+
+  <div class="subsection">
+    <h3>Installing as App (PWA)</h3>
+    <p>On mobile, you may see an "Install RSIMD-ITEMS" banner. Tap <strong>Install</strong> to add it to your home screen for quick access — it works like a native app with offline capability.</p>
+  </div>
+</div>
+
+<!-- SECTION 2: DASHBOARD -->
+<div class="section" id="dashboard">
+  <div class="section-header">
+    <div class="section-num">02</div>
+    <div class="section-title">Dashboard</div>
+  </div>
+
+  <p>The dashboard gives a real-time overview of all maintenance activities for the selected quarter.</p>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="feature-card-icon">📊</div>
+      <div class="feature-card-title">Summary Cards</div>
+      <div class="feature-card-desc">Total logs + breakdown by type with quarter-over-quarter comparison arrows</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-card-icon">📈</div>
+      <div class="feature-card-title">Trend Chart</div>
+      <div class="feature-card-desc">Stacked bar chart showing monthly maintenance distribution</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-card-icon">🏢</div>
+      <div class="feature-card-title">Entity Breakdown</div>
+      <div class="feature-card-desc">Click any directorate bar to drill down into room and category details</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-card-icon">⚠️</div>
+      <div class="feature-card-title">Anomaly Alerts</div>
+      <div class="feature-card-desc">Auto-detected issues — hotspot rooms, overloaded entities, Win10 EOL warnings</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-card-icon">🖥️</div>
+      <div class="feature-card-title">Win11 Readiness</div>
+      <div class="feature-card-desc">Pie chart showing how many devices can upgrade to Windows 11</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-card-icon">🔴</div>
+      <div class="feature-card-title">Equipment Risk</div>
+      <div class="feature-card-desc">Count of critical health devices and Windows 10 EOL machines</div>
+    </div>
+  </div>
+
+  <div class="info-box tip">
+    <span class="info-box-icon">💡</span>
+    <div>Use the <strong>Year</strong> and <strong>Quarter</strong> dropdowns at the top right to view data for any period. Delta arrows compare against the previous quarter automatically.</div>
+  </div>
+</div>
+
+<!-- SECTION 3: EQUIPMENT -->
+<div class="section" id="equipment">
+  <div class="section-header">
+    <div class="section-num">03</div>
+    <div class="section-title">Equipment Registry</div>
+  </div>
+
+  <div class="subsection">
+    <h3>Registering Equipment</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">Click "Register Equipment"</div>
+          <div class="step-desc">Opens a form to add a new device to the registry.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">Fill Device Details</div>
+          <div class="step-desc">Select type (desktop, laptop, printer, etc.), enter make/model, processor, serial number, OS version, and processor generation. Select the directorate/unit location and room number.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Asset Tag Generated</div>
+          <div class="step-desc">The system auto-generates a unique asset tag (e.g., OHCS-DES-A1B2C) and a QR code you can print and stick on the device.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3>Health Scores</h3>
+    <p>Every device gets a <strong>0-100 health score</strong> computed from:</p>
+    <ul style="margin: 12px 0; padding-left: 24px; color: var(--text);">
+      <li>Age of the device (years since installation)</li>
+      <li>Number of corrective/emergency maintenance logs</li>
+      <li>Time since last maintenance</li>
+      <li>Windows 10 EOL penalty (-20 points)</li>
+      <li>Legacy processor penalty (Pentium/Celeron: -10 points)</li>
+    </ul>
+    <div class="info-box important">
+      <span class="info-box-icon">ℹ</span>
+      <div><strong>Aging Fleet Report:</strong> Click "Fleet Report" on the Equipment page to see age distribution, OS breakdown, and a list of all equipment flagged for replacement — exportable as CSV for procurement requests.</div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3>Bulk QR Labels</h3>
+    <p>Select multiple devices using checkboxes, then click <strong>"Print QR"</strong> to generate an A4-formatted label sheet with QR codes, asset tags, and room numbers. Print and attach to physical equipment.</p>
+  </div>
+
+  <div class="subsection">
+    <h3>Bulk Import (Admin)</h3>
+    <p>In the Admin panel, upload a CSV file to register multiple devices at once. The CSV should have columns: type, make, model, processor, serial_number, org_entity_id, room_number, os_version, processor_gen.</p>
+  </div>
+</div>
+
+<!-- SECTION 4: MAINTENANCE -->
+<div class="section" id="maintenance">
+  <div class="section-header">
+    <div class="section-num">04</div>
+    <div class="section-title">Maintenance Logging</div>
+  </div>
+
+  <div class="subsection">
+    <h3>Logging an Activity</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">Click "Log Activity" or press <span class="kbd">N</span></div>
+          <div class="step-desc">Opens the maintenance log form from any page.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">Select Location & Type</div>
+          <div class="step-desc">Choose the directorate/unit, maintenance type (routine, corrective, emergency, etc.), and category (internet, printer, etc.).</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Describe the Work</div>
+          <div class="step-desc">Type a description — or tap the <strong>microphone icon</strong> to dictate using voice input. The system transcribes your speech.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-title">Attach Photos (Optional)</div>
+          <div class="step-desc">Tap "Add Photo" to capture before/after images. Up to 3 photos per log, max 5MB each.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <div class="step-title">Submit</div>
+          <div class="step-desc">The system auto-calculates the quarter and month from the date. If you're offline, it saves locally and syncs when you reconnect.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3>Quick Repeat</h3>
+    <p>When logging via QR scan, if the equipment has previous maintenance records, a <strong>"Repeat last"</strong> button appears. One tap fills in the previous description, resolution, category, and type — ideal for recurring issues.</p>
+  </div>
+
+  <div class="subsection">
+    <h3>Filtering Logs</h3>
+    <p>Use the filter dropdowns on the Maintenance page to view logs by year, quarter, maintenance type, or location. Click <strong>"Export CSV"</strong> to download the filtered data.</p>
+  </div>
+</div>
+
+<!-- SECTION 5: QR SCAN -->
+<div class="section" id="qr-scan">
+  <div class="section-header">
+    <div class="section-num">05</div>
+    <div class="section-title">QR Scan-to-Log</div>
+  </div>
+
+  <p>The fastest way to log maintenance — scan the QR sticker on any registered device.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-title">Open Scan Page</div>
+        <div class="step-desc">Tap "Scan" in the bottom nav (mobile) or sidebar (desktop), or press <span class="kbd">S</span>.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-title">Point Camera at QR Code</div>
+        <div class="step-desc">Click "Start Scanner" and point your phone camera at the QR sticker on the equipment. The scanner reads it automatically.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-title">Log Form Pre-filled</div>
+        <div class="step-desc">The maintenance form opens with equipment details, location, and room number already filled in. Just add description and submit.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-box tip">
+    <span class="info-box-icon">💡</span>
+    <div>You can also access equipment directly by URL: <code style="color:var(--green);background:var(--bg3);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">/scan/OHCS-DES-XXXX</code></div>
+  </div>
+</div>
+
+<!-- SECTION 6: REPORTS -->
+<div class="section" id="reports">
+  <div class="section-header">
+    <div class="section-num">06</div>
+    <div class="section-title">Quarterly Reports</div>
+  </div>
+
+  <p>Auto-generate the quarterly DOCX maintenance report matching OHCS's exact format — complete with AI-written narratives and data tables.</p>
+
+  <div class="subsection">
+    <h3>Two-Step Generation</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">Generate Preview</div>
+          <div class="step-desc">Select year and quarter, click "Generate Preview". The system aggregates all data and generates AI narratives (30-60 seconds). A full preview appears with all sections.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">Review & Edit Narratives</div>
+          <div class="step-desc">Each section shows the AI-generated text in an editable box. Fix any errors, add context, or rewrite sections before finalizing.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Generate DOCX</div>
+          <div class="step-desc">Click "Generate DOCX" to create the final Word document with your edited narratives + data tables. Download from the reports list.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3>Report Structure</h3>
+    <div class="accordion">
+      <div class="accordion-item">
+        <button class="accordion-trigger" onclick="toggleAccordion(this)">
+          <span>1.0 Introduction & Objectives</span>
+          <span class="accordion-arrow">▸</span>
+        </button>
+        <div class="accordion-body"><div class="accordion-body-inner">AI-generated introduction referencing the exact quarter, year, and total maintenance count. Objectives section describes RSIMD's mandate.</div></div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-trigger" onclick="toggleAccordion(this)">
+          <span>2.0 Methodology</span>
+          <span class="accordion-arrow">▸</span>
+        </button>
+        <div class="accordion-body"><div class="accordion-body-inner">Describes the 5 maintenance types used by OHCS: condition-based, routine, corrective, emergency, and predictive.</div></div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-trigger" onclick="toggleAccordion(this)">
+          <span>3.0 Details of Maintenance & Servicing</span>
+          <span class="accordion-arrow">▸</span>
+        </button>
+        <div class="accordion-body"><div class="accordion-body-inner">Five sub-sections (3.1-3.5) each with AI narratives and data tables. Routine and emergency include monthly breakdown tables. Corrective includes summary + directorate/room breakdown tables.</div></div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-trigger" onclick="toggleAccordion(this)">
+          <span>4.0 Challenges</span>
+          <span class="accordion-arrow">▸</span>
+        </button>
+        <div class="accordion-body"><div class="accordion-body-inner"><strong>Smart-generated</strong> from data: recurring issues, Windows 10 EOL risk, high-volume categories. Not a generic template — real findings from your data.</div></div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-trigger" onclick="toggleAccordion(this)">
+          <span>5.0 Recommendations & 6.0 Conclusion</span>
+          <span class="accordion-arrow">▸</span>
+        </button>
+        <div class="accordion-body"><div class="accordion-body-inner"><strong>Smart-generated</strong> recommendations: equipment replacement counts, Win11 upgrade blockers, root cause investigations. Conclusion summarizes the quarter's impact.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-box warning">
+    <span class="info-box-icon">⚠</span>
+    <div>Only <strong>Lead</strong> and <strong>Admin</strong> roles can generate reports. The generated DOCX uses Bookman Old Style font.</div>
+  </div>
+</div>
+
+<!-- SECTION 7: ADMIN -->
+<div class="section" id="admin">
+  <div class="section-header">
+    <div class="section-num">07</div>
+    <div class="section-title">Admin Panel</div>
+  </div>
+
+  <p>Admin-only area with 6 management tabs:</p>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="feature-card-icon">🏛️</div>
+      <div class="feature-card-title">Org Entities</div>
+      <div class="feature-card-desc">Add, edit, or deactivate directorates, units, and secretariats</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-card-icon">🏷️</div>
+      <div class="feature-card-title">Categories</div>
+      <div class="feature-card-desc">Manage maintenance issue categories (internet, printer, etc.)</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-card-icon">👥</div>
+      <div class="feature-card-title">Technicians</div>
+      <div class="feature-card-desc">Create accounts, assign roles (technician/lead/admin), reset PINs</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-card-icon">📊</div>
+      <div class="feature-card-title">Workload</div>
+      <div class="feature-card-desc">See logs per technician per quarter — balance team assignments</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-card-icon">📋</div>
+      <div class="feature-card-title">Audit Log</div>
+      <div class="feature-card-desc">Every admin action tracked: who created, modified, or deleted what</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-card-icon">📤</div>
+      <div class="feature-card-title">Bulk Import</div>
+      <div class="feature-card-desc">Upload CSV to register multiple equipment items at once</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 8: ROLES -->
+<div class="section" id="roles">
+  <div class="section-header">
+    <div class="section-num">08</div>
+    <div class="section-title">Roles & Permissions</div>
+  </div>
+
+  <table class="role-table">
+    <thead>
+      <tr>
+        <th>Feature</th>
+        <th>Technician</th>
+        <th>Lead</th>
+        <th>Admin</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>View Dashboard</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+      <tr><td>Browse Equipment</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+      <tr><td>Log Maintenance</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+      <tr><td>Scan QR Codes</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+      <tr><td>Register Equipment</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+      <tr><td>Export CSV Data</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+      <tr><td>View Reports</td><td class="cross">—</td><td class="check">✓</td><td class="check">✓</td></tr>
+      <tr><td>Generate Reports</td><td class="cross">—</td><td class="check">✓</td><td class="check">✓</td></tr>
+      <tr><td>Manage Org Entities</td><td class="cross">—</td><td class="cross">—</td><td class="check">✓</td></tr>
+      <tr><td>Manage Categories</td><td class="cross">—</td><td class="cross">—</td><td class="check">✓</td></tr>
+      <tr><td>Manage Technicians</td><td class="cross">—</td><td class="cross">—</td><td class="check">✓</td></tr>
+      <tr><td>View Audit Log</td><td class="cross">—</td><td class="cross">—</td><td class="check">✓</td></tr>
+      <tr><td>Bulk Import</td><td class="cross">—</td><td class="cross">—</td><td class="check">✓</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- SECTION 9: OFFLINE -->
+<div class="section" id="offline">
+  <div class="section-header">
+    <div class="section-num">09</div>
+    <div class="section-title">Offline Mode</div>
+  </div>
+
+  <p>RSIMD-ITEMS works without internet — critical for field technicians in areas with poor connectivity.</p>
+
+  <div class="subsection">
+    <h3>How It Works</h3>
+    <ul style="margin: 12px 0; padding-left: 24px; color: var(--text); line-height: 2;">
+      <li>Equipment lists, org entities, and categories are <strong>cached in IndexedDB</strong> on first load</li>
+      <li>When offline, cached data is served automatically</li>
+      <li>Maintenance logs are <strong>saved locally</strong> and queued for sync</li>
+      <li>The header shows a red <strong>"Offline"</strong> badge and pending log count</li>
+      <li>When you reconnect, logs <strong>auto-sync</strong> via bulk upload</li>
+      <li>The submit button changes to <strong>"Save Offline"</strong> when disconnected</li>
+    </ul>
+  </div>
+
+  <div class="info-box tip">
+    <span class="info-box-icon">💡</span>
+    <div>Install the PWA (Add to Home Screen) for the best offline experience. The app shell loads instantly from cache even without internet.</div>
+  </div>
+</div>
+
+<!-- SECTION 10: SHORTCUTS -->
+<div class="section" id="shortcuts">
+  <div class="section-header">
+    <div class="section-num">10</div>
+    <div class="section-title">Keyboard Shortcuts</div>
+  </div>
+
+  <p>Desktop power users can navigate faster with these shortcuts (only active when not typing in an input field):</p>
+
+  <table class="role-table" style="margin-top: 20px;">
+    <thead>
+      <tr><th>Key</th><th>Action</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><span class="kbd">N</span></td><td>Open new maintenance log form</td></tr>
+      <tr><td><span class="kbd">S</span></td><td>Navigate to QR Scanner page</td></tr>
+      <tr><td><span class="kbd">/</span></td><td>Focus the global search bar</td></tr>
+      <tr><td><span class="kbd">?</span></td><td>Show keyboard shortcuts help</td></tr>
+      <tr><td><span class="kbd">Esc</span></td><td>Close any open modal or dropdown</td></tr>
+    </tbody>
+  </table>
+
+  <div class="subsection" style="margin-top: 32px;">
+    <h3>Global Search</h3>
+    <p>The search bar in the header (press <span class="kbd">/</span>) searches across equipment (asset tags, make, model), maintenance logs (descriptions), and org entities (names, codes). Results appear in a categorized dropdown — click any result to navigate directly.</p>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<!-- FOOTER -->
+<div class="footer">
+  <p>RSIMD-ITEMS v1.0 — Built by the Research, Statistics & Information Management Directorate</p>
+  <p style="margin-top: 8px;">Office of the Head of Civil Service, Ghana</p>
+  <p style="margin-top: 16px;"><a href="/">← Return to System</a></p>
+</div>
+
+<script>
+  // Scroll-triggered section reveals
+  const sections = document.querySelectorAll('.section');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+  sections.forEach(s => observer.observe(s));
+
+  // Accordion
+  function toggleAccordion(btn) {
+    const item = btn.parentElement;
+    const body = item.querySelector('.accordion-body');
+    const isOpen = item.classList.contains('open');
+
+    // Close all
+    document.querySelectorAll('.accordion-item').forEach(i => {
+      i.classList.remove('open');
+      i.querySelector('.accordion-body').style.maxHeight = '0';
+    });
+
+    // Open clicked if was closed
+    if (!isOpen) {
+      item.classList.add('open');
+      body.style.maxHeight = body.scrollHeight + 'px';
+    }
+  }
+
+  // Smooth scroll for TOC
+  document.querySelectorAll('.toc-item').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = document.querySelector(link.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
