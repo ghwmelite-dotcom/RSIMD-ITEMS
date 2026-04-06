@@ -40,6 +40,7 @@ import { dashboardSummary, dashboardTrends, entityDetail, workload } from "./rou
 import { listAuditLog } from "./routes/audit";
 import { search } from "./routes/search";
 import { uploadFile } from "./routes/upload";
+import { listSchedules, todaySchedule, createSchedule, updateSchedule, deleteSchedule } from "./routes/schedules";
 import {
   listReports,
   getReport,
@@ -165,6 +166,19 @@ router.get("/api/search", (request: Request, env: Env) => search(request, env));
 
 // Upload
 router.post("/api/upload", (request: Request, env: Env) => uploadFile(request, env));
+
+// Schedules
+router.get("/api/schedules/today", (request: Request, env: Env) => todaySchedule(request, env));
+router.get("/api/schedules", (request: Request, env: Env) => listSchedules(request, env));
+router.post("/api/schedules", (request: Request, env: Env) => createSchedule(request, env));
+router.put("/api/schedules/:id", (request: Request, env: Env) => {
+  const id = (request as unknown as { params: { id: string } }).params.id;
+  return updateSchedule(request, env, id);
+});
+router.delete("/api/schedules/:id", (request: Request, env: Env) => {
+  const id = (request as unknown as { params: { id: string } }).params.id;
+  return deleteSchedule(request, env, id);
+});
 
 // 404 catch-all
 router.all("*", () => {

@@ -12,6 +12,7 @@ import { EquipmentHealth } from "../components/dashboard/EquipmentHealth";
 import { AlertCards } from "../components/dashboard/AlertCards";
 import { ReadinessWidget } from "../components/dashboard/ReadinessWidget";
 import { RiskSummary } from "../components/dashboard/RiskSummary";
+import { TodaySchedule } from "../components/dashboard/TodaySchedule";
 
 interface DashboardSummary {
   total: number;
@@ -118,6 +119,8 @@ export function DashboardPage() {
 
       {!loading && data && (
         <div className="space-y-8">
+          <TodaySchedule />
+
           {data.alerts && data.alerts.length > 0 && (
             <AlertCards alerts={data.alerts} />
           )}
