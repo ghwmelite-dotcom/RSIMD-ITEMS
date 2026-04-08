@@ -8,6 +8,7 @@ import { Card } from "../components/ui/Card";
 import { Select } from "../components/ui/Select";
 import { Input } from "../components/ui/Input";
 import { Button } from "../components/ui/Button";
+import { PhotoCapture } from "../components/maintenance/PhotoCapture";
 import type { OrgEntity, MaintenanceCategory } from "../types";
 import { MAINTENANCE_TYPES } from "../lib/constants";
 
@@ -50,6 +51,7 @@ export function FieldLogPage() {
   ]);
   const [description, setDescription] = useState("");
   const [challenges, setChallenges] = useState("");
+  const [photoUrls, setPhotoUrls] = useState<string[]>([]);
 
   // Load reference data
   useEffect(() => {
@@ -100,7 +102,7 @@ export function FieldLogPage() {
 
     try {
       // Create one log per checked category
-      const logs = checkedItems.map((item) => ({
+      const logs = checkedItems.map((item, idx) => ({
         org_entity_id: orgEntityId,
         maintenance_type: maintenanceType,
         category_id: item.category.id,
@@ -108,6 +110,7 @@ export function FieldLogPage() {
         description: `${item.category.name}${item.count ? ` (${item.count} issues)` : ""}${item.notes ? ` — ${item.notes}` : ""}`,
         resolution: item.notes || null,
         logged_date: date,
+        photo_urls: idx === 0 ? photoUrls : [], // Attach photos to first log
       }));
 
       // If there's a general description not tied to a category, add it too
@@ -120,6 +123,7 @@ export function FieldLogPage() {
           description: description.trim(),
           resolution: null,
           logged_date: date,
+          photo_urls: photoUrls,
         });
       }
 
@@ -168,6 +172,7 @@ export function FieldLogPage() {
     ]);
     setDescription("");
     setChallenges("");
+    setPhotoUrls([]);
     setSubmitted(false);
   }
 
@@ -394,6 +399,17 @@ export function FieldLogPage() {
             />
           </div>
         </div>
+      </Card>
+
+      {/* Photos */}
+      <Card>
+        <h3 className="font-mono text-xs font-bold text-surface-500 uppercase tracking-wider mb-3">
+          Photos / Screenshots
+        </h3>
+        <p className="text-[11px] text-surface-400 mb-3">
+          Capture before/after photos or screenshots of issues found during the exercise
+        </p>
+        <PhotoCapture photoUrls={photoUrls} onPhotosChange={setPhotoUrls} maxPhotos={6} />
       </Card>
 
       {/* Offline banner */}
