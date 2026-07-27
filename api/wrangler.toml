@@ -9,11 +9,11 @@ ENVIRONMENT = "production"
 [[d1_databases]]
 binding = "DB"
 database_name = "rsimd_items_db"
-database_id = "c0ef4000-85be-435e-a9d4-db9654e055f5"
+database_id = "ff57f1b7-da26-490c-aaf7-19228acf16a1"
 
 [[kv_namespaces]]
 binding = "KV"
-id = "b873309f9dba413b93852acd0acf9699"
+id = "f05fbbeeceb54cf695d6c8178f3c6fb1"
 
 [[r2_buckets]]
 binding = "R2"

@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 320" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <radialGradient id="wfGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00E676" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#00E676" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1280" height="320" rx="18" fill="#080F1C"/>
+  <ellipse cx="640" cy="160" rx="580" ry="150" fill="url(#wfGlow)"/>
+
+  <text x="640" y="48" text-anchor="middle" font-size="26" font-weight="800" fill="#e8f5ec">One workflow, zero paper</text>
+  <text x="640" y="76" text-anchor="middle" font-size="15" fill="#9fb3c8">From memory-based tracking to a full digital audit trail</text>
+
+  <!-- connector -->
+  <path d="M130 150 H 1150" stroke="#00E676" stroke-opacity="0.2" stroke-width="2" stroke-dasharray="2 7" stroke-linecap="round"/>
+
+  <!-- 1: Register (chip + plus) -->
+  <g>
+    <circle cx="130" cy="150" r="42" fill="#0a1626" stroke="#00E676" stroke-width="2.5"/>
+    <rect x="114" y="134" width="32" height="32" rx="5" fill="none" stroke="#00E676" stroke-width="3"/>
+    <path d="M130 128v-8M130 172v8M114 150h-8M146 150h8" stroke="#00E676" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M150 128h12M156 122v12" stroke="#FCD116" stroke-width="3" stroke-linecap="round"/>
+    <text x="130" y="222" text-anchor="middle" font-size="15" font-weight="700" fill="#e8f5ec">Register</text>
+    <text x="130" y="242" text-anchor="middle" font-size="12" fill="#9fb3c8">every IT asset, CSV bulk import</text>
+  </g>
+
+  <!-- 2: Label (QR sticker) -->
+  <g>
+    <circle cx="385" cy="150" r="42" fill="#0a1626" stroke="#00B0FF" stroke-width="2.5"/>
+    <g fill="#00B0FF">
+      <rect x="369" y="134" width="14" height="14" fill="none" stroke="#00B0FF" stroke-width="2.5"/>
+      <rect x="373" y="138" width="6" height="6"/>
+      <rect x="387" y="134" width="14" height="14" fill="none" stroke="#00B0FF" stroke-width="2.5"/>
+      <rect x="391" y="138" width="6" height="6"/>
+      <rect x="369" y="152" width="14" height="14" fill="none" stroke="#00B0FF" stroke-width="2.5"/>
+      <rect x="373" y="156" width="6" height="6"/>
+      <rect x="387" y="152" width="5" height="5"/><rect x="396" y="154" width="5" height="5"/>
+      <rect x="388" y="161" width="6" height="6"/><rect x="397" y="162" width="4" height="4"/>
+    </g>
+    <text x="385" y="222" text-anchor="middle" font-size="15" font-weight="700" fill="#e8f5ec">Label</text>
+    <text x="385" y="242" text-anchor="middle" font-size="12" fill="#9fb3c8">print A4 QR sticker sheets</text>
+  </g>
+
+  <!-- 3: Scan (phone) -->
+  <g>
+    <circle cx="640" cy="150" r="42" fill="#0a1626" stroke="#FCD116" stroke-width="2.5"/>
+    <rect x="626" y="128" width="28" height="44" rx="6" fill="none" stroke="#FCD116" stroke-width="3"/>
+    <path d="M636 164h8" stroke="#FCD116" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M632 140l6 6M644 140l-6 6" stroke="#00E676" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="640" cy="150" r="30" fill="none" stroke="#FCD116" stroke-opacity="0.4" stroke-dasharray="4 6" stroke-width="2"/>
+    <text x="640" y="222" text-anchor="middle" font-size="15" font-weight="700" fill="#e8f5ec">Scan &amp; Log</text>
+    <text x="640" y="242" text-anchor="middle" font-size="12" fill="#9fb3c8">field form pre-fills, works offline</text>
+  </g>
+
+  <!-- 4: Analyze (chart) -->
+  <g>
+    <circle cx="895" cy="150" r="42" fill="#0a1626" stroke="#00E676" stroke-width="2.5"/>
+    <path d="M875 170h40" stroke="#00E676" stroke-opacity="0.5" stroke-width="2"/>
+    <rect x="878" y="152" width="7" height="18" fill="#00E676" opacity="0.45"/>
+    <rect x="889" y="142" width="7" height="28" fill="#00E676" opacity="0.65"/>
+    <rect x="900" y="134" width="7" height="36" fill="#00E676" opacity="0.9"/>
+    <path d="M876 146l12-8 10 4 12-10" fill="none" stroke="#FCD116" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="895" y="222" text-anchor="middle" font-size="15" font-weight="700" fill="#e8f5ec">Analyze</text>
+    <text x="895" y="242" text-anchor="middle" font-size="12" fill="#9fb3c8">health scores, anomalies, aging fleet</text>
+  </g>
+
+  <!-- 5: Report (DOCX) -->
+  <g>
+    <circle cx="1150" cy="150" r="42" fill="#0a1626" stroke="#00B0FF" stroke-width="2.5"/>
+    <path d="M1138 128h18l8 8v36h-26z" fill="none" stroke="#00B0FF" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M1156 128v8h8" fill="none" stroke="#00B0FF" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M1143 148h16M1143 156h16M1143 164h10" stroke="#00B0FF" stroke-width="2" stroke-linecap="round"/>
+    <text x="1150" y="222" text-anchor="middle" font-size="15" font-weight="700" fill="#e8f5ec">Report</text>
+    <text x="1150" y="242" text-anchor="middle" font-size="12" fill="#9fb3c8">AI-written quarterly DOCX</text>
+  </g>
+
+  <!-- arrows -->
+  <g fill="#00E676" fill-opacity="0.75">
+    <path d="M200 145l14 5-14 5z"/>
+    <path d="M455 145l14 5-14 5z"/>
+    <path d="M710 145l14 5-14 5z"/>
+    <path d="M965 145l14 5-14 5z"/>
+  </g>
+
+  <!-- bottom stat bar -->
+  <g>
+    <rect x="340" y="272" width="600" height="34" rx="17" fill="#00E676" fill-opacity="0.08" stroke="#00E676" stroke-opacity="0.45"/>
+    <text x="640" y="294" text-anchor="middle" font-family="Consolas, monospace" font-size="15" font-weight="700" fill="#00E676">report generation: 2 weeks manual &#8594; 5 minutes automated</text>
+  </g>
+</svg>

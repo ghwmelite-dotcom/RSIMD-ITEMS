@@ -1,8 +1,6 @@
 <div align="center">
 
-<img src="web/public/icons/icon.svg" width="80" height="80" alt="RSIMD-ITEMS" />
-
-# RSIMD-ITEMS
+<img src="docs/assets/banner.svg" alt="RSIMD-ITEMS — IT Equipment Maintenance System, OHCS Ghana" width="100%" />
 
 **IT Equipment Maintenance Management System**
 
@@ -13,7 +11,7 @@ Built by the Research, Statistics & Information Management Directorate (RSIMD)
 ---
 
 [![Live System](https://img.shields.io/badge/Live-rsimd--items.pages.dev-00E676?style=for-the-badge&logo=cloudflare&logoColor=white)](https://rsimd-items.pages.dev)
-[![API](https://img.shields.io/badge/API-workers.dev-00B0FF?style=for-the-badge&logo=cloudflare&logoColor=white)](https://rsimd-items-api.ghwmelite.workers.dev/api/health)
+[![API](https://img.shields.io/badge/API-workers.dev-00B0FF?style=for-the-badge&logo=cloudflare&logoColor=white)](https://rsimd-items-api.ohcsghana-main.workers.dev/api/health)
 [![Guide](https://img.shields.io/badge/User%20Guide-Online-FCD116?style=for-the-badge)](https://rsimd-items.pages.dev/guide)
 
 </div>
@@ -34,9 +32,9 @@ OHCS manages quarterly IT equipment maintenance across 5 directorates, 5 units, 
 
 RSIMD-ITEMS digitizes the entire maintenance workflow:
 
-```
-Register Equipment → Stick QR Labels → Scan & Log in the Field → Auto-Generate Reports
-```
+<div align="center">
+<img src="docs/assets/workflow.svg" alt="RSIMD-ITEMS workflow — Register, Label, Scan and Log, Analyze, Report" width="100%" />
+</div>
 
 **Report generation: 2 weeks manual → 5 minutes automated.**
 
@@ -103,16 +101,34 @@ Register Equipment → Stick QR Labels → Scan & Log in the Field → Auto-Gene
 
 ## Architecture
 
-```
-┌─────────────┐     ┌──────────────────┐     ┌─────────────┐
-│  React PWA  │────▶│  CF Worker API   │────▶│  D1 (SQLite)│
-│  (Pages)    │     │  (44 routes)     │     └─────────────┘
-└─────────────┘     │                  │     ┌─────────────┐
-                    │  Auth (KV)       │────▶│  KV Sessions│
-                    │  AI Narratives   │     └─────────────┘
-                    │  DOCX Assembly   │     ┌─────────────┐
-                    │  Photo Upload    │────▶│  R2 Storage  │
-                    └──────────────────┘     └─────────────┘
+```mermaid
+flowchart LR
+    subgraph PWA["📱 React PWA — Cloudflare Pages"]
+        UI["Dashboard · Registry<br/>Field Log · Reports"]
+        SW["Service Worker<br/><i>offline queue · IndexedDB</i>"]
+    end
+
+    subgraph API["☁️ CF Worker API — 44 routes"]
+        AUTH["Auth<br/><i>PIN + KV sessions</i>"]
+        NAR["AI Narratives<br/><i>Llama 3.1 70B</i>"]
+        DOCX["DOCX Assembly"]
+        PHOTO["Photo Upload"]
+    end
+
+    subgraph DATA["🗄️ Edge Data"]
+        D1[("D1 · SQLite<br/>9 tables")]
+        KV[("KV Sessions")]
+        R2[("R2 Storage<br/>reports · photos")]
+    end
+
+    PWA -->|HTTPS| API
+    AUTH --> KV
+    API --> D1
+    DOCX & PHOTO --> R2
+
+    style PWA fill:#0a1626,stroke:#00E676,color:#e8f5ec
+    style API fill:#0a1420,stroke:#00B0FF,color:#e8f5ec
+    style DATA fill:#12100a,stroke:#FCD116,color:#e8f5ec
 ```
 
 **Database: 9 tables**
@@ -241,7 +257,7 @@ wrangler pages deploy dist --project-name rsimd-items
 | **Live System** | [rsimd-items.pages.dev](https://rsimd-items.pages.dev) |
 | **User Guide** | [rsimd-items.pages.dev/guide](https://rsimd-items.pages.dev/guide) |
 | **Field Form (printable)** | [rsimd-items.pages.dev/field-form](https://rsimd-items.pages.dev/field-form) |
-| **API Health** | [rsimd-items-api.ghwmelite.workers.dev/api/health](https://rsimd-items-api.ghwmelite.workers.dev/api/health) |
+| **API Health** | [rsimd-items-api.ohcsghana-main.workers.dev/api/health](https://rsimd-items-api.ohcsghana-main.workers.dev/api/health) |
 
 ---
 
