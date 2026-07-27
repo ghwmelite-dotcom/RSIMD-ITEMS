@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 360" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <radialGradient id="gGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00E676" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#00E676" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="bGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00B0FF" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#00B0FF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ttl" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#e8f5ec"/>
+      <stop offset="60%" stop-color="#00E676"/>
+      <stop offset="100%" stop-color="#e8f5ec"/>
+    </linearGradient>
+  </defs>
+
+  <!-- canvas -->
+  <rect width="1280" height="360" fill="#080F1C"/>
+  <ellipse cx="200" cy="170" rx="340" ry="210" fill="url(#gGlow)"/>
+  <ellipse cx="1140" cy="300" rx="360" ry="200" fill="url(#bGlow)"/>
+
+  <!-- circuit grid -->
+  <g stroke="#00E676" stroke-opacity="0.06">
+    <path d="M0 72h1280M0 144h1280M0 216h1280M0 288h1280"/>
+    <path d="M160 0v360M320 0v360M480 0v360M640 0v360M800 0v360M960 0v360M1120 0v360"/>
+  </g>
+  <g fill="#00E676" opacity="0.18">
+    <circle cx="160" cy="72" r="3.5"/><circle cx="480" cy="216" r="3.5"/>
+    <circle cx="800" cy="72" r="3.5"/><circle cx="1120" cy="288" r="3.5"/>
+    <circle cx="320" cy="288" r="3.5"/><circle cx="960" cy="144" r="3.5"/>
+  </g>
+
+  <!-- logo: chip -->
+  <g transform="translate(64,96)">
+    <rect width="168" height="168" rx="30" fill="#0a1626" stroke="#00E676" stroke-opacity="0.4" stroke-width="2"/>
+    <g stroke="#00E676" stroke-width="3.5" stroke-linecap="round">
+      <path d="M56 52V34M84 52V34M112 52V34M56 116v18M84 116v18M112 116v18M52 56H34M52 84H34M52 112H34M116 56h18M116 84h18M116 112h18"/>
+    </g>
+    <rect x="52" y="52" width="64" height="64" rx="10" fill="none" stroke="#00E676" stroke-width="4.5"/>
+    <rect x="68" y="68" width="32" height="32" rx="5" fill="#00E676" opacity="0.18"/>
+    <text x="84" y="91" text-anchor="middle" font-family="Consolas, monospace" font-size="17" font-weight="bold" fill="#00E676">IT</text>
+  </g>
+
+  <!-- wordmark -->
+  <text x="268" y="172" font-family="Consolas, 'Courier New', monospace" font-size="64" font-weight="800" letter-spacing="2" fill="url(#ttl)">RSIMD-ITEMS</text>
+  <text x="272" y="214" font-size="21" font-weight="500" fill="#9fb3c8">IT Equipment Maintenance System — OHCS Ghana</text>
+  <text x="272" y="252" font-family="Consolas, monospace" font-size="16" fill="#00E676">&gt; report gen: 2 weeks manual &#8594; 5 min automated<span opacity="0.7">_</span></text>
+
+  <!-- chips -->
+  <g font-size="14" font-weight="600" font-family="Consolas, monospace">
+    <g>
+      <rect x="272" y="272" width="132" height="32" rx="16" fill="#00E676" fill-opacity="0.07" stroke="#00E676" stroke-opacity="0.5"/>
+      <text x="338" y="293" text-anchor="middle" fill="#00E676">QR scan-to-log</text>
+    </g>
+    <g>
+      <rect x="416" y="272" width="118" height="32" rx="16" fill="#00B0FF" fill-opacity="0.07" stroke="#00B0FF" stroke-opacity="0.5"/>
+      <text x="475" y="293" text-anchor="middle" fill="#5ec9f8">offline PWA</text>
+    </g>
+    <g>
+      <rect x="546" y="272" width="124" height="32" rx="16" fill="#FCD116" fill-opacity="0.06" stroke="#FCD116" stroke-opacity="0.45"/>
+      <text x="608" y="293" text-anchor="middle" fill="#FCD116">AI DOCX reports</text>
+    </g>
+  </g>
+
+  <!-- terminal window (right) -->
+  <g transform="translate(752,58)">
+    <rect width="472" height="248" rx="14" fill="#050b14" stroke="#00E676" stroke-opacity="0.35" stroke-width="1.5"/>
+    <path d="M0 14a14 14 0 0 1 14-14h444a14 14 0 0 1 14 14v16H0z" fill="#0a1420"/>
+    <circle cx="22" cy="15" r="5.5" fill="#00E676" opacity="0.85"/>
+    <circle cx="42" cy="15" r="5.5" fill="#00B0FF" opacity="0.85"/>
+    <circle cx="62" cy="15" r="5.5" fill="#FCD116" opacity="0.85"/>
+    <text x="236" y="20" text-anchor="middle" font-family="Consolas, monospace" font-size="12" fill="#5b7089">rsimd@edge: ~/maintenance</text>
+
+    <g font-family="Consolas, monospace" font-size="14.5">
+      <text x="20" y="58" fill="#00E676">&gt; boot OHCS-RSIMD-ITEMS v1.0</text>
+      <text x="20" y="84" fill="#8fa5bb">auth ........ <tspan fill="#00E676">PIN verified</tspan></text>
+      <text x="20" y="108" fill="#8fa5bb">d1 .......... <tspan fill="#00E676">9 tables connected</tspan></text>
+      <text x="20" y="132" fill="#8fa5bb">edge ........ <tspan fill="#00E676">44 routes online</tspan></text>
+      <text x="20" y="156" fill="#8fa5bb">qr scanner .. <tspan fill="#00E676">ready</tspan></text>
+      <text x="20" y="184" fill="#FCD116">&gt; scan: ROOM-19-PC-04</text>
+      <text x="20" y="208" fill="#8fa5bb">health 82/100 &#183; win11-ready &#183; log saved</text>
+      <text x="20" y="232" fill="#00E676">&gt; sync: queued &#8594; synced in 1.2s<span opacity="0.7">_</span></text>
+    </g>
+
+    <!-- QR motif -->
+    <g transform="translate(392,64)" fill="#00E676">
+      <rect x="0" y="0" width="20" height="20" fill="none" stroke="#00E676" stroke-width="3"/>
+      <rect x="6" y="6" width="8" height="8"/>
+      <rect x="34" y="0" width="20" height="20" fill="none" stroke="#00E676" stroke-width="3"/>
+      <rect x="40" y="6" width="8" height="8"/>
+      <rect x="0" y="34" width="20" height="20" fill="none" stroke="#00E676" stroke-width="3"/>
+      <rect x="6" y="40" width="8" height="8"/>
+      <rect x="28" y="28" width="6" height="6"/><rect x="38" y="30" width="5" height="5"/>
+      <rect x="47" y="28" width="7" height="7"/><rect x="30" y="40" width="5" height="5"/>
+      <rect x="40" y="42" width="6" height="6"/><rect x="49" y="40" width="5" height="5"/>
+      <rect x="28" y="50" width="7" height="7"/><rect x="44" y="52" width="5" height="5"/>
+    </g>
+  </g>
+
+  <!-- bottom accent -->
+  <rect x="0" y="354" width="640" height="6" fill="#00E676"/>
+  <rect x="640" y="354" width="640" height="6" fill="#00B0FF"/>
+</svg>
