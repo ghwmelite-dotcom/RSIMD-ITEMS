@@ -1,4 +1,4 @@
-const CACHE_NAME = "rsimd-items-v8-staff-accounts";
+const CACHE_NAME = "rsimd-items-v9-login-terminal";
 const PRECACHE = ["/", "/index.html", "/manifest.json", "/icons/icon-192.png", "/icons/icon-512.png"];
 const STANDALONE_PAGES = ["/field-form", "/guide", "/field-form.html", "/guide.html"];
 

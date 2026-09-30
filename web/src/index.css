@@ -101,3 +101,18 @@
     box-shadow: inset 0 0 20px rgba(0, 230, 118, 0.03);
   }
 }
+
+/* Keep browser autofill consistent with the terminal login. */
+.login-terminal input:-webkit-autofill,
+.login-terminal input:-webkit-autofill:hover,
+.login-terminal input:-webkit-autofill:focus {
+  -webkit-text-fill-color: theme('colors.neon.green');
+  -webkit-box-shadow: 0 0 0 1000px theme('colors.surface.950') inset;
+  caret-color: theme('colors.neon.green');
+}
+@media (prefers-reduced-motion: reduce) {
+  .login-terminal *, .login-terminal *::before, .login-terminal *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

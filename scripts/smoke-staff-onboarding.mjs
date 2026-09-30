@@ -65,6 +65,9 @@ try {
   await page.getByLabel('Completed staff template').setInputFiles(filled);
   await page.getByRole('button', { name: 'Create 0 staff accounts', exact: true }).waitFor();
   await page.evaluate(() => localStorage.clear()); await page.goto(`${base}/login`);
+  await page.getByText('INTERFACE READY', { exact: true }).waitFor();
+  assert.equal(await page.locator('.login-terminal .animate-data-flow').evaluate(el => getComputedStyle(el).animationName), 'dataFlow');
+  await page.screenshot({ path: path.join(out, 'login-terminal-desktop.png'), fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByLabel('Staff ID', { exact: true }).fill('001007'); await page.getByLabel('PIN', { exact: true }).fill('1007');
   await page.screenshot({ path: path.join(out, 'staff-id-login.png'), fullPage: true });
@@ -81,6 +84,16 @@ try {
   await page.getByLabel('Staff ID', { exact: true }).fill('001007'); await page.getByLabel('PIN', { exact: true }).fill('1007');
   await page.getByRole('button', { name: 'Sign in', exact: true }).click(); await page.waitForURL(`${base}/`);
   assert.equal(await page.getByRole('heading', { name: 'Your PIN preference' }).count(), 0);
+  await page.evaluate(() => localStorage.clear());
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto(`${base}/login`);
+  await page.getByText('INTERFACE READY', { exact: true }).waitFor();
+  assert.equal(await page.locator('.login-terminal .animate-data-flow').evaluate(el => getComputedStyle(el).animationName), 'none');
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false);
+  await page.getByRole('button', { name: 'Existing account without a Staff ID?' }).click();
+  await page.getByLabel('Existing account email', { exact: true }).fill('legacy@example.test');
+  await page.getByRole('button', { name: 'Use Staff ID instead' }).click();
+  assert.equal(await page.getByLabel('Staff ID', { exact: true }).inputValue(), '');
   assert.deepEqual(errors, []);
   console.log('PASS: browser template, preview-only, account creation, last-four PIN, repeat import, Staff ID login, keep-PIN opt-out, remembered choice and admin denial. Synthetic local records only.');
 } catch (error) {
