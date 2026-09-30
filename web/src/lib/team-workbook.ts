@@ -89,7 +89,7 @@ function textCell(cell: Cell): string {
   if (value instanceof Date) return value.toISOString().slice(0, 10);
   throw new Error(`${cell.worksheet.name}!${cell.address}: use plain text, not formulas, links or embedded objects.`);
 }
-function checkZip(data: ArrayBuffer): void {
+export function checkZip(data: ArrayBuffer): void {
   if (data.byteLength > 2_000_000 || data.byteLength < 22) throw new Error("Use an ITEMS .xlsx workbook no larger than 2 MB.");
   const view = new DataView(data);
   let end = -1;

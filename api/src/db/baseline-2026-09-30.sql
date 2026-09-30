@@ -47,10 +47,6 @@ CREATE TABLE IF NOT EXISTS technicians (
   assigned_entities TEXT DEFAULT '[]',
   is_active INTEGER DEFAULT 1,
   password_hash TEXT NOT NULL,
-  staff_id TEXT,
-  staff_category TEXT NOT NULL DEFAULT 'technician',
-  must_change_pin INTEGER NOT NULL DEFAULT 0,
-  session_version INTEGER NOT NULL DEFAULT 0,
   created_at TEXT DEFAULT (datetime('now')),
   updated_at TEXT DEFAULT (datetime('now'))
 );
@@ -157,6 +153,3 @@ CREATE TABLE IF NOT EXISTS team_form_observations (
   form_id TEXT NOT NULL REFERENCES team_forms(id)
 );
 CREATE INDEX IF NOT EXISTS idx_team_form_observations_form ON team_form_observations(form_id);
-
-CREATE UNIQUE INDEX IF NOT EXISTS idx_technicians_staff_id ON technicians(staff_id);
-CREATE TABLE IF NOT EXISTS auth_login_limits (limit_key TEXT PRIMARY KEY, attempts INTEGER NOT NULL, window_start INTEGER NOT NULL);

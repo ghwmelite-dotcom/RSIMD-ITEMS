@@ -1,4 +1,4 @@
-import type { Env, AuthSession } from "../types";
+import type { Env, AuthSession, TechnicianRow } from "../types";
 import { errorResponse } from "./error-handler";
 
 export async function authenticate(
@@ -16,7 +16,14 @@ export async function authenticate(
     return errorResponse("Token expired or invalid", 401, request);
   }
 
-  return JSON.parse(sessionJson) as AuthSession;
+  let session: AuthSession;
+  try { session = JSON.parse(sessionJson) as AuthSession; } catch { return errorResponse("Invalid session", 401, request); }
+  const row = await env.DB.prepare("SELECT * FROM technicians WHERE id = ?").bind(session.technician_id).first<TechnicianRow>();
+  if (!row || !row.is_active) return errorResponse("Account is inactive", 403, request);
+  if ((session.session_version ?? 0) !== (row.session_version ?? 0)) return errorResponse("Session expired. Sign in again.", 401, request);
+  const path = new URL(request.url).pathname;
+  if (row.must_change_pin && !["/api/auth/me", "/api/auth/change-pin", "/api/auth/keep-pin", "/api/auth/logout"].includes(path)) return errorResponse("Choose whether to keep or change your initial PIN before continuing", 403, request);
+  return { ...session, name: row.name, role: row.role };
 }
 
 export function requireRole(session: AuthSession, request: Request, ...roles: AuthSession["role"][]): Response | null {

@@ -1,7 +1,8 @@
 import { Router } from "itty-router";
+import { importStaff } from "./routes/staff-import";
 import { teamFormImport } from "./routes/team-forms";
 import type { Env } from "./types";
-import { login, logout, me, register } from "./routes/auth";
+import { login, logout, me, register, changePin, keepPin } from "./routes/auth";
 import {
   listEntities,
   getEntity,
@@ -61,9 +62,13 @@ router.get("/api/health", () => {
 
 // Auth
 router.post("/api/auth/login", (request: Request, env: Env) => login(request, env));
-router.post("/api/auth/register", (request: Request, env: Env) => register(request, env));
+router.post("/api/auth/register", (request: Request, env: Env) => register(request));
 router.post("/api/auth/logout", (request: Request, env: Env) => logout(request, env));
 router.get("/api/auth/me", (request: Request, env: Env) => me(request, env));
+
+router.post("/api/auth/change-pin", (request: Request, env: Env) => changePin(request, env));
+
+router.post("/api/auth/keep-pin", (request: Request, env: Env) => keepPin(request, env));
 
 // Org Entities
 router.get("/api/org-entities", (request: Request, env: Env) => listEntities(request, env));
@@ -88,6 +93,9 @@ router.put("/api/categories/:id", (request: Request, env: Env) => {
   const id = (request as unknown as { params: { id: string } }).params.id;
   return updateCategory(request, env, id);
 });
+
+router.post("/api/staff-import/preview", (request: Request, env: Env) => importStaff(request, env, false));
+router.post("/api/staff-import/commit", (request: Request, env: Env) => importStaff(request, env, true));
 
 // Technicians
 router.get("/api/technicians", (request: Request, env: Env) => getTechnicians(request, env));

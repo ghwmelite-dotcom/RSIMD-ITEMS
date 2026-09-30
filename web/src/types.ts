@@ -1,4 +1,8 @@
 export interface Technician {
+  staff_id?: string | null;
+  staff_category?: "technician" | "officer";
+  must_change_pin?: boolean;
+  is_active?: boolean;
   id: string;
   name: string;
   role: "technician" | "lead" | "admin";

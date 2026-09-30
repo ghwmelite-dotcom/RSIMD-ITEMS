@@ -28,7 +28,7 @@ jobs:
       - run: node scripts/check-migrations.mjs
       - name: Check migration tracking on an isolated local database
         run: |
-          npx --no-install wrangler d1 execute rsimd_items_db --config api/wrangler.toml --local --persist-to .wrangler/ci-migration-test --file api/src/db/schema.sql
+          npx --no-install wrangler d1 execute rsimd_items_db --config api/wrangler.toml --local --persist-to .wrangler/ci-migration-test --file api/src/db/baseline-2026-09-30.sql
           npx --no-install wrangler d1 migrations apply rsimd_items_db --config api/wrangler.toml --local --persist-to .wrangler/ci-migration-test
           npx --no-install wrangler d1 migrations apply rsimd_items_db --config api/wrangler.toml --local --persist-to .wrangler/ci-migration-test
       - run: npm test --workspace=api

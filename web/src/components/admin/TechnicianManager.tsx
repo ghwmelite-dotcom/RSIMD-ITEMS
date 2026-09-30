@@ -1,255 +1,53 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, type FormEvent } from "react";
 import { api } from "../../lib/api-client";
-import { exportToCsv } from "../../lib/export-csv";
-import { useToast } from "../../hooks/useToast";
-import { Table } from "../ui/Table";
+import { useAuth } from "../../hooks/useAuth";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
 import { Select } from "../ui/Select";
 import { Modal } from "../ui/Modal";
-import { Badge } from "../ui/Badge";
+import { StaffImport } from "./StaffImport";
 import type { Technician } from "../../types";
 
-interface TechnicianForm {
-  name: string;
-  email: string;
-  phone: string;
-  role: "technician" | "lead" | "admin";
-  pin: string;
-}
-
-const emptyForm: TechnicianForm = {
-  name: "",
-  email: "",
-  phone: "",
-  role: "technician",
-  pin: "",
-};
-
-const roleOptions = [
-  { value: "technician", label: "Technician" },
-  { value: "lead", label: "Lead" },
-  { value: "admin", label: "Admin" },
-];
-
-const roleBadgeVariant: Record<string, "red" | "gold" | "green"> = {
-  admin: "red",
-  lead: "gold",
-  technician: "green",
-};
-
+const empty = { staff_id: "", name: "", email: "", phone: "", staff_category: "officer", role: "technician", is_active: true, reset_pin: false };
+const accessName = (role: string) => role === "lead" ? "Report officer" : role === "admin" ? "Administrator" : "Member";
 export function TechnicianManager() {
-  const { showToast } = useToast();
-  const [technicians, setTechnicians] = useState<Technician[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState<TechnicianForm>(emptyForm);
-
-  const loadTechnicians = useCallback(async () => {
-    try {
-      setLoading(true);
-      const data = await api.get<Technician[]>("/technicians");
-      setTechnicians(data);
-    } catch {
-      showToast("error", "Failed to load technicians");
-    } finally {
-      setLoading(false);
-    }
-  }, [showToast]);
-
-  useEffect(() => {
-    loadTechnicians();
-  }, [loadTechnicians]);
-
-  const openCreate = () => {
-    setForm(emptyForm);
-    setEditingId(null);
-    setModalOpen(true);
-  };
-
-  const openEdit = (tech: Technician) => {
-    setForm({
-      name: tech.name,
-      email: tech.email ?? "",
-      phone: tech.phone ?? "",
-      role: tech.role,
-      pin: "",
-    });
-    setEditingId(tech.id);
-    setModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setModalOpen(false);
-    setEditingId(null);
-    setForm(emptyForm);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-
-    const payload: Record<string, unknown> = {
-      name: form.name,
-      email: form.email || null,
-      phone: form.phone || null,
-      role: form.role,
-    };
-
-    if (form.pin) {
-      payload.password = form.pin; // API still uses 'password' field internally
-    }
-
-    try {
-      if (editingId) {
-        await api.put(`/technicians/${editingId}`, payload);
-        showToast("success", "Technician updated successfully");
-      } else {
-        if (!form.pin) {
-          showToast("error", "PIN is required for new technicians");
-          setSaving(false);
-          return;
-        }
-        await api.post("/technicians", payload);
-        showToast("success", "Technician created successfully");
-      }
-      closeModal();
-      await loadTechnicians();
-    } catch {
-      showToast("error", editingId ? "Failed to update technician" : "Failed to create technician");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  type Row = Record<string, unknown>;
-
-  const columns = [
-    { key: "name", header: "Name" },
-    {
-      key: "email",
-      header: "Email",
-      render: (row: Row) => {
-        const tech = row as unknown as Technician;
-        return tech.email || "-";
-      },
-    },
-    {
-      key: "role",
-      header: "Role",
-      render: (row: Row) => {
-        const tech = row as unknown as Technician;
-        return <Badge variant={roleBadgeVariant[tech.role]}>{tech.role}</Badge>;
-      },
-    },
-    {
-      key: "actions",
-      header: "Actions",
-      render: (row: Row) => {
-        const tech = row as unknown as Technician;
-        return (
-          <Button size="sm" variant="secondary" onClick={() => openEdit(tech)}>
-            Edit
-          </Button>
-        );
-      },
-    },
-  ];
-
-  if (loading) {
-    return (
-      <div className="flex justify-center py-12">
-        <div className="animate-spin h-8 w-8 border-4 border-ghana-green border-t-transparent rounded-full" />
-      </div>
-    );
+  const { user, logout } = useAuth();
+  const [staff, setStaff] = useState<Technician[]>([]), [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false), [error, setError] = useState(""), [notice, setNotice] = useState("");
+  const [open, setOpen] = useState(false), [id, setId] = useState<string | null>(null), [form, setForm] = useState(empty);
+  const load = useCallback(async () => { try { setStaff(await api.get<Technician[]>("/technicians")); } catch (e) { setError(e instanceof Error ? e.message : "Could not load staff"); } finally { setLoading(false); } }, []);
+  useEffect(() => { void load(); }, [load]);
+  function edit(row?: Technician) {
+    setId(row?.id ?? null); setForm(row ? { staff_id: row.staff_id ?? "", name: row.name, email: row.email ?? "", phone: row.phone ?? "", staff_category: row.staff_category ?? "technician", role: row.role, is_active: row.is_active !== false, reset_pin: false } : empty);
+    setError(""); setNotice(""); setOpen(true);
   }
-
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">Technicians</h3>
-        <div className="flex gap-2">
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => {
-              const exportData = technicians.map((t) => ({
-                name: t.name,
-                email: t.email ?? "",
-                role: t.role,
-              }));
-              exportToCsv("technicians", [
-                { key: "name", header: "Name" },
-                { key: "email", header: "Email" },
-                { key: "role", header: "Role" },
-              ], exportData);
-            }}
-          >
-            Export CSV
-          </Button>
-          <Button onClick={openCreate}>Add Technician</Button>
-        </div>
-      </div>
-
-      <Table
-        columns={columns}
-        data={technicians as unknown as Record<string, unknown>[]}
-        keyField="id"
-        emptyMessage="No technicians found"
-      />
-
-      <Modal isOpen={modalOpen} onClose={closeModal} title={editingId ? "Edit Technician" : "Add Technician"}>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            label="Name"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            required
-          />
-          <Input
-            label="Email"
-            type="email"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-          />
-          <Input
-            label="Phone"
-            value={form.phone}
-            onChange={(e) => setForm({ ...form, phone: e.target.value })}
-          />
-          <Select
-            label="Role"
-            options={roleOptions}
-            value={form.role}
-            onChange={(e) =>
-              setForm({ ...form, role: e.target.value as TechnicianForm["role"] })
-            }
-          />
-          <div>
-            <Input
-              label={editingId ? "New PIN (leave blank to keep)" : "PIN"}
-              type="password"
-              inputMode="numeric"
-              maxLength={6}
-              value={form.pin}
-              onChange={(e) => setForm({ ...form, pin: e.target.value.replace(/\D/g, "") })}
-              required={!editingId}
-              placeholder="4-6 digits"
-            />
-            <p className="text-[10px] text-surface-500 mt-1 font-mono">4-6 digit PIN</p>
-          </div>
-          <div className="flex justify-end gap-3 pt-2">
-            <Button type="button" variant="secondary" onClick={closeModal}>
-              Cancel
-            </Button>
-            <Button type="submit" isLoading={saving}>
-              {editingId ? "Update" : "Create"}
-            </Button>
-          </div>
-        </form>
-      </Modal>
-    </div>
-  );
+  async function save(event: FormEvent) {
+    event.preventDefault(); setBusy(true); setError("");
+    try {
+      const result = id ? await api.put<Technician & { temporary_pin?: string }>(`/technicians/${id}`, form) : await api.post<Technician & { temporary_pin?: string }>("/technicians", form);
+      setNotice(result.temporary_pin ? "Account saved. The temporary PIN is the last four digits of the Staff ID; the user can keep it or choose a new PIN at first sign-in." : "Staff details saved."); setOpen(false);
+      if (id === user?.id && (result.staff_id !== user.staff_id || form.reset_pin)) { await logout(); return; }
+      await load();
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not save staff"); } finally { setBusy(false); }
+  }
+  return <div>
+    <StaffImport onCreated={() => void load()} />
+    <div className="flex justify-between items-center gap-3 mb-4"><h3 className="text-lg font-semibold">Technicians and officers</h3><Button onClick={() => edit()}>Add staff member</Button></div>
+    <p className="text-sm mb-4">Assign official Staff IDs to existing accounts using Edit. This preserves their history and current PIN. Category describes the staff member; system access controls report generation and administration.</p>
+    {notice && <p role="status" className="mb-3">{notice}</p>}{error && !open && <p role="alert" className="text-red-600 mb-3">{error}</p>}
+    {loading ? <p>Loading staff…</p> : <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr>{["Name", "Staff ID", "Category", "System access", "Status", "Action"].map(h => <th className="text-left p-2" key={h}>{h}</th>)}</tr></thead><tbody>{staff.map(row => <tr key={row.id} className="border-t border-surface-200 dark:border-surface-700"><td className="p-2">{row.name}</td><td className="p-2">{row.staff_id || "Not assigned — email login"}</td><td className="p-2">{row.staff_category === "officer" ? "Officer" : "Technician"}</td><td className="p-2">{accessName(row.role)}</td><td className="p-2">{row.is_active === false ? "Inactive" : row.must_change_pin ? "PIN preference pending" : "Active"}</td><td className="p-2"><Button variant="secondary" size="sm" onClick={() => edit(row)} aria-label={`Edit ${row.name}`}>Edit</Button></td></tr>)}</tbody></table></div>}
+    <Modal isOpen={open} onClose={() => { if (!busy) setOpen(false); }} title={id ? "Edit staff account" : "Add staff member"}>
+      <form onSubmit={save} className="space-y-4">
+        <Input label="Staff ID" required maxLength={40} value={form.staff_id} onChange={e => setForm({ ...form, staff_id: e.target.value })} />
+        <Input label="Full name" required maxLength={150} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+        <Select label="Staff category" options={[{ value: "technician", label: "Technician" }, { value: "officer", label: "Officer" }]} value={form.staff_category} onChange={e => setForm({ ...form, staff_category: e.target.value })} />
+        <Select label="System access" options={[{ value: "technician", label: "Member" }, { value: "lead", label: "Report officer" }, { value: "admin", label: "Administrator" }]} value={form.role} onChange={e => setForm({ ...form, role: e.target.value })} />
+        <Input label="Email (optional)" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+        <Input label="Phone (optional)" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} />
+        {id && <><label className="block text-sm"><input type="checkbox" checked={form.is_active} onChange={e => setForm({ ...form, is_active: e.target.checked })} /> Account active</label><label className="block text-sm"><input type="checkbox" checked={form.reset_pin} onChange={e => setForm({ ...form, reset_pin: e.target.checked })} /> Reset PIN to the last four digits of Staff ID</label></>}
+        <p className="text-sm">New/reset accounts use the last four numeric digits of the Staff ID as their temporary PIN and can keep it or choose a different PIN on first login. Existing PINs are retained unless reset is selected.</p>
+        {error && <p role="alert" className="text-red-600">{error}</p>}<Button type="submit" disabled={busy}>{busy ? "Saving…" : "Save staff account"}</Button>
+      </form>
+    </Modal>
+  </div>;
 }

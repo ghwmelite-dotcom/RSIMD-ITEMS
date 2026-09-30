@@ -53,6 +53,10 @@ export interface TechnicianRow {
   assigned_entities: string;
   is_active: number;
   password_hash: string;
+  staff_id: string | null;
+  staff_category: "technician" | "officer";
+  must_change_pin: number;
+  session_version: number;
   created_at: string;
   updated_at: string;
 }
@@ -113,6 +117,7 @@ export interface ApiResponse<T = unknown> {
 
 export interface AuthSession {
   technician_id: string;
+  session_version?: number;
   role: "technician" | "lead" | "admin";
   name: string;
   created_at: string;

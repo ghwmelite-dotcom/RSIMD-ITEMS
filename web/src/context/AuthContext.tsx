@@ -12,6 +12,8 @@ interface AuthState {
 interface AuthContextValue extends AuthState {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  keepPin: (currentPin: string) => Promise<void>;
+  changePin: (currentPin: string, newPin: string) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
@@ -37,7 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .get<Technician>("/auth/me")
       .then((user) => {
         setState({ token: savedToken, user, isLoading: false });
-        primeOfflineCache().catch(() => {});
+        if (!user.must_change_pin) primeOfflineCache().catch(() => {});
       })
       .catch(() => {
         localStorage.removeItem(TOKEN_KEY);
@@ -48,12 +50,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(async (email: string, password: string) => {
     const { token, technician } = await api.post<LoginResponse>("/auth/login", {
-      email,
+      ...(email.includes("@") ? { email } : { staff_id: email }),
       pin: password,
     });
 
     localStorage.setItem(TOKEN_KEY, token);
     api.setToken(token);
+    setState({ token, user: technician, isLoading: false });
+    if (!technician.must_change_pin) primeOfflineCache().catch(() => {});
+  }, []);
+
+  const changePin = useCallback(async (currentPin: string, newPin: string) => {
+    const { token, technician } = await api.post<LoginResponse>("/auth/change-pin", { current_pin: currentPin, new_pin: newPin });
+    localStorage.setItem(TOKEN_KEY, token); api.setToken(token);
+    setState({ token, user: technician, isLoading: false });
+    primeOfflineCache().catch(() => {});
+  }, []);
+
+  const keepPin = useCallback(async (currentPin: string) => {
+    const { token, technician } = await api.post<LoginResponse>("/auth/keep-pin", { current_pin: currentPin });
+    localStorage.setItem(TOKEN_KEY, token); api.setToken(token);
     setState({ token, user: technician, isLoading: false });
     primeOfflineCache().catch(() => {});
   }, []);
@@ -71,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ ...state, login, logout }}>
+    <AuthContext.Provider value={{ ...state, login, logout, changePin, keepPin }}>
       {children}
     </AuthContext.Provider>
   );

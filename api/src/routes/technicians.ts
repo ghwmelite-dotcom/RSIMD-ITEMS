@@ -1,200 +1,54 @@
-import { hash } from "bcryptjs";
-import type { Env, AuthSession, TechnicianRow } from "../types";
+import type { Env, TechnicianRow } from "../types";
 import { jsonResponse, errorResponse } from "../middleware/error-handler";
 import { authenticate, requireRole } from "../middleware/auth";
-import { listTechnicians, getTechnicianById } from "../db/queries";
-import { logAudit } from "../db/audit";
+import { listTechnicians } from "../db/queries";
+import { hashPin, temporaryPin, publicStaff, jsonObject } from "../services/staff-auth";
+import { staffInput } from "../services/staff-input";
 
-function sanitizeTechnician(row: TechnicianRow) {
-  let assignedEntities: string[] = [];
-  try {
-    assignedEntities = JSON.parse(row.assigned_entities);
-  } catch {
-    assignedEntities = [];
-  }
-
-  const { password_hash: _, ...rest } = row;
-  return {
-    ...rest,
-    assigned_entities: assignedEntities,
-    is_active: Boolean(row.is_active),
-  };
+export async function getTechnicians(request: Request, env: Env): Promise<Response> {
+  const session = await authenticate(request, env); if (session instanceof Response) return session;
+  const rows = await listTechnicians(env.DB);
+  return jsonResponse(rows.filter(row => session.role === "admin" || row.is_active).map(row => session.role === "admin" ? publicStaff(row) : { id: row.id, name: row.name, role: row.role, staff_category: row.staff_category, assigned_entities: publicStaff(row).assigned_entities }), 200, request);
 }
-
-export async function getTechnicians(
-  request: Request,
-  env: Env
-): Promise<Response> {
-  const sessionOrError = await authenticate(request, env);
-  if (sessionOrError instanceof Response) return sessionOrError;
-
-  const technicians = await listTechnicians(env.DB);
-  return jsonResponse(technicians.map(sanitizeTechnician), 200, request);
+export async function getTechnician(request: Request, env: Env, id: string): Promise<Response> {
+  const session = await authenticate(request, env); if (session instanceof Response) return session;
+  if (session.role !== "admin" && session.technician_id !== id) return errorResponse("Administrator access required", 403, request);
+  const row = await env.DB.prepare("SELECT * FROM technicians WHERE id = ?").bind(id).first<TechnicianRow>();
+  return row ? jsonResponse(publicStaff(row), 200, request) : errorResponse("Staff account not found", 404, request);
 }
-
-export async function getTechnician(
-  request: Request,
-  env: Env,
-  id: string
-): Promise<Response> {
-  const sessionOrError = await authenticate(request, env);
-  if (sessionOrError instanceof Response) return sessionOrError;
-
-  const technician = await getTechnicianById(env.DB, id);
-  if (!technician) {
-    return errorResponse("Technician not found", 404, request);
+export async function createTechnician(request: Request, env: Env): Promise<Response> { return saveStaff(request, env); }
+export async function updateTechnician(request: Request, env: Env, id: string): Promise<Response> { return saveStaff(request, env, id); }
+async function saveStaff(request: Request, env: Env, id?: string): Promise<Response> {
+  const session = await authenticate(request, env); if (session instanceof Response) return session;
+  const denied = requireRole(session, request, "admin"); if (denied) return denied;
+  const existing = id ? await env.DB.prepare("SELECT * FROM technicians WHERE id = ?").bind(id).first<TechnicianRow>() : null;
+  if (id && !existing) return errorResponse("Staff account not found", 404, request);
+  let body: Record<string, unknown>;
+  try { body = await jsonObject(request, 8192); } catch { return errorResponse("Invalid staff request", 400, request); }
+  let row;
+  try { row = staffInput({ ...existing, ...body }, true); } catch (error) { return errorResponse(error instanceof Error ? error.message : "Invalid staff details", 400, request); }
+  if (body.is_active !== undefined && typeof body.is_active !== "boolean") return errorResponse("Active status must be true or false", 400, request);
+  const active = body.is_active === undefined ? existing?.is_active ?? 1 : Number(body.is_active);
+  if (id === session.technician_id && (!active || row.role !== "admin")) return errorResponse("You cannot disable or remove your own administrator access", 400, request);
+  if (body.reset_pin !== undefined && typeof body.reset_pin !== "boolean") return errorResponse("Invalid PIN reset request", 400, request);
+  const pin = !existing || body.reset_pin === true ? temporaryPin(row.staff_id) : undefined;
+  if (row.email) {
+    const other = await env.DB.prepare("SELECT id FROM technicians WHERE lower(email) = ? AND id <> ?").bind(row.email, id ?? "").first();
+    if (other) return errorResponse("Email already belongs to another account", 409, request);
   }
-
-  return jsonResponse(sanitizeTechnician(technician), 200, request);
-}
-
-export async function createTechnician(
-  request: Request,
-  env: Env
-): Promise<Response> {
-  const sessionOrError = await authenticate(request, env);
-  if (sessionOrError instanceof Response) return sessionOrError;
-  const session = sessionOrError as AuthSession;
-
-  const roleError = requireRole(session, request, "admin");
-  if (roleError) return roleError;
-
-  let body: {
-    name?: string;
-    email?: string;
-    password?: string;
-    role?: string;
-    phone?: string;
-    assigned_entities?: string[];
-  };
+  const staffKey = id ?? `staff-${crypto.randomUUID()}`;
+  const encoded = pin ? await hashPin(pin) : existing!.password_hash;
+  const version = (existing?.session_version ?? 0) + (existing && (pin || row.role !== existing.role || active !== existing.is_active || row.staff_id !== existing.staff_id) ? 1 : 0);
+  const mustChange = pin ? 1 : existing?.must_change_pin ?? 0;
   try {
-    body = await request.json();
-  } catch {
-    return errorResponse("Invalid JSON body", 400, request);
-  }
-
-  const { name, email, password, role, phone, assigned_entities } = body;
-  if (!name || !email || !password) {
-    return errorResponse(
-      "name, email, and password are required",
-      400,
-      request
-    );
-  }
-
-  const validRoles = ["technician", "lead", "admin"];
-  const techRole = role || "technician";
-  if (!validRoles.includes(techRole)) {
-    return errorResponse(
-      `role must be one of: ${validRoles.join(", ")}`,
-      400,
-      request
-    );
-  }
-
-  const id = `tech-${crypto.randomUUID().slice(0, 8)}`;
-  const now = new Date().toISOString();
-  const passwordHash = await hash(password, 10);
-  const entitiesJson = JSON.stringify(assigned_entities || []);
-
-  await env.DB.prepare(
-    "INSERT INTO technicians (id, name, role, email, phone, assigned_entities, password_hash, is_active, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?)"
-  )
-    .bind(id, name, techRole, email, phone || null, entitiesJson, passwordHash, now, now)
-    .run();
-
-  const created = await getTechnicianById(env.DB, id);
-
-  try {
-    await logAudit(env.DB, {
-      actor_id: session.technician_id,
-      actor_name: session.name,
-      action: "create",
-      resource_type: "technician",
-      resource_id: id,
-      details: `Created technician ${name}`,
-    });
-  } catch { /* audit failure should not break main operation */ }
-
-  return jsonResponse(sanitizeTechnician(created!), 201, request);
-}
-
-export async function updateTechnician(
-  request: Request,
-  env: Env,
-  id: string
-): Promise<Response> {
-  const sessionOrError = await authenticate(request, env);
-  if (sessionOrError instanceof Response) return sessionOrError;
-  const session = sessionOrError as AuthSession;
-
-  const roleError = requireRole(session, request, "admin");
-  if (roleError) return roleError;
-
-  const existing = await getTechnicianById(env.DB, id);
-  if (!existing) {
-    return errorResponse("Technician not found", 404, request);
-  }
-
-  let body: {
-    name?: string;
-    email?: string;
-    password?: string;
-    role?: string;
-    phone?: string;
-    assigned_entities?: string[];
-  };
-  try {
-    body = await request.json();
-  } catch {
-    return errorResponse("Invalid JSON body", 400, request);
-  }
-
-  const validRoles = ["technician", "lead", "admin"];
-  if (body.role && !validRoles.includes(body.role)) {
-    return errorResponse(
-      `role must be one of: ${validRoles.join(", ")}`,
-      400,
-      request
-    );
-  }
-
-  const name = body.name ?? existing.name;
-  const email = body.email ?? existing.email;
-  const role = body.role ?? existing.role;
-  const phone = body.phone !== undefined ? body.phone : existing.phone;
-  const assignedEntities = body.assigned_entities
-    ? JSON.stringify(body.assigned_entities)
-    : existing.assigned_entities;
-  const now = new Date().toISOString();
-
-  if (body.password) {
-    const passwordHash = await hash(body.password, 10);
-    await env.DB.prepare(
-      "UPDATE technicians SET name = ?, email = ?, role = ?, phone = ?, assigned_entities = ?, password_hash = ?, updated_at = ? WHERE id = ?"
-    )
-      .bind(name, email, role, phone, assignedEntities, passwordHash, now, id)
-      .run();
-  } else {
-    await env.DB.prepare(
-      "UPDATE technicians SET name = ?, email = ?, role = ?, phone = ?, assigned_entities = ?, updated_at = ? WHERE id = ?"
-    )
-      .bind(name, email, role, phone, assignedEntities, now, id)
-      .run();
-  }
-
-  const updated = await getTechnicianById(env.DB, id);
-
-  try {
-    await logAudit(env.DB, {
-      actor_id: session.technician_id,
-      actor_name: session.name,
-      action: "update",
-      resource_type: "technician",
-      resource_id: id,
-      details: `Updated technician ${name}`,
-    });
-  } catch { /* audit failure should not break main operation */ }
-
-  return jsonResponse(sanitizeTechnician(updated!), 200, request);
+    const write = existing ? env.DB.prepare("UPDATE technicians SET staff_id=?, name=?, staff_category=?, role=?, email=?, phone=?, password_hash=?, is_active=?, must_change_pin=?, session_version=?, updated_at=datetime('now') WHERE id=?")
+      .bind(row.staff_id, row.name, row.staff_category, row.role, row.email || null, row.phone || null, encoded, active, mustChange, version, staffKey)
+      : env.DB.prepare("INSERT INTO technicians (id,staff_id,name,staff_category,role,email,phone,password_hash,is_active,must_change_pin,session_version) VALUES (?,?,?,?,?,?,?,?,?,?,?)")
+      .bind(staffKey, row.staff_id, row.name, row.staff_category, row.role, row.email || null, row.phone || null, encoded, active, mustChange, version);
+    await env.DB.batch([write, env.DB.prepare("INSERT INTO audit_log (id,actor_id,actor_name,action,resource_type,resource_id,details) VALUES (?,?,?,?,?,?,?)")
+      .bind(crypto.randomUUID(), session.technician_id, session.name, existing ? "update" : "create", "staff", staffKey, pin ? "Account saved; temporary PIN issued (value omitted)" : "Account details updated")]);
+  } catch (error) { if (String(error).includes("UNIQUE")) return errorResponse("Staff ID already exists", 409, request); throw error; }
+  const updated = await env.DB.prepare("SELECT * FROM technicians WHERE id = ?").bind(staffKey).first<TechnicianRow>();
+  const response = jsonResponse({ ...publicStaff(updated!), ...(pin ? { temporary_pin: pin } : {}) }, existing ? 200 : 201, request);
+  response.headers.set("Cache-Control", "no-store"); return response;
 }

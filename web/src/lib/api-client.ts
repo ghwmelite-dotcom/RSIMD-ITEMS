@@ -2,7 +2,7 @@ import { API_BASE } from "./constants";
 import { cacheApiResponse, getCachedResponse } from "./offline-store";
 
 // Paths to never cache (auth tokens, ephemeral searches)
-const SKIP_CACHE_PATHS = ["/auth/", "/search"];
+const SKIP_CACHE_PATHS = ["/auth/", "/search", "/technicians", "/staff-import"];
 
 class ApiClient {
   private token: string | null = null;
@@ -51,7 +51,7 @@ class ApiClient {
       // Aggressive offline fallback: try cache for any failed GET request.
       // navigator.onLine is unreliable on some networks, so we attempt
       // cache retrieval on ANY fetch failure, not just when offline.
-      if (isCacheableGet) {
+      if (isCacheableGet && !(err instanceof ApiError)) {
         const cached = await getCachedResponse<T>(path).catch(() => null);
         if (cached) {
           return cached.data;

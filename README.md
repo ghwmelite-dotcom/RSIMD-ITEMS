@@ -254,6 +254,10 @@ wrangler pages deploy dist --project-name rsimd-items
 
 ## Documentation
 
+### Staff accounts
+
+Download and upload the staff roster from **Administration > Staff accounts**. Staff sign in with their Staff ID and an initial PIN matching its last four numeric digits, and can choose to keep that PIN. See [Staff accounts](docs/STAFF-ACCOUNTS.md) for import, access and existing-account instructions.
+
 ### Offline team forms
 
 Download an Excel form from **Maintenance > Team forms**, complete it with the RSIMD team, preview the upload and save the validated records. Quarterly reports include the dated room/device results and supporting evidence. See [Team forms](docs/TEAM-FORMS.md) for use and limits. Deployed on 30 September 2026 with the additive database migration; see [release evidence](docs/releases/2026-09-30-team-forms.md).

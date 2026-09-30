@@ -27,7 +27,7 @@ The live checks use no credentials and write no maintenance data. Authenticated 
 
 Keep applied migrations immutable. Add sequential files (`0002_description.sql`, etc.), test against the previous schema, and update the fresh-install schema separately. The migration checker conservatively allows additive table/index/column operations and rejects destructive/data-writing migrations. It is not a general-purpose SQL security parser. Destructive changes require a separately reviewed manual operation, recovery planning and compatible releases; do not weaken the guard to force them through.
 
-This baseline targets the existing deployment. Provision new empty databases with `api/src/db/schema.sql` before applying it. CI never runs seed data against production.
+This baseline targets the existing deployment. To provision a new database using tracked migrations, initialize it with the frozen `api/src/db/baseline-2026-09-30.sql`, then apply all files in `api/migrations` in order. CI rehearses this sequence and applies migrations a second time to verify tracking. `api/src/db/schema.sql` separately describes the current end-state for isolated tests; do not initialize with that end-state and then replay historical ALTER statements. CI never runs seed data against production.
 
 ## Operations and recovery
 

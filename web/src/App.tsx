@@ -4,6 +4,7 @@ import { ToastProvider } from "./context/ToastContext";
 import { OfflineProvider } from "./context/OfflineContext";
 import { useAuth } from "./hooks/useAuth";
 import { AppShell } from "./components/layout/AppShell";
+import { ChangePinPage } from "./pages/ChangePinPage";
 import { LoginPage } from "./pages/LoginPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { AdminPage } from "./pages/AdminPage";
@@ -32,6 +33,8 @@ function ProtectedRoutes() {
   if (!user) {
     return <Navigate to="/login" replace />;
   }
+
+  if (user.must_change_pin) return <ChangePinPage />;
 
   return (
     <AppShell>

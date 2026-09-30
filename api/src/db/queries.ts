@@ -69,7 +69,7 @@ export async function listTechnicians(
 ): Promise<TechnicianRow[]> {
   const result = await db
     .prepare(
-      "SELECT id, name, role, email, phone, assigned_entities, is_active, created_at, updated_at FROM technicians WHERE is_active = 1 ORDER BY name"
+      "SELECT * FROM technicians ORDER BY name"
     )
     .all<TechnicianRow>();
   return result.results;

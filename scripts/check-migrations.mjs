@@ -21,14 +21,13 @@ export function checkMigrations() {
   const files = readdirSync(dir).sort();
   const db = new DatabaseSync(':memory:');
   try {
-    db.exec(readFileSync(resolve(root, 'api/src/db/schema.sql'), 'utf8'));
+    db.exec(readFileSync(resolve(root, 'api/src/db/baseline-2026-09-30.sql'), 'utf8'));
     for (const file of files) {
       if (!/^\d{4}_[a-z0-9_]+\.sql$/.test(file)) throw new Error(`Invalid migration name: ${file}`);
       const sql = readFileSync(resolve(dir, file), 'utf8');
       validateMigration(sql, file === '0001_existing_production_baseline.sql');
-      // Baseline is checked against the current fresh-install schema.
-      // Future migrations need their own tests against the preceding schema.
-      if (file === '0001_existing_production_baseline.sql') db.exec(sql);
+      // Apply every tracked migration in sequence to the frozen pre-tracking schema.
+      db.exec(sql);
     }
     console.log(`Validated ${files.length} migration file(s); baseline probes passed.`);
   } finally { db.close(); }

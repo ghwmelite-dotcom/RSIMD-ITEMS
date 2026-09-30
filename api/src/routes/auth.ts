@@ -1,156 +1,67 @@
-import { compare, hash } from "bcryptjs";
-import type { Env, AuthSession } from "../types";
+import type { Env, TechnicianRow } from "../types";
 import { jsonResponse, errorResponse } from "../middleware/error-handler";
 import { authenticate } from "../middleware/auth";
-import { getTechnicianByEmail, getTechnicianById } from "../db/queries";
-
-const ALLOWED_DOMAIN = "@ohcs.gov.gh";
-
-function isValidPin(pin: string): boolean {
-  return /^\d{4,6}$/.test(pin);
-}
+import { getTechnicianById } from "../db/queries";
+import { normalizeStaffId, validStaffId, validPin, verifyPin, hashPin, issueSession, publicStaff, allowAttempt, jsonObject } from "../services/staff-auth";
 
 export async function login(request: Request, env: Env): Promise<Response> {
-  let body: { email?: string; pin?: string; password?: string };
-  try {
-    body = await request.json();
-  } catch {
-    return errorResponse("Invalid JSON body", 400, request);
-  }
-
-  const { email } = body;
-  const pin = body.pin ?? body.password; // Accept both for backwards compatibility
-  if (!email || !pin) {
-    return errorResponse("Email and PIN are required", 400, request);
-  }
-
-  const technician = await getTechnicianByEmail(env.DB, email.trim().toLowerCase());
-  if (!technician) {
-    return errorResponse("Invalid email or PIN", 401, request);
-  }
-
-  const pinValid = await compare(pin, technician.password_hash);
-  if (!pinValid) {
-    return errorResponse("Invalid email or PIN", 401, request);
-  }
-
-  const token = `ritems_${crypto.randomUUID().replace(/-/g, "")}`;
-  const session: AuthSession = {
-    technician_id: technician.id,
-    role: technician.role,
-    name: technician.name,
-    created_at: new Date().toISOString(),
-  };
-
-  await env.KV.put(`session:${token}`, JSON.stringify(session), {
-    expirationTtl: 86400,
-  });
-
-  return jsonResponse(
-    {
-      token,
-      technician: {
-        id: technician.id,
-        name: technician.name,
-        role: technician.role,
-        email: technician.email,
-      },
-    },
-    200,
-    request
-  );
+  let body: Record<string, unknown>;
+  try { body = await jsonObject(request, 4096); } catch { return errorResponse("Invalid login request", 400, request); }
+  const raw = body.staff_id ?? body.email;
+  const pin = body.pin ?? body.password;
+  if (typeof raw !== "string" || raw.length > 150 || !validPin(pin)) return errorResponse("Staff ID and a 4–6 digit PIN are required", 400, request);
+  const identifier = raw.trim();
+  const legacy = typeof body.email === "string" && !body.staff_id;
+  if (!legacy && !validStaffId(normalizeStaffId(identifier))) return errorResponse("Enter a valid Staff ID", 400, request);
+  if (!await allowAttempt(env, `login-ip:${request.headers.get("CF-Connecting-IP") ?? "local"}`, 50) ||
+      !await allowAttempt(env, `login-id:${identifier.toUpperCase()}`, 10)) return errorResponse("Too many sign-in attempts. Try again in 15 minutes.", 429, request);
+  const row = legacy
+    ? await env.DB.prepare("SELECT * FROM technicians WHERE lower(email) = ? AND staff_id IS NULL AND is_active = 1").bind(identifier.toLowerCase()).first<TechnicianRow>()
+    : await env.DB.prepare("SELECT * FROM technicians WHERE staff_id = ? AND is_active = 1").bind(normalizeStaffId(identifier)).first<TechnicianRow>();
+  // Perform comparable work for absent accounts without exposing account existence.
+  const ok = row ? await verifyPin(pin, row.password_hash) : (await hashPin(pin), false);
+  if (!row || !ok) return errorResponse("Invalid Staff ID or PIN (existing accounts may use email until assigned a Staff ID)", 401, request);
+  return jsonResponse(await issueSession(env, row), 200, request);
 }
-
-export async function register(request: Request, env: Env): Promise<Response> {
-  let body: { name?: string; email?: string; pin?: string; phone?: string };
-  try {
-    body = await request.json();
-  } catch {
-    return errorResponse("Invalid JSON body", 400, request);
-  }
-
-  const { name, email, pin, phone } = body;
-
-  if (!name || !email || !pin) {
-    return errorResponse("Name, email, and PIN are required", 400, request);
-  }
-
-  // Validate email domain
-  const normalizedEmail = email.trim().toLowerCase();
-  if (!normalizedEmail.endsWith(ALLOWED_DOMAIN)) {
-    return errorResponse(`Only ${ALLOWED_DOMAIN} email addresses are allowed`, 400, request);
-  }
-
-  // Validate PIN format
-  if (!isValidPin(pin)) {
-    return errorResponse("PIN must be 4-6 digits", 400, request);
-  }
-
-  // Check if email already exists
-  const existing = await getTechnicianByEmail(env.DB, normalizedEmail);
-  if (existing) {
-    return errorResponse("An account with this email already exists", 409, request);
-  }
-
-  const id = `tech-${crypto.randomUUID().slice(0, 8)}`;
-  const pinHash = await hash(pin, 10);
-
-  await env.DB.prepare(
-    "INSERT INTO technicians (id, name, role, email, phone, assigned_entities, password_hash) VALUES (?, ?, 'technician', ?, ?, '[]', ?)"
-  ).bind(id, name.trim(), normalizedEmail, phone?.trim() ?? null, pinHash).run();
-
-  // Auto-login after registration
-  const token = `ritems_${crypto.randomUUID().replace(/-/g, "")}`;
-  const session: AuthSession = {
-    technician_id: id,
-    role: "technician",
-    name: name.trim(),
-    created_at: new Date().toISOString(),
-  };
-
-  await env.KV.put(`session:${token}`, JSON.stringify(session), {
-    expirationTtl: 86400,
-  });
-
-  return jsonResponse(
-    {
-      token,
-      technician: { id, name: name.trim(), role: "technician", email: normalizedEmail },
-    },
-    201,
-    request
-  );
+export async function register(request: Request): Promise<Response> {
+  return errorResponse("Ask your ITEMS administrator to create your staff account", 403, request);
 }
-
 export async function logout(request: Request, env: Env): Promise<Response> {
-  const authHeader = request.headers.get("Authorization");
-  if (authHeader?.startsWith("Bearer ritems_")) {
-    const token = authHeader.slice(7);
-    await env.KV.delete(`session:${token}`);
-  }
-
+  const header = request.headers.get("Authorization");
+  if (header?.startsWith("Bearer ritems_")) await env.KV.delete(`session:${header.slice(7)}`);
   return jsonResponse({ success: true }, 200, request);
 }
-
 export async function me(request: Request, env: Env): Promise<Response> {
-  const sessionOrError = await authenticate(request, env);
-  if (sessionOrError instanceof Response) return sessionOrError;
+  const session = await authenticate(request, env); if (session instanceof Response) return session;
+  const row = await getTechnicianById(env.DB, session.technician_id);
+  if (!row) return errorResponse("Account unavailable", 401, request);
+  return jsonResponse(publicStaff(row), 200, request);
+}
+export async function changePin(request: Request, env: Env): Promise<Response> {
+  const session = await authenticate(request, env); if (session instanceof Response) return session;
+  let body: Record<string, unknown>;
+  try { body = await jsonObject(request, 4096); } catch { return errorResponse("Invalid PIN change request", 400, request); }
+  if (!validPin(body.current_pin) || !validPin(body.new_pin) || body.current_pin === body.new_pin) return errorResponse("Enter your current PIN and a different new 4–6 digit PIN", 400, request);
+  if (!await allowAttempt(env, `change-pin:${session.technician_id}`, 10)) return errorResponse("Too many attempts. Try again in 15 minutes.", 429, request);
+  const row = await getTechnicianById(env.DB, session.technician_id);
+  if (!row || !await verifyPin(body.current_pin, row.password_hash)) return errorResponse("Current PIN is incorrect", 400, request);
+  const passwordHash = await hashPin(body.new_pin);
+  const updated = await env.DB.prepare("UPDATE technicians SET password_hash = ?, must_change_pin = 0, session_version = session_version + 1, updated_at = datetime('now') WHERE id = ? AND password_hash = ? AND session_version = ? RETURNING *")
+    .bind(passwordHash, row.id, row.password_hash, row.session_version).first<TechnicianRow>();
+  if (!updated) return errorResponse("Account changed. Sign in again.", 409, request);
+  return jsonResponse(await issueSession(env, updated), 200, request);
+}
 
-  const technician = await getTechnicianById(env.DB, sessionOrError.technician_id);
-  if (!technician) {
-    return errorResponse("Technician not found", 404, request);
-  }
-
-  return jsonResponse(
-    {
-      id: technician.id,
-      name: technician.name,
-      role: technician.role,
-      email: technician.email,
-      phone: technician.phone,
-      assigned_entities: (() => { try { return JSON.parse(technician.assigned_entities); } catch { return []; } })(),
-    },
-    200,
-    request
-  );
+export async function keepPin(request: Request, env: Env): Promise<Response> {
+  const session = await authenticate(request, env); if (session instanceof Response) return session;
+  let body: Record<string, unknown>;
+  try { body = await jsonObject(request, 4096); } catch { return errorResponse("Invalid PIN preference", 400, request); }
+  if (!validPin(body.current_pin)) return errorResponse("Enter your current PIN to confirm", 400, request);
+  if (!await allowAttempt(env, `change-pin:${session.technician_id}`, 10)) return errorResponse("Too many attempts. Try again in 15 minutes.", 429, request);
+  const row = await getTechnicianById(env.DB, session.technician_id);
+  if (!row || !await verifyPin(body.current_pin, row.password_hash)) return errorResponse("Current PIN is incorrect", 400, request);
+  const updated = await env.DB.prepare("UPDATE technicians SET must_change_pin=0, session_version=session_version+1, updated_at=datetime('now') WHERE id=? AND password_hash=? AND session_version=? RETURNING *")
+    .bind(row.id, row.password_hash, row.session_version).first<TechnicianRow>();
+  if (!updated) return errorResponse("Account changed. Sign in again.", 409, request);
+  return jsonResponse(await issueSession(env, updated), 200, request);
 }

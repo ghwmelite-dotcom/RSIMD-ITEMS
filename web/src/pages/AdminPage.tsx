@@ -1,3 +1,4 @@
+import { useAuth } from "../hooks/useAuth";
 import { useState } from "react";
 import { Card } from "../components/ui/Card";
 import { OrgEntityManager } from "../components/admin/OrgEntityManager";
@@ -10,7 +11,7 @@ import { BulkImport } from "../components/admin/BulkImport";
 const tabs = [
   { key: "entities", label: "Org Entities" },
   { key: "categories", label: "Categories" },
-  { key: "technicians", label: "Technicians" },
+  { key: "technicians", label: "Staff accounts" },
   { key: "workload", label: "Workload" },
   { key: "audit", label: "Audit Log" },
   { key: "import", label: "Bulk Import" },
@@ -20,6 +21,9 @@ type TabKey = (typeof tabs)[number]["key"];
 
 export function AdminPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("entities");
+
+  const { user } = useAuth();
+  if (user?.role !== "admin") return <p>Administrator access is required.</p>;
 
   return (
     <div className="space-y-6">
