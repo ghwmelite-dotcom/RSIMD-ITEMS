@@ -1,0 +1,125 @@
+name: Check and deploy
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Test and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: node --test scripts/check-migrations.test.mjs
+      - run: node scripts/check-migrations.mjs
+      - name: Check migration tracking on an isolated local database
+        run: |
+          npx --no-install wrangler d1 execute rsimd_items_db --config api/wrangler.toml --local --persist-to .wrangler/ci-migration-test --file api/src/db/schema.sql
+          npx --no-install wrangler d1 migrations apply rsimd_items_db --config api/wrangler.toml --local --persist-to .wrangler/ci-migration-test
+          npx --no-install wrangler d1 migrations apply rsimd_items_db --config api/wrangler.toml --local --persist-to .wrangler/ci-migration-test
+      - run: npm test --workspace=api
+      - run: npx --no-install tsc --noEmit -p api/tsconfig.json
+      - run: npm run build:web
+      - run: npm run build:api
+      - name: Stamp tested website
+        run: node -e "require('fs').writeFileSync('web/dist/release.json', JSON.stringify({commit:process.env.GITHUB_SHA}))"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: website-${{ github.sha }}
+          path: web/dist
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
+
+  deploy:
+    name: Deploy production
+    needs: check
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: production
+      url: https://rsimd-items.pages.dev
+    concurrency:
+      group: rsimd-items-production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: website-${{ github.sha }}
+          path: web/dist
+      - name: Skip superseded commits
+        id: current
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          latest=$(gh api repos/$GITHUB_REPOSITORY/commits/main --jq .sha)
+          if [ "$latest" = "$GITHUB_SHA" ]; then
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Superseded by $latest; no production changes." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Verify production credentials
+        if: steps.current.outputs.deploy == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo 'Missing production API token'; exit 1; }
+          test "$CLOUDFLARE_ACCOUNT_ID" = 'f4f236a6cd8fbddf397c6e9de17d8113' || { echo 'Unexpected Cloudflare account'; exit 1; }
+      - name: Record recovery point and apply pending migrations
+        if: steps.current.outputs.deploy == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          node scripts/check-migrations.mjs
+          npx --no-install wrangler d1 time-travel info rsimd_items_db --config api/wrangler.toml --json > recovery.json
+          echo '### Pre-migration recovery bookmark' >> "$GITHUB_STEP_SUMMARY"
+          cat recovery.json >> "$GITHUB_STEP_SUMMARY"
+          npx --no-install wrangler d1 migrations apply rsimd_items_db --config api/wrangler.toml --remote
+      - name: Deploy API
+        if: steps.current.outputs.deploy == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx --no-install wrangler deploy --config api/wrangler.toml
+      - name: Deploy tested website
+        if: steps.current.outputs.deploy == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx --no-install wrangler pages deploy web/dist --project-name rsimd-items --branch main --commit-hash "$GITHUB_SHA" --commit-dirty=true
+      - name: Check live release
+        if: steps.current.outputs.deploy == 'true'
+        run: node scripts/check-production.mjs
+      - name: Record outcome
+        if: always()
+        env:
+          DEPLOY_STATUS: ${{ job.status }}
+        run: |
+          echo "Production job: $DEPLOY_STATUS; commit: $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Site: https://rsimd-items.pages.dev' >> "$GITHUB_STEP_SUMMARY"
+          echo 'If a later stage failed, earlier migration/API changes may already be live. Fix forward or perform a reviewed recovery; no automatic database rollback.' >> "$GITHUB_STEP_SUMMARY"

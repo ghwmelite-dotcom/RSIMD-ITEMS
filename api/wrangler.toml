@@ -10,6 +10,7 @@ ENVIRONMENT = "production"
 binding = "DB"
 database_name = "rsimd_items_db"
 database_id = "ff57f1b7-da26-490c-aaf7-19228acf16a1"
+migrations_dir = "migrations"
 
 [[kv_namespaces]]
 binding = "KV"

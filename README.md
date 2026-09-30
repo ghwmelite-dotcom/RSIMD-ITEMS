@@ -217,6 +217,8 @@ npm run dev
 
 ### Deploy to Production
 
+Pushes to `main` deploy automatically through [GitHub Actions](.github/workflows/deploy.yml) after tests and builds pass. See [deployment setup, migrations and recovery](docs/GITHUB-DEPLOYMENT.md). The manual commands below remain available for deliberate recovery operations.
+
 ```bash
 # Create Cloudflare resources
 wrangler d1 create rsimd_items_db
