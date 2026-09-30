@@ -254,7 +254,7 @@ wrangler pages deploy dist --project-name rsimd-items
 
 ### Offline team forms
 
-Download an Excel form from **Maintenance > Team forms**, complete it with the RSIMD team, preview the upload and save the validated records. Quarterly reports include the dated room/device results and supporting evidence. See [Team forms](docs/TEAM-FORMS.md) for use, limits and the required additive migration. This feature is implemented locally; deployment is a separate activation step.
+Download an Excel form from **Maintenance > Team forms**, complete it with the RSIMD team, preview the upload and save the validated records. Quarterly reports include the dated room/device results and supporting evidence. See [Team forms](docs/TEAM-FORMS.md) for use and limits. Deployed on 30 September 2026 with the additive database migration; see [release evidence](docs/releases/2026-09-30-team-forms.md).
 
 | Resource | URL |
 |----------|-----|

@@ -1,6 +1,6 @@
 # Offline team maintenance forms
 
-Implemented locally on 30 September 2026. Production activation requires the additive database migration and deployment; this document does not claim they have occurred.
+Deployed to production on 30 September 2026, including the additive database migration, API and website. Open [Team forms](https://rsimd-items.pages.dev/team-forms). See [release evidence](releases/2026-09-30-team-forms.md) for verification and remaining limits.
 
 ## Use
 
