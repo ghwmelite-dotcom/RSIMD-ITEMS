@@ -1,4 +1,5 @@
 import { Router } from "itty-router";
+import { teamFormImport } from "./routes/team-forms";
 import type { Env } from "./types";
 import { login, logout, me, register } from "./routes/auth";
 import {
@@ -124,6 +125,8 @@ router.delete("/api/equipment/:id", (request: Request, env: Env) => {
 });
 
 // Maintenance Logs (bulk-sync MUST be before :id)
+router.post("/api/team-forms/preview", (request: Request, env: Env) => teamFormImport(request, env, false));
+router.post("/api/team-forms/import", (request: Request, env: Env) => teamFormImport(request, env, true));
 router.get("/api/maintenance", (request: Request, env: Env) => listLogs(request, env));
 router.post("/api/maintenance/bulk-sync", (request: Request, env: Env) => bulkSync(request, env));
 router.post("/api/maintenance", (request: Request, env: Env) => createLog(request, env));

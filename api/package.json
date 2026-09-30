@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "test": "vitest run",
     "dev": "wrangler dev",
     "build": "wrangler deploy --dry-run",
     "deploy": "wrangler deploy",
@@ -19,6 +20,7 @@
     "@cloudflare/workers-types": "^4.20240909.0",
     "@types/bcryptjs": "^2.4.6",
     "typescript": "^5.5.0",
+    "vitest": "^4.1.11",
     "wrangler": "^3.78.0"
   }
 }

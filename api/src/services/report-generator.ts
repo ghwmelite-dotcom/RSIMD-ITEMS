@@ -19,6 +19,7 @@ import {
   PageBreak,
 } from "docx";
 import type { AllNarratives } from "./ai-narrator";
+import type { TeamForm } from "./team-form";
 
 interface MonthlyData {
   category: string;
@@ -42,6 +43,7 @@ interface ReportContent {
   year: number;
   narratives: AllNarratives;
   tables: {
+    teamForms?: TeamForm[];
     routineByCategory: MonthlyData[];
     correctiveSummary: CorrectiveSummaryRow[];
     correctiveByEntity: CorrectiveEntityRow[];
@@ -264,6 +266,43 @@ function buildOverviewTable(quarter: number, year: number, tables: ReportContent
 
 // --- Main Generator ---
 
+function teamFormEvidence(forms: TeamForm[], detail: boolean): (Paragraph | Table)[] {
+  if (!forms.length) return detail ? [] : [heading2("3.6 Team Exercise Returns"), bodyText("No team workbooks have been uploaded for this reporting quarter. This does not establish that no visits occurred.")];
+  const output: (Paragraph | Table)[] = [heading2(detail ? "Annex: Team Maintenance Evidence" : "3.6 Team Exercise Returns")];
+  if (!detail) output.push(bodyText("The following team returns are recorded separately from the maintenance activity counts above. Actual visit dates are retained, including exercises performed after the reporting quarter. Outcomes are team-recorded observations, not automatic hardware certification."));
+  for (const form of forms) {
+    output.push(heading2(form.team), bodyText(`Participating officers: ${form.members}. Reporting period: Q${form.quarter} ${form.year}.`));
+    if (detail) {
+      for (const d of form.devices) {
+        output.push(bodyText(`${d.reference} (${d.type}; ${d.makeModel || "make/model not recorded"}) — ${d.entity}, Room ${d.room}, ${d.date}. Checked by: ${d.officer}.`));
+        output.push(bodyText(`Before: ${d.before}. Checks: ${d.checks}. Work: ${d.work || "None recorded"}. After: ${d.after}. Final test: ${d.finalTest}.`));
+        output.push(bodyText(`Outstanding: ${d.outstanding || "None recorded"}. Recommendation/parts: ${d.recommendation || "None recorded"}.`));
+      }
+      if (form.challenges) output.push(bodyText(`Team challenges: ${form.challenges}`));
+      if (form.recommendations) output.push(bodyText(`Team recommendations: ${form.recommendations}`));
+      if (form.helpdesk) output.push(bodyText(`Team-reported helpdesk observations: ${form.helpdesk}`));
+      output.push(bodyText(`Source workbook: ${form.id}`));
+    } else {
+      const widths = [1500, 650, 1400, 1500, 3976];
+      const row = (values: string[], header = false) => new TableRow({ tableHeader: header, children: values.map((value, i) => new TableCell({
+        width: { size: widths[i]!, type: WidthType.DXA }, borders: BORDERS, margins: CELL_MARGINS,
+        shading: header ? { fill: "1A4D2E", type: ShadingType.CLEAR } : undefined,
+        children: [new Paragraph({ children: [new TextRun({ text: value, font: FONT, size: 18, bold: header, color: header ? "FFFFFF" : "222222" })] })],
+      })) });
+      output.push(new Table({ width: { size: TABLE_WIDTH, type: WidthType.DXA }, columnWidths: widths, rows: [
+        row(["Directorate", "Room", "Actual date", "Visit", "Device outcomes / notes"], true),
+        ...form.rooms.map(r => {
+          const devices = form.devices.filter(d => d.entity === r.entity && d.room === r.room && d.date === r.date);
+          const counts = ["functional", "limited", "nonfunctional", "not_tested"].map(s => `${s}: ${devices.filter(d => d.after === s).length}`).join("; ");
+          return row([r.entity, r.room, r.date, `${r.mode}; ${r.status}`, `${devices.length} device records. ${counts}. ${r.notes}`]);
+        }),
+      ] }));
+      output.push(spacer());
+    }
+  }
+  return output;
+}
+
 export async function generateDocx(content: ReportContent): Promise<Uint8Array> {
   const { quarter, year, narratives, tables } = content;
   const months = QUARTER_MONTHS[quarter] ?? ["M1", "M2", "M3"];
@@ -458,6 +497,7 @@ export async function generateDocx(content: ReportContent): Promise<Uint8Array> 
           // --- 3.5 Predictive ---
           heading2("3.5 Predictive Maintenance"),
           bodyText(narratives.predictive),
+          ...teamFormEvidence(tables.teamForms ?? [], false),
 
           // ===== 4.0 CHALLENGES =====
           heading1("4.0 Challenges"),
@@ -492,6 +532,7 @@ export async function generateDocx(content: ReportContent): Promise<Uint8Array> 
           // ===== 6.0 CONCLUSION =====
           heading1("6.0 Conclusion"),
           bodyText(narratives.conclusion),
+          ...teamFormEvidence(tables.teamForms ?? [], true),
         ],
       },
     ],

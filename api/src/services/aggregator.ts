@@ -165,7 +165,10 @@ export async function getDashboardSummary(
   };
 }
 
+import { getTeamForms, type TeamForm } from "./team-form";
+
 export interface ReportAggregation {
+  teamForms: TeamForm[];
   total: number;
   byType: Record<string, number>;
   routineByCategory: Array<{
@@ -431,6 +434,7 @@ export async function getReportAggregation(
     total: totalResult?.count ?? 0,
     byType,
     routineByCategory: pivotCategoryByMonth(routineResult.results),
+    teamForms: await getTeamForms(db, year, quarter),
     correctiveSummary: correctiveSummaryResult.results,
     correctiveByEntity: correctiveByEntityResult.results,
     emergencyByCategory: pivotCategoryByMonth(emergencyResult.results),

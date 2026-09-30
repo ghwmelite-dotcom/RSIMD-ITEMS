@@ -167,6 +167,7 @@ export async function generateReport(
         correctiveSummary: aggregatedData.correctiveSummary,
         correctiveByEntity: aggregatedData.correctiveByEntity,
         emergencyByCategory: aggregatedData.emergencyByCategory,
+        teamForms: aggregatedData.teamForms,
       },
     });
 

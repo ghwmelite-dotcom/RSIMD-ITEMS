@@ -3,6 +3,7 @@ import { Card } from "../ui/Card";
 import { Button } from "../ui/Button";
 import { api } from "../../lib/api-client";
 import { useToast } from "../../hooks/useToast";
+import type { TeamForm } from "../../lib/team-form-types";
 
 interface ReportPreviewProps {
   year: number;
@@ -27,6 +28,7 @@ interface Narratives {
 interface PreviewResponse {
   narratives: Narratives;
   tables: {
+    teamForms?: TeamForm[];
     routine?: unknown[];
     corrective?: unknown[];
     emergency?: unknown[];
@@ -195,6 +197,15 @@ export function ReportPreview({
       </p>
 
       {/* Sections */}
+      <Card>
+        <h3 className="font-semibold">Uploaded team exercise returns</h3>
+        <p className="text-sm mt-2">{tables.teamForms?.length ?? 0} workbook(s) for Q{quarter} {year}. These appear in section 3.6 and the evidence annex, separately from maintenance activity counts.</p>
+        {tables.teamForms?.map(form => <details key={`${form.id}-${form.team}`} className="mt-3">
+          <summary className="cursor-pointer">{form.team}: {form.rooms.length} room visits, {form.devices.length} device records</summary>
+          <p className="text-sm mt-2">Officers: {form.members}</p>
+          <ul className="text-sm list-disc pl-5">{form.rooms.map((room, i) => <li key={i}>{room.entity} / Room {room.room} — {room.date}: {room.status}</li>)}</ul>
+        </details>)}
+      </Card>
       {SECTIONS.map((section) => {
         const tableCount = section.tableKey
           ? (tables[section.tableKey] as unknown[] | undefined)?.length ?? 0

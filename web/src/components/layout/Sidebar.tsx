@@ -10,6 +10,7 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
+  { to: "/team-forms", label: "Team forms", roles: ["technician", "lead", "admin"], icon: "M9 12h6m-6 4h6M7 3h7l4 4v14H7z", tag: "FORM" },
   { to: "/", label: "Dashboard", roles: ["technician", "lead", "admin"], icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0h4", tag: "SYS" },
   { to: "/equipment", label: "Equipment", roles: ["technician", "lead", "admin"], icon: "M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z", tag: "REG" },
   { to: "/maintenance", label: "Maintenance", roles: ["technician", "lead", "admin"], icon: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z", tag: "LOG" },

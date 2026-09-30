@@ -20,6 +20,10 @@ export function MaintenancePage() {
         </div>
         <div className="flex items-center gap-3">
           <button
+            onClick={() => navigate("/team-forms")}
+            className="px-3 py-3 text-sm font-semibold border border-neon-blue/30 rounded-lg text-neon-blue"
+          >Team forms</button>
+          <button
             onClick={() => navigate("/field-log")}
             className="inline-flex items-center gap-2 px-3 py-1.5 text-[10px] font-mono font-semibold uppercase tracking-wider text-neon-blue border border-neon-blue/30 rounded-lg hover:bg-neon-blue/10 transition-all"
           >
