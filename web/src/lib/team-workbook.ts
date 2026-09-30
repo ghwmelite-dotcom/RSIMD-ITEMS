@@ -39,9 +39,13 @@ function dropdown(ws: Worksheet, column: number, values: string, count: number) 
 
 export async function createTeamWorkbook(options: ExportOptions): Promise<Uint8Array> {
   const wb = new Workbook();
+  wb.views = [{ x: 0, y: 0, width: 12000, height: 9000, firstSheet: 0, activeTab: 1, visibility: "visible" }];
   wb.creator = "OHCS RSIMD-ITEMS";
   const guide = sheet(wb, "Instructions", ["OHCS TEAM MAINTENANCE FORM", "How to complete"], [34, 105], 0);
   [
+    ["YOUR TEAM", options.team || "Enter your team name on the Team tab"],
+    ["PARTICIPATING OFFICERS", options.members || "Enter participating officers on the Team tab"],
+    ["REPORTING PERIOD", `Q${options.quarter} ${options.year} — actual visit dates are recorded separately`],
     ["1. Team", "Complete team members and observations. Give each team a distinct name if sharing copies of this blank form. Quarter is the reporting quarter, not necessarily the visit quarter. Do not edit the workbook ID."],
     ["2. Rooms", "One row per room per visit date. Use a Directorate code from Directory. Record inaccessible rooms too. Fill the cream cells; keep headers and sheet names unchanged."],
     ["3. Devices", "One row per device per visit date, including working PCs/printers. Use a unique asset tag or serial number, not just 'PC 1'. Devices must match a visited/revisit row on Rooms."],
@@ -69,6 +73,9 @@ export async function createTeamWorkbook(options: ExportOptions): Promise<Uint8A
   dropdown(devices, 5, '"desktop,laptop,printer,scanner,cctv,clock_in,network,ups,other"', 100);
   dropdown(devices, 7, CONDITIONS, 100); dropdown(devices, 10, CONDITIONS, 100);
   const directory = sheet(wb, "Directory", ["Directorate code", "Name"], [25, 85], 0);
+  for (const ws of [team, rooms, devices]) {
+    ws.headerFooter.oddHeader = `&L${options.team.replace(/&/g, "&&")}\n${options.members.replace(/&/g, "&&")}&RQ${options.quarter} ${options.year}`;
+  }
   options.entities.forEach(e => directory.addRow([e.code, e.name]));
   directory.eachRow(row => row.eachCell(c => { c.font = { ...c.font, name: "Arial", size: 11 }; }));
   return new Uint8Array(await wb.xlsx.writeBuffer());

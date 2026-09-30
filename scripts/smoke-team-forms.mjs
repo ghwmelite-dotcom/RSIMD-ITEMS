@@ -9,6 +9,8 @@ import path from "node:path";
 import assert from "node:assert/strict";
 import { build } from "esbuild";
 import ExcelJS from "exceljs";
+import JSZip from "jszip";
+import { DOMParser, XMLSerializer } from "@xmldom/xmldom";
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || "playwright");
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -68,11 +70,15 @@ try {
   const downloading = page.waitForEvent("download"); await page.getByRole("button", { name: "Download Excel form" }).click();
   const download = await downloading; const filename = path.join(out, "browser-download.xlsx"); await download.saveAs(filename);
   const wb = new ExcelJS.Workbook(); await wb.xlsx.readFile(filename);
+  assert.equal(wb.getWorksheet("Team").getCell("B6").value, "Synthetic room team");
+  assert.equal(wb.getWorksheet("Team").getCell("B7").value, "Test IT officer, Test admin officer");
+  assert.equal(wb.views[0].activeTab, 1);
+  assert.equal(wb.getWorksheet("Instructions").getCell("B2").value, "Synthetic room team");
   wb.getWorksheet("Rooms").getRow(2).values = ["RSIMD", "19", "2026-10-01", "on_site", "visited", "Two synthetic devices checked"];
   wb.getWorksheet("Devices").getRow(2).values = ["RSIMD", "19", "2026-10-01", "TEST-PC-1", "desktop", "Synthetic PC", "functional", "Boot and network", "No repair needed", "functional", "Opened shared drive", "", "", "Test IT officer"];
   wb.getWorksheet("Devices").getRow(3).values = ["RSIMD", "19", "2026-10-01", "TEST-PRINTER-1", "printer", "Synthetic printer", "nonfunctional", "Power and test page", "Cleaned feed", "nonfunctional", "Test page failed", "No toner", "Replace toner", "Test IT officer"];
   const filled = path.join(out, "filled.xlsx"); await wb.xlsx.writeFile(filled);
-  await page.getByLabel("Completed Excel workbook", { exact: true }).setInputFiles(filled);
+  await page.getByLabel("Completed Word or Excel form", { exact: true }).setInputFiles(filled);
   await page.getByRole("button", { name: "Save records for Q3 2026" }).waitFor();
   assert.equal(sqlite.prepare("SELECT COUNT(*) AS n FROM team_forms").get().n, 0);
   await page.screenshot({ path: path.join(out, "desktop-preview.png"), fullPage: true });
@@ -84,11 +90,47 @@ try {
   await page.getByRole("button", { name: "Save records for Q3 2026" }).click();
   await page.getByRole("heading", { name: "Records saved", exact: true }).waitFor();
   assert.equal(sqlite.prepare("SELECT COUNT(*) AS n FROM team_forms").get().n, 1);
-  await page.getByLabel("Completed Excel workbook", { exact: true }).setInputFiles(filled);
+  await page.getByLabel("Completed Word or Excel form", { exact: true }).setInputFiles(filled);
   await page.getByRole("heading", { name: "This form is already saved", exact: true }).waitFor();
   assert.equal(sqlite.prepare("SELECT COUNT(*) AS n FROM team_forms").get().n, 1);
+  const wordDownloading = page.waitForEvent("download"); await page.getByRole("button", { name: "Download Word form" }).click();
+  const wordDownload = await wordDownloading; const wordFilename = path.join(out, "browser-download.docx"); await wordDownload.saveAs(wordFilename);
+  const zip = await JSZip.loadAsync(await readFile(wordFilename));
+  const ns = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+  const doc = new DOMParser().parseFromString(await zip.file("word/document.xml").async("string"), "application/xml");
+  assert.ok(doc.documentElement.textContent.includes("Synthetic room team"));
+  assert.ok(doc.documentElement.textContent.includes("Test IT officer, Test admin officer"));
+  function fillWord(title, entries) {
+    const tbl = Array.from(doc.getElementsByTagNameNS(ns, "tbl")).find(t => t.getElementsByTagNameNS(ns, "tr")[0].textContent === title);
+    for (const [label, value] of Object.entries(entries)) {
+      const row = Array.from(tbl.getElementsByTagNameNS(ns, "tr")).find(r => r.getElementsByTagNameNS(ns, "tc")[0].textContent === label);
+      const cell = row.getElementsByTagNameNS(ns, "tc")[1]; const para = cell.getElementsByTagNameNS(ns, "p")[0];
+      while(para.firstChild) para.removeChild(para.firstChild);
+      const run=doc.createElementNS(ns,"w:r"), text=doc.createElementNS(ns,"w:t");
+      text.appendChild(doc.createTextNode(value));run.appendChild(text);para.appendChild(run);
+    }
+  }
+  const location={"Office / directorate code":"RSIMD", "Room number":"20", "Date of visit (YYYY-MM-DD)":"2026-10-01"};
+  fillWord("ROOM VISIT", {...location, "How did you assist?":"In person", "Was the room visited?":"Yes"});
+  fillWord("DEVICE CHECK", {...location, "Asset tag or serial number":"TEST-WORD-PC", "Type of equipment":"Desktop computer", "Was it working before the visit?":"Working with a problem", "What did you check?":"The office folder would not open", "What did you do or fix?":"Replaced network cable", "Is it working after your work?":"Working", "How did you confirm the result?":"Office folder opened", "Name of officer who checked it":"Test IT officer"});
+  zip.file("word/document.xml",new XMLSerializer().serializeToString(doc));
+  const wordFilled=path.join(out,"filled.docx");await writeFile(wordFilled,await zip.generateAsync({type:"nodebuffer"}));
+  await page.getByLabel("Completed Word or Excel form", { exact: true }).setInputFiles(wordFilled);
+  await page.getByRole("button", { name: "Save records for Q3 2026" }).waitFor();
+  assert.equal(sqlite.prepare("SELECT COUNT(*) AS n FROM team_forms").get().n,1);
+  await page.setViewportSize({width:1280,height:1000});
+  await page.screenshot({path:path.join(out,"word-desktop-preview.png"),fullPage:true});
+  await page.setViewportSize({width:390,height:844});
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1),false);
+  await page.screenshot({path:path.join(out,"word-mobile-preview.png"),fullPage:true});
+  await page.getByRole("button", { name: "Save records for Q3 2026" }).click();
+  await page.getByRole("heading", { name: "Records saved", exact: true }).waitFor();
+  assert.equal(sqlite.prepare("SELECT COUNT(*) AS n FROM team_forms").get().n,2);
+  await page.getByLabel("Completed Word or Excel form", { exact: true }).setInputFiles(wordFilled);
+  await page.getByRole("heading", { name: "This form is already saved", exact: true }).waitFor();
+  assert.equal(sqlite.prepare("SELECT COUNT(*) AS n FROM team_forms").get().n,2);
   assert.deepEqual(errors, []);
-  console.log("PASS: browser download, Excel completion, API preview, mobile overflow, save, duplicate upload; synthetic SQLite only.");
+  console.log("PASS: browser team prefill, Excel and Word completion, API previews, mobile overflow, saves, duplicate uploads; synthetic SQLite only.");
 } catch (e) {
   if (page) { console.error("Browser state:", await page.locator("body").innerText()); await page.screenshot({ path: path.join(out, "failure.png"), fullPage: true }); }
   throw e;

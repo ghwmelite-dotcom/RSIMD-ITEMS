@@ -18,3 +18,9 @@ const bytes = await createTeamWorkbook({ year: 2026, quarter: 3, team: "", membe
 const destination = path.join(root, "docs/forms/OHCS-Q3-2026-Team-Maintenance-Form.xlsx");
 await writeFile(destination, bytes);
 console.log(`Created ${destination}. Directory codes come from the local seed; in-app downloads use the current directory.`);
+const wordBundle = path.join(root, ".wrangler/team-forms/word.cjs");
+await build({ entryPoints: [path.join(root, "web/src/lib/team-word.ts")], outfile: wordBundle, bundle: true, platform: "node", format: "cjs", external: ["docx", "jszip"] });
+const { createTeamWord } = createRequire(import.meta.url)(wordBundle);
+const wordDestination = path.join(root, "docs/forms/OHCS-Q3-2026-Team-Maintenance-Form.docx");
+await writeFile(wordDestination, await createTeamWord({ year: 2026, quarter: 3, team: "", members: "", entities, devicePages: 3 }));
+console.log(`Created ${wordDestination}.`);

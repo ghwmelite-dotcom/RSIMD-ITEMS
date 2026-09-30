@@ -14,6 +14,7 @@ export function TeamFormsPage() {
   const [quarter, setQuarter] = useState(Math.ceil((now.getMonth() + 1) / 3));
   const [team, setTeam] = useState("");
   const [members, setMembers] = useState("");
+  const [devicePages, setDevicePages] = useState(3);
   const [entities, setEntities] = useState<OrgEntity[]>([]);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [scheduleId, setScheduleId] = useState("");
@@ -26,15 +27,17 @@ export function TeamFormsPage() {
     api.get<Schedule[]>("/schedules").then(setSchedules).catch(() => setSchedules([]));
   }, []);
 
-  async function download() {
+  async function download(format: "docx" | "xlsx") {
     setError(""); setBusy(true);
     try {
-      const { createTeamWorkbook } = await import("../lib/team-workbook");
       const schedule = schedules.find(s => s.id === scheduleId);
-      const bytes = await createTeamWorkbook({ year, quarter, team, members, entities: entities.filter(e => e.is_active),
-        rooms: schedule?.rooms.map(room => ({ entity: schedule.entity_code, room, date: schedule.date })) });
-      const url = URL.createObjectURL(new Blob([new Uint8Array(bytes).buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
-      const a = document.createElement("a"); a.href = url; a.download = `OHCS-Team-Form-Q${quarter}-${year}.xlsx`; a.click();
+      const options = { year, quarter, team, members, entities: entities.filter(e => e.is_active), devicePages,
+        rooms: schedule?.rooms.map(room => ({ entity: schedule.entity_code, room, date: schedule.date })) };
+      const bytes = format === "docx"
+        ? await (await import("../lib/team-word")).createTeamWord(options)
+        : await (await import("../lib/team-workbook")).createTeamWorkbook(options);
+      const url = URL.createObjectURL(new Blob([new Uint8Array(bytes).buffer], { type: format === "docx" ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
+      const a = document.createElement("a"); a.href = url; a.download = `OHCS-Team-Form-Q${quarter}-${year}.${format}`; a.click();
       setTimeout(() => URL.revokeObjectURL(url), 10_000);
     } catch (e) { setError(e instanceof Error ? e.message : "Download failed"); }
     finally { setBusy(false); }
@@ -44,19 +47,21 @@ export function TeamFormsPage() {
     if (!file) return;
     setError(""); setPreview(null); setUpload(null); setBusy(true);
     try {
-      if (!file.name.toLowerCase().endsWith(".xlsx") || file.size > 2_000_000) throw new Error("Choose an .xlsx team form no larger than 2 MB.");
-      const { parseTeamWorkbook } = await import("../lib/team-workbook");
-      const data = await parseTeamWorkbook(await file.arrayBuffer());
+      const word = file.name.toLowerCase().endsWith(".docx");
+      if ((!word && !file.name.toLowerCase().endsWith(".xlsx")) || file.size > 2_000_000) throw new Error("Choose a Word (.docx) or Excel (.xlsx) team form no larger than 2 MB.");
+      const bytes = await file.arrayBuffer();
+      const data = word ? await (await import("../lib/team-word")).parseTeamWord(bytes)
+        : await (await import("../lib/team-workbook")).parseTeamWorkbook(bytes);
       const result = await api.post<FormPreview>("/team-forms/preview", data);
       setUpload(data); setPreview(result);
-    } catch (e) { setError(e instanceof Error ? e.message : "Could not read the workbook"); }
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not read the form"); }
     finally { setBusy(false); }
   }
   async function save() {
     if (!upload || !preview?.valid) return;
     setError(""); setBusy(true);
     try { setPreview(await api.post<FormPreview>("/team-forms/import", upload)); }
-    catch (e) { setPreview(null); setError(e instanceof Error ? e.message : "Upload failed; preview the workbook again"); }
+    catch (e) { setPreview(null); setError(e instanceof Error ? e.message : "Upload failed; preview the form again"); }
     finally { setBusy(false); }
   }
   const form = preview?.form;
@@ -71,24 +76,28 @@ export function TeamFormsPage() {
           <select className={fieldClass} value={scheduleId} onChange={e => {
             setScheduleId(e.target.value); const s = schedules.find(x => x.id === e.target.value);
             if (s) { setTeam(`${s.entity_code} team`); setMembers(s.technician_names.join(", ")); }
-          }}><option value="">Blank form — enter rooms in Excel</option>{schedules.map(s => <option key={s.id} value={s.id}>{s.date} · {s.entity_code} · Rooms {s.rooms.join(", ")}</option>)}</select>
+          }}><option value="">Blank form — enter the rooms in your form</option>{schedules.map(s => <option key={s.id} value={s.id}>{s.date} · {s.entity_code} · Rooms {s.rooms.join(", ")}</option>)}</select>
         </label>
         <label className="text-sm">Team name<input className={fieldClass} maxLength={120} value={team} onChange={e => setTeam(e.target.value)} placeholder="e.g. RSIMD team A" /></label>
         <label className="text-sm">Participating officers<input className={fieldClass} maxLength={1000} value={members} onChange={e => setMembers(e.target.value)} placeholder="Names of all participating team members" /></label>
       </div>
-      <p className="text-sm my-4">Keep Q3 selected for the Q3 exercise performed in October. Actual visit dates are entered separately. The workbook includes instructions, room visits, device checks and directory codes.</p>
-      <Button disabled={busy || !entities.length || !Number.isInteger(year) || year < 2000 || year > 2100} onClick={download}>Download Excel form</Button>
-      <p className="text-xs text-surface-500 mt-3">Complete electronically in Excel or LibreOffice. For paper forms, transcribe the answers into the workbook before uploading. Up to 50 rooms and 100 devices per form.</p>
+      <p className="text-sm my-4">Word is recommended for teams: a filled example, everyday language and one page per device. Your team name and members appear on the cover and visit pages. Keep Q3 selected for the exercise performed in October; record the actual visit dates separately.</p>
+      <label className="block text-sm mb-4 max-w-xs">Device pages in Word<input className={fieldClass} type="number" min={1} max={100} value={devicePages} onChange={e => setDevicePages(Number(e.target.value))} /></label>
+      <div className="flex flex-wrap gap-3">
+        <Button disabled={busy || !entities.length || !Number.isInteger(year) || year < 2000 || year > 2100 || !Number.isInteger(devicePages) || devicePages < 1 || devicePages > 100} onClick={() => download("docx")}>Download Word form</Button>
+        <Button disabled={busy || !entities.length || !Number.isInteger(year) || year < 2000 || year > 2100} onClick={() => download("xlsx")}>Download Excel form</Button>
+      </div>
+      <p className="text-xs text-surface-500 mt-3">Type answers in Word or Excel, then upload the same file here. Keep the table questions/headings. Copy a whole room or device table for more entries. For handwritten paper forms, type the answers into the file before uploading. Up to 50 rooms and 100 devices.</p>
     </Card>
     <Card><h2 className="font-semibold mb-3">2. Preview a completed form</h2>
-      <label className="block text-sm">Completed Excel workbook<input aria-label="Completed Excel workbook" type="file" accept=".xlsx" disabled={busy} onChange={readFile} className="block mt-2 w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:p-3 file:bg-surface-200" /></label>
-      <p className="mt-3 text-sm text-surface-500">Nothing is saved during preview. Re-uploading the same completed file will not duplicate its records. Imported checks appear in a separate team-exercise section of the quarterly Word report.</p>
+      <label className="block text-sm">Completed Word or Excel form<input aria-label="Completed Word or Excel form" type="file" accept=".docx,.xlsx" disabled={busy} onChange={readFile} className="block mt-2 w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:p-3 file:bg-surface-200" /></label>
+      <p className="mt-3 text-sm text-surface-500">Only answers inside the form tables are imported. Check the preview before saving. Nothing is saved during preview. Re-uploading the same completed file will not duplicate its records. Imported checks appear in a separate team-exercise section of the quarterly Word report.</p>
     </Card>
-    {busy && <p role="status">Processing workbook…</p>}
+    {busy && <p role="status">Processing form…</p>}
     {error && <p role="alert" className="rounded-lg border border-red-400 p-4">{error}</p>}
     {preview && <Card>
       <h2 className="font-semibold">{preview.saved ? "Records saved" : preview.duplicate ? "This form is already saved" : "3. Check and save"}</h2>
-      {!preview.valid && <div role="alert" className="mt-3"><p>Correct these entries in Excel, then preview again. Nothing was saved.</p><ul className="list-disc pl-5 mt-2">{preview.errors.map((e, i) => <li key={i}>{e.location}: {e.message}</li>)}</ul></div>}
+      {!preview.valid && <div role="alert" className="mt-3"><p>Correct these entries in your form, then preview again. Nothing was saved.</p><ul className="list-disc pl-5 mt-2">{preview.errors.map((e, i) => <li key={i}>{e.location}: {e.message}</li>)}</ul></div>}
       {form && <>
         <p className="mt-3"><strong>Q{form.quarter} {form.year} · {form.team}</strong></p>
         <p className="text-sm">Team: {form.members}</p>
@@ -107,7 +116,7 @@ export function TeamFormsPage() {
           <p className="mt-2 text-sm">Helpdesk observations: {form.helpdesk || "Not supplied"}</p>
         </details>
         {preview.valid && !preview.saved && !preview.duplicate && <Button disabled={busy} onClick={save}>Save records for Q{form.quarter} {form.year}</Button>}
-        {preview.saved && <p role="status" className="mt-3">Saved for quarterly reporting. {preview.duplicate ? "No duplicate records were added." : "Keep the original workbook for your records."}</p>}
+        {preview.saved && <p role="status" className="mt-3">Saved for quarterly reporting. {preview.duplicate ? "No duplicate records were added." : "Keep the original form for your records."}</p>}
       </>}
     </Card>}
   </div>;
