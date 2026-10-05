@@ -23,7 +23,11 @@ afterEach(() => { databases.splice(0).forEach(db => db.close()); });
 function database(migrate = true) {
   const sqlite = new DatabaseSync(":memory:"); databases.push(sqlite);
   sqlite.exec("PRAGMA foreign_keys = ON; CREATE TABLE technicians (id TEXT PRIMARY KEY, is_active INTEGER); INSERT INTO technicians VALUES ('tester', 1); CREATE TABLE org_entities (code TEXT, is_active INTEGER); INSERT INTO org_entities VALUES ('RSIMD', 1);");
-  if (migrate) sqlite.exec(readFileSync(new URL("../src/db/migration-004-team-forms.sql", import.meta.url), "utf8"));
+  sqlite.exec("ALTER TABLE technicians ADD COLUMN role TEXT DEFAULT 'technician'");
+  if (migrate) {
+    sqlite.exec(readFileSync(new URL("../src/db/migration-004-team-forms.sql", import.meta.url), "utf8"));
+    sqlite.exec(readFileSync(new URL("../migrations/0003_team_form_revisions.sql", import.meta.url), "utf8"));
+  }
   function statement(sql: string, args: (string | number | null)[] = []) {
     return {
       bind: (...values: (string | number | null)[]) => statement(sql, values),
@@ -91,7 +95,7 @@ describe("transactional import", () => {
   it("rejects a changed saved workbook and a copied observation", async () => {
     const { env, sqlite } = database(); const f = sample(); await teamFormImport(request(f), env, true);
     f.members = "Changed team";
-    expect((await teamFormImport(request(f), env, true)).status).toBe(409);
+    expect((await teamFormImport(request(f), env, true)).status).toBe(403);
     f.id = crypto.randomUUID(); f.quarter = 4;
     expect((await teamFormImport(request(f), env, true)).status).toBe(409);
     expect(sqlite.prepare("SELECT COUNT(*) AS n FROM team_forms").get()?.n).toBe(1);
@@ -136,6 +140,37 @@ describe("transactional import", () => {
   });
 });
 
+describe("saved return revisions", () => {
+  it("requires a privileged preview, preserves history and replaces observation keys", async () => {
+    const { env, sqlite } = database(); const f = sample();
+    await teamFormImport(request(f), env, true);
+    f.rooms[0]!.date = "2026-10-04"; f.devices[0]!.date = "2026-10-04";
+    expect((await teamFormImport(request(f), env, false)).status).toBe(403);
+    sqlite.exec("UPDATE technicians SET role='admin'");
+    const preview = await (await teamFormImport(request(f), env, false)).json();
+    expect(preview.revision).toBe(true);
+    expect((await teamFormImport(request(f), env, true)).status).toBe(409);
+    expect((await teamFormImport(request({ ...f, expectedHash: preview.expectedHash }), env, true)).status).toBe(200);
+    expect(sqlite.prepare("SELECT COUNT(*) AS n FROM team_forms").get()?.n).toBe(1);
+    expect(sqlite.prepare("SELECT COUNT(*) AS n FROM team_form_revisions").get()?.n).toBe(1);
+    expect(sqlite.prepare("SELECT payload FROM team_form_revisions").get()?.payload).toContain("2026-10-01");
+    expect(sqlite.prepare("SELECT COUNT(*) AS n FROM team_form_observations").get()?.n).toBe(2);
+    f.challenges = "Another change";
+    expect((await teamFormImport(request({ ...f, expectedHash: preview.expectedHash }), env, true)).status).toBe(409);
+    expect(sqlite.prepare("SELECT COUNT(*) AS n FROM team_form_revisions").get()?.n).toBe(1);
+  });
+  it("rejects overlapping revisions without losing the original return", async () => {
+    const { env, sqlite } = database(); const f = sample(); await teamFormImport(request(f), env, true);
+    const other = sample(); other.rooms[0]!.room = "20"; other.devices[0]!.room = "20"; other.devices[0]!.reference = "OTHER";
+    await teamFormImport(request(other), env, true);
+    sqlite.exec("UPDATE technicians SET role='admin'");
+    f.rooms[0]!.room = "20"; f.devices[0]!.room = "20";
+    const preview = await (await teamFormImport(request(f), env, false)).json();
+    expect(preview.valid).toBe(false);
+    expect(sqlite.prepare("SELECT COUNT(*) AS n FROM team_form_revisions").get()?.n).toBe(0);
+  });
+});
+
 describe("Excel round trip and report evidence", () => {
   async function workbook() {
     const bytes = await createTeamWorkbook({ year: 2026, quarter: 3, team: "Test team", members: "Test officer", entities: [{ code: "RSIMD", name: "Test directorate" }] });
@@ -159,6 +194,9 @@ describe("Excel round trip and report evidence", () => {
     const zip = await JSZip.loadAsync(bytes); const xml = await zip.file("word/document.xml")!.async("string");
     expect(xml).toContain("2026-10-01"); expect(xml).toContain("TEST-ASSET-1"); expect(xml).toContain(f.challenges);
     expect(xml).toContain("functional: 1"); expect(xml).toContain("Opened shared drive");
+    expect(xml).toContain("Submitted Room Maintenance Findings");
+    expect(xml).toContain("No emergency intervention recorded");
+    expect(xml).not.toContain("100%");
   });
   it("rejects formulas instead of trusting cached values", async () => {
     const wb = await workbook(); wb.getWorksheet("Team")!.getCell("B6").value = { formula: '"hidden"', result: "hidden" };

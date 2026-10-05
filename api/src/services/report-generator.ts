@@ -154,6 +154,32 @@ function spacer(): Paragraph {
   return new Paragraph({ spacing: { after: 100 }, children: [] });
 }
 
+function evidenceTable(headers: string[], rows: string[][]): Table {
+  const widths = headers.map((_, i) => Math.floor(TABLE_WIDTH / headers.length) + (i === 0 ? TABLE_WIDTH % headers.length : 0));
+  const row = (values: string[], header = false) => new TableRow({
+    tableHeader: header,
+    children: values.map((text, i) => new TableCell({
+      width: { size: widths[i]!, type: WidthType.DXA }, borders: BORDERS, margins: CELL_MARGINS,
+      shading: header ? { fill: "1F4E79", type: ShadingType.CLEAR } : undefined,
+      children: [new Paragraph({ children: [new TextRun({ text, font: FONT, size: 20, bold: header, color: header ? "FFFFFF" : "222222" })] })],
+    })),
+  });
+  return new Table({ width: { size: TABLE_WIDTH, type: WidthType.DXA }, columnWidths: widths, rows: [row(headers, true), ...rows.map(values => row(values))] });
+}
+
+function roomFindings(forms: TeamForm[]): Table {
+  return evidenceTable(["OFFICE / ROOM", "ACTUAL DATE / STATUS", "SUBMITTED FINDINGS"], forms.flatMap(form => form.rooms.map(r => [
+    `${r.entity} / ${r.room}`, `${r.date} / ${r.status}`,
+    `${form.team}: ${r.notes || "No room-level narrative supplied."}${form.devices.filter(d => d.entity === r.entity && d.room === r.room && d.date === r.date).map(d => ` Checks: ${d.checks}. Work: ${d.work || "None recorded"}. Result: ${d.finalTest}.`).join("")}`,
+  ])));
+}
+
+function correctiveFindings(forms: TeamForm[]): Table {
+  return evidenceTable(["SOURCE", "REPORTED CORRECTIVE WORK / OUTSTANDING ACTIONS"], forms.map(f => [f.team,
+    [f.recommendations, ...f.devices.map(d => `${d.entity}, room ${d.room}: ${d.work || "No corrective work recorded"}. Outstanding: ${d.outstanding || "None recorded"}. ${d.recommendation}`)].filter(Boolean).join(" ") || "No corrective action recorded in this return.",
+  ]));
+}
+
 // --- Table Builders ---
 
 function buildMonthlyTable(data: MonthlyData[], quarter: number): Table {
@@ -242,6 +268,16 @@ function buildOverviewTable(quarter: number, year: number, tables: ReportContent
   const emergencyTotal = tables.emergencyByCategory.reduce((s, r) => s + r.total, 0);
   const grandTotal = routineTotal + correctiveTotal + emergencyTotal;
 
+  if (!grandTotal && tables.teamForms?.length) {
+    const rooms = new Set(tables.teamForms.flatMap(f => f.rooms.map(r => `${r.entity}/${r.room}`)));
+    return evidenceTable(["REPORTING BASIS", "RECORDED EVIDENCE"], [
+      ["Team returns", String(tables.teamForms.length)],
+      ["Distinct assigned rooms represented", String(rooms.size)],
+      ["Maintenance findings", "See room findings and corrective-action tables. Attendance does not by itself establish completed servicing."],
+      ["Device totals", "Grouped returns do not establish a complete device inventory. No device totals or completion percentages have been inferred."],
+    ]);
+  }
+
   return new Table({
     width: { size: TABLE_WIDTH, type: WidthType.DXA },
     rows: [
@@ -258,7 +294,7 @@ function buildOverviewTable(quarter: number, year: number, tables: ReportContent
         children: [dCell("Emergency Maintenance"), nCell(emergencyTotal), nCell(grandTotal > 0 ? Math.round((emergencyTotal / grandTotal) * 100) : 0)],
       }),
       new TableRow({
-        children: [totalCell("GRAND TOTAL"), totalCell(grandTotal), totalCell("100%")],
+        children: [totalCell("GRAND TOTAL"), totalCell(grandTotal), totalCell(grandTotal ? "100%" : "0%")],
       }),
     ],
   });
@@ -446,12 +482,12 @@ export async function generateDocx(content: ReportContent): Promise<Uint8Array> 
           new Paragraph({
             numbering: { reference: "roman-list", level: 0 },
             spacing: { after: 60 },
-            children: [new TextRun({ text: "Maintenance and servicing of CCTV surveillance cameras.", font: FONT, size: 22 })],
+            children: [new TextRun({ text: "Documenting equipment condition, work performed and outstanding faults.", font: FONT, size: 22 })],
           }),
           new Paragraph({
             numbering: { reference: "roman-list", level: 0 },
             spacing: { after: 200 },
-            children: [new TextRun({ text: "Maintenance of network infrastructure and internet connectivity.", font: FONT, size: 22 })],
+            children: [new TextRun({ text: "Identifying repair, replacement and follow-up priorities for management.", font: FONT, size: 22 })],
           }),
 
           // ===== 2.0 METHODOLOGY =====
@@ -473,31 +509,37 @@ export async function generateDocx(content: ReportContent): Promise<Uint8Array> 
           // --- 3.2 Routine ---
           heading2("3.2 Routine Maintenance and Servicing"),
           bodyText(narratives.routineNarrative),
-          tableCaption("Table 2: Routine Maintenance Breakdown by Month"),
-          buildMonthlyTable(tables.routineByCategory, quarter),
+          tableCaption(tables.routineByCategory.length ? "Table 2: Routine Maintenance Breakdown by Month" : "Table 2: Submitted Room Maintenance Findings"),
+          ...(tables.routineByCategory.length ? [buildMonthlyTable(tables.routineByCategory, quarter)] : tables.teamForms?.length ? [
+            bodyText("Room findings below preserve the actual exercise dates and recorded status. Combined results are not per-room or per-device totals; pending rooms are explicitly identified."),
+            roomFindings(tables.teamForms),
+          ] : [bodyText("No routine maintenance records were submitted for this period.")]),
           spacer(),
 
           // --- 3.3 Corrective ---
           heading2("3.3 Corrective Maintenance"),
           bodyText(narratives.correctiveNarrative),
           tableCaption("Table 3: Corrective Maintenance Summary"),
-          buildSummaryTable(tables.correctiveSummary),
+          ...(tables.correctiveSummary.length ? [buildSummaryTable(tables.correctiveSummary)] : tables.teamForms?.length ? [correctiveFindings(tables.teamForms)] : [bodyText("No corrective maintenance records were submitted for this period.")]),
           spacer(),
           tableCaption("Table 4: Breakdown of Maintenance by Directorate/Rooms"),
-          buildEntityBreakdownTable(tables.correctiveByEntity),
+          ...(tables.correctiveByEntity.length ? [buildEntityBreakdownTable(tables.correctiveByEntity)] : [bodyText("No separate counts of resolved issues are available. Reported work and outstanding faults are described above; unresolved faults are not counted as completed repairs.")]),
           spacer(),
 
           // --- 3.4 Emergency ---
           heading2("3.4 Emergency Maintenance"),
           bodyText(narratives.emergencyNarrative),
           tableCaption("Table 5: Emergency Maintenance Breakdown by Month"),
-          buildMonthlyTable(tables.emergencyByCategory, quarter),
+          ...(tables.emergencyByCategory.length ? [buildMonthlyTable(tables.emergencyByCategory, quarter)] : [evidenceTable(["ACTIVITY", "RECORDED STATUS"], [["Emergency maintenance", "No emergency intervention recorded in the submitted activity logs. Team findings are retained in the room-evidence section."]])]),
           spacer(),
 
           // --- 3.5 Predictive ---
           heading2("3.5 Predictive Maintenance"),
           bodyText(narratives.predictive),
-          ...teamFormEvidence(tables.teamForms ?? [], false),
+          ...(tables.routineByCategory.length || !tables.teamForms?.length ? teamFormEvidence(tables.teamForms ?? [], false) : [
+            heading2("3.6 Participating Teams"),
+            ...tables.teamForms.map(f => bodyText(`${f.team}: ${f.members}. Device records: ${f.devices.length}; functional: ${f.devices.filter(d => d.after === "functional").length}. Room findings are presented in Table 2.`)),
+          ]),
 
           // ===== 4.0 CHALLENGES =====
           heading1("4.0 Challenges"),

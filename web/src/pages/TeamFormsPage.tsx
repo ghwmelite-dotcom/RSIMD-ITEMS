@@ -60,7 +60,7 @@ export function TeamFormsPage() {
   async function save() {
     if (!upload || !preview?.valid) return;
     setError(""); setBusy(true);
-    try { setPreview(await api.post<FormPreview>("/team-forms/import", upload)); }
+    try { setPreview(await api.post<FormPreview>("/team-forms/import", { ...upload, expectedHash: preview.expectedHash })); }
     catch (e) { setPreview(null); setError(e instanceof Error ? e.message : "Upload failed; preview the form again"); }
     finally { setBusy(false); }
   }
@@ -115,7 +115,7 @@ export function TeamFormsPage() {
           <p className="mt-2 text-sm">Recommendations: {form.recommendations || "None recorded"}</p>
           <p className="mt-2 text-sm">Helpdesk observations: {form.helpdesk || "Not supplied"}</p>
         </details>
-        {preview.valid && !preview.saved && !preview.duplicate && <Button disabled={busy} onClick={save}>Save records for Q{form.quarter} {form.year}</Button>}
+        {preview.valid && !preview.saved && !preview.duplicate && <Button disabled={busy} onClick={save}>{preview.revision ? "Replace saved return" : `Save records for Q${form.quarter} ${form.year}`}</Button>}
         {preview.saved && <p role="status" className="mt-3">Saved for quarterly reporting. {preview.duplicate ? "No duplicate records were added." : "Keep the original form for your records."}</p>}
       </>}
     </Card>}

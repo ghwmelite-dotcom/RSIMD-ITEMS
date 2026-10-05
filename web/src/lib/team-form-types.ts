@@ -9,6 +9,7 @@ export interface TeamForm {
   challenges: string; recommendations: string; helpdesk: string; rooms: FormRoom[]; devices: FormDevice[];
 }
 export interface FormPreview {
+  revision?: boolean; expectedHash?: string;
   valid: boolean; duplicate?: boolean; saved?: boolean; form?: TeamForm;
   errors: { location: string; message: string }[]; warnings?: string[];
 }
