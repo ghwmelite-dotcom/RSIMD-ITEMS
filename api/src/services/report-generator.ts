@@ -462,6 +462,24 @@ export async function generateDocx(content: ReportContent): Promise<Uint8Array> 
           new TableOfContents("Table of Contents", {
             hyperlink: true,
             headingStyleRange: "1-2",
+            // Workers cannot paginate Word files. Cache real section labels so
+            // readers see contents immediately; Word calculates pages on update.
+            cachedEntries: [
+              { title: "1.0 Introduction", level: 1 },
+              { title: "1.1 Objectives", level: 2 },
+              { title: "2.0 Methodology", level: 1 },
+              { title: "3.0 Details of Maintenance and Servicing", level: 1 },
+              { title: "3.1 Condition Based Servicing and Monitoring", level: 2 },
+              { title: "3.2 Routine Maintenance and Servicing", level: 2 },
+              { title: "3.3 Corrective Maintenance", level: 2 },
+              { title: "3.4 Emergency Maintenance", level: 2 },
+              { title: "3.5 Predictive Maintenance", level: 2 },
+              { title: tables.routineByCategory.length || !tables.teamForms?.length ? "3.6 Team Exercise Returns" : "3.6 Participating Teams", level: 2 },
+              { title: "4.0 Challenges", level: 1 },
+              { title: "5.0 Recommendations", level: 1 },
+              { title: "6.0 Conclusion", level: 1 },
+              ...(tables.teamForms?.length ? [{ title: "Annex: Team Maintenance Evidence", level: 2 }] : []),
+            ],
           }),
 
           // ===== 1.0 INTRODUCTION =====

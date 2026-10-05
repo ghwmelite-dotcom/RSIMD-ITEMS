@@ -197,6 +197,11 @@ describe("Excel round trip and report evidence", () => {
     expect(xml).toContain("Submitted Room Maintenance Findings");
     expect(xml).toContain("No emergency intervention recorded");
     expect(xml).not.toContain("100%");
+    const toc = xml.match(/<w:sdtContent>([\s\S]*?)<\/w:sdtContent>/)?.[1];
+    expect(toc).toContain("1.0 Introduction");
+    expect(toc).toContain("6.0 Conclusion");
+    expect(toc).toContain("3.6 Participating Teams");
+    expect(toc).toContain("Annex: Team Maintenance Evidence");
   });
   it("rejects formulas instead of trusting cached values", async () => {
     const wb = await workbook(); wb.getWorksheet("Team")!.getCell("B6").value = { formula: '"hidden"', result: "hidden" };
