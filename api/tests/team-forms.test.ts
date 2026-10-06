@@ -5,7 +5,7 @@ import { Workbook } from "exceljs";
 import JSZip from "jszip";
 import { validateTeamForm, getTeamForms, observationKeys, type TeamForm } from "../src/services/team-form";
 import { teamFormImport } from "../src/routes/team-forms";
-import { generateDocx } from "../src/services/report-generator";
+import { generateDocx, reportText } from "../src/services/report-generator";
 import { createTeamWorkbook, parseTeamWorkbook } from "../../web/src/lib/team-workbook";
 import type { Env } from "../src/types";
 
@@ -192,16 +192,26 @@ describe("Excel round trip and report evidence", () => {
     const narratives = { introduction: "Test", methodology: "Test", conditionBased: "Test", routineNarrative: "Test", correctiveNarrative: "Test", emergencyNarrative: "Test", predictive: "Test", challenges: "Test challenge description.", recommendations: "Test recommendation description.", conclusion: "Test" };
     const bytes = await generateDocx({ year: 2026, quarter: 3, narratives, tables: { routineByCategory: [], correctiveSummary: [], correctiveByEntity: [], emergencyByCategory: [], teamForms: [parsed] } });
     const zip = await JSZip.loadAsync(bytes); const xml = await zip.file("word/document.xml")!.async("string");
-    expect(xml).toContain("2026-10-01"); expect(xml).toContain("TEST-ASSET-1"); expect(xml).toContain(f.challenges);
-    expect(xml).toContain("functional: 1"); expect(xml).toContain("Opened shared drive");
-    expect(xml).toContain("Submitted Room Maintenance Findings");
+    expect(xml).not.toContain("TEST-ASSET-1");
+    expect(xml).toContain("Breakdown of Maintenance by Directorate");
+    expect(xml).not.toContain("Source workbook");
+    expect(xml).not.toContain("Test officer");
+    expect(xml).not.toContain("Test team");
+    expect(xml).toContain("EXAMPLES / TOOLS");
+    expect(xml).toContain("4.0 OHCS HELPDESK ACTIVITIES");
+    expect(xml).toContain('w:w="12240"');
     expect(xml).toContain("No emergency intervention recorded");
     expect(xml).not.toContain("100%");
     const toc = xml.match(/<w:sdtContent>([\s\S]*?)<\/w:sdtContent>/)?.[1];
     expect(toc).toContain("1.0 Introduction");
-    expect(toc).toContain("6.0 Conclusion");
-    expect(toc).toContain("3.6 Participating Teams");
-    expect(toc).toContain("Annex: Team Maintenance Evidence");
+    expect(toc).toContain("7.0 Conclusion");
+    expect(xml).not.toContain("Participating Teams");
+    expect(xml).not.toContain("Annex: Team Maintenance Evidence");
+  });
+  it("removes team labels from public prose without losing faults and measurements", () => {
+    const text = reportText("Team A reports 2.1 GB freed. RSIMD Team C identified faulty printer 007/24/ACCTS. Structured date is a group-date anchor.");
+    expect(text).not.toMatch(/Team [A-Z]|Structured date/);
+    expect(text).toContain("2.1 GB"); expect(text).toContain("faulty printer 007/24/ACCTS");
   });
   it("rejects formulas instead of trusting cached values", async () => {
     const wb = await workbook(); wb.getWorksheet("Team")!.getCell("B6").value = { formula: '"hidden"', result: "hidden" };

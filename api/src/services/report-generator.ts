@@ -10,10 +10,8 @@ import {
   AlignmentType,
   HeadingLevel,
   BorderStyle,
-  ShadingType,
   TableOfContents,
   LevelFormat,
-  Header,
   Footer,
   PageNumber,
   PageBreak,
@@ -42,6 +40,8 @@ interface ReportContent {
   quarter: number;
   year: number;
   narratives: AllNarratives;
+  helpdesk?: string;
+  activityTables?: { routine: string[][]; corrective: string[][]; breakdown: string[][]; emergency: string[][] };
   tables: {
     teamForms?: TeamForm[];
     routineByCategory: MonthlyData[];
@@ -52,6 +52,23 @@ interface ReportContent {
 }
 
 const FONT = "Bookman Old Style";
+
+// Public reports use directorates and rooms. Import identities and revision
+// bookkeeping remain in the saved source records, not the management document.
+export function reportText(text: string): string {
+  return text.split(/(?<=[.!?])\s+(?=[A-Z])/u)
+    .filter(sentence => !/\b(structured date|date field|group-date anchor|do not duplicate|do not repeat|record these group results once|source workbook|findings are credited|user confirmation|tag corrected from|supersede.*figures|no per-device overlap reconciliation)\b/i.test(sentence))
+    .map(sentence => sentence
+      .replace(/\b(?:RSIMD\s+)?Team\s+[A-Z]\b/g, "maintenance officers")
+      .replace(/\bteam-reported\b/gi, "reported")
+      .replace(/\bTeam reports\b/g, "Officers report")
+      .replace(/\bChecked by:[^.]*\.?/gi, "")
+      .replace(/\bChecked by [^.]*\.?/gi, "")
+      .replace(/\bCOMBINED findings\b/g, "Combined findings")
+      .replace(/, recorded once(?=:|\.)/g, "")
+      .replace(/\bconfirmed by the user\b/gi, "confirmed by the reporting officer"))
+    .join(" ").trim();
+}
 const QUARTER_MONTHS: Record<number, [string, string, string]> = {
   1: ["JANUARY", "FEBRUARY", "MARCH"],
   2: ["APRIL", "MAY", "JUNE"],
@@ -70,18 +87,18 @@ const QUARTER_LABELS: Record<number, string> = {
 const BORDER = { style: BorderStyle.SINGLE, size: 1, color: "999999" };
 const BORDERS = { top: BORDER, bottom: BORDER, left: BORDER, right: BORDER };
 const CELL_MARGINS = { top: 60, bottom: 60, left: 100, right: 100 };
-const TABLE_WIDTH = 9026; // A4 content width with 1" margins
+const TABLE_WIDTH = 9360; // Default OHCS Letter page with one-inch margins
 
 function hCell(text: string, width?: number): TableCell {
   return new TableCell({
     borders: BORDERS,
     width: width ? { size: width, type: WidthType.DXA } : undefined,
-    shading: { fill: "1F4E79", type: ShadingType.CLEAR },
+
     margins: CELL_MARGINS,
     children: [
       new Paragraph({
         alignment: AlignmentType.CENTER,
-        children: [new TextRun({ text, bold: true, font: FONT, size: 20, color: "FFFFFF" })],
+        children: [new TextRun({ text, bold: true, font: FONT, size: 24, color: "000000" })],
       }),
     ],
   });
@@ -94,7 +111,7 @@ function dCell(text: string | number, bold = false, align: (typeof AlignmentType
     children: [
       new Paragraph({
         alignment: align,
-        children: [new TextRun({ text: String(text), font: FONT, size: 20, bold })],
+        children: [new TextRun({ text: String(text), font: FONT, size: 24, bold })],
       }),
     ],
   });
@@ -107,12 +124,11 @@ function nCell(num: number, bold = false): TableCell {
 function totalCell(text: string | number): TableCell {
   return new TableCell({
     borders: BORDERS,
-    shading: { fill: "D6E4F0", type: ShadingType.CLEAR },
     margins: CELL_MARGINS,
     children: [
       new Paragraph({
         alignment: typeof text === "number" ? AlignmentType.CENTER : AlignmentType.LEFT,
-        children: [new TextRun({ text: String(text), bold: true, font: FONT, size: 20 })],
+        children: [new TextRun({ text: String(text), bold: true, font: FONT, size: 24 })],
       }),
     ],
   });
@@ -124,7 +140,7 @@ function heading1(text: string): Paragraph {
   return new Paragraph({
     heading: HeadingLevel.HEADING_1,
     spacing: { before: 360, after: 200 },
-    children: [new TextRun({ text: text.toUpperCase(), bold: true, font: FONT, size: 26 })],
+    children: [new TextRun({ text: text.toUpperCase(), bold: true, font: FONT, size: 24 })],
   });
 }
 
@@ -139,14 +155,7 @@ function heading2(text: string): Paragraph {
 function bodyText(text: string): Paragraph {
   return new Paragraph({
     spacing: { after: 200, line: 360 },
-    children: [new TextRun({ text, font: FONT, size: 22 })],
-  });
-}
-
-function tableCaption(text: string): Paragraph {
-  return new Paragraph({
-    spacing: { before: 200, after: 100 },
-    children: [new TextRun({ text, bold: true, italics: true, font: FONT, size: 20 })],
+    children: [new TextRun({ text, font: FONT, size: 24 })],
   });
 }
 
@@ -160,24 +169,11 @@ function evidenceTable(headers: string[], rows: string[][]): Table {
     tableHeader: header,
     children: values.map((text, i) => new TableCell({
       width: { size: widths[i]!, type: WidthType.DXA }, borders: BORDERS, margins: CELL_MARGINS,
-      shading: header ? { fill: "1F4E79", type: ShadingType.CLEAR } : undefined,
-      children: [new Paragraph({ children: [new TextRun({ text, font: FONT, size: 20, bold: header, color: header ? "FFFFFF" : "222222" })] })],
+  
+      children: [new Paragraph({ children: [new TextRun({ text: reportText(text), font: FONT, size: 24, bold: header, color: "000000" })] })],
     })),
   });
   return new Table({ width: { size: TABLE_WIDTH, type: WidthType.DXA }, columnWidths: widths, rows: [row(headers, true), ...rows.map(values => row(values))] });
-}
-
-function roomFindings(forms: TeamForm[]): Table {
-  return evidenceTable(["OFFICE / ROOM", "ACTUAL DATE / STATUS", "SUBMITTED FINDINGS"], forms.flatMap(form => form.rooms.map(r => [
-    `${r.entity} / ${r.room}`, `${r.date} / ${r.status}`,
-    `${form.team}: ${r.notes || "No room-level narrative supplied."}${form.devices.filter(d => d.entity === r.entity && d.room === r.room && d.date === r.date).map(d => ` Checks: ${d.checks}. Work: ${d.work || "None recorded"}. Result: ${d.finalTest}.`).join("")}`,
-  ])));
-}
-
-function correctiveFindings(forms: TeamForm[]): Table {
-  return evidenceTable(["SOURCE", "REPORTED CORRECTIVE WORK / OUTSTANDING ACTIONS"], forms.map(f => [f.team,
-    [f.recommendations, ...f.devices.map(d => `${d.entity}, room ${d.room}: ${d.work || "No corrective work recorded"}. Outstanding: ${d.outstanding || "None recorded"}. ${d.recommendation}`)].filter(Boolean).join(" ") || "No corrective action recorded in this return.",
-  ]));
 }
 
 // --- Table Builders ---
@@ -262,92 +258,17 @@ function buildEntityBreakdownTable(data: CorrectiveEntityRow[]): Table {
   });
 }
 
-function buildOverviewTable(quarter: number, year: number, tables: ReportContent["tables"]): Table {
-  const routineTotal = tables.routineByCategory.reduce((s, r) => s + r.total, 0);
-  const correctiveTotal = tables.correctiveSummary.reduce((s, r) => s + r.count, 0);
-  const emergencyTotal = tables.emergencyByCategory.reduce((s, r) => s + r.total, 0);
-  const grandTotal = routineTotal + correctiveTotal + emergencyTotal;
-
-  if (!grandTotal && tables.teamForms?.length) {
-    const rooms = new Set(tables.teamForms.flatMap(f => f.rooms.map(r => `${r.entity}/${r.room}`)));
-    return evidenceTable(["REPORTING BASIS", "RECORDED EVIDENCE"], [
-      ["Team returns", String(tables.teamForms.length)],
-      ["Distinct assigned rooms represented", String(rooms.size)],
-      ["Maintenance findings", "See room findings and corrective-action tables. Attendance does not by itself establish completed servicing."],
-      ["Device totals", "Grouped returns do not establish a complete device inventory. No device totals or completion percentages have been inferred."],
-    ]);
-  }
-
-  return new Table({
-    width: { size: TABLE_WIDTH, type: WidthType.DXA },
-    rows: [
-      new TableRow({
-        children: [hCell("MAINTENANCE TYPE"), hCell("COUNT"), hCell("% OF TOTAL")],
-      }),
-      new TableRow({
-        children: [dCell("Routine Maintenance"), nCell(routineTotal), nCell(grandTotal > 0 ? Math.round((routineTotal / grandTotal) * 100) : 0)],
-      }),
-      new TableRow({
-        children: [dCell("Corrective Maintenance"), nCell(correctiveTotal), nCell(grandTotal > 0 ? Math.round((correctiveTotal / grandTotal) * 100) : 0)],
-      }),
-      new TableRow({
-        children: [dCell("Emergency Maintenance"), nCell(emergencyTotal), nCell(grandTotal > 0 ? Math.round((emergencyTotal / grandTotal) * 100) : 0)],
-      }),
-      new TableRow({
-        children: [totalCell("GRAND TOTAL"), totalCell(grandTotal), totalCell(grandTotal ? "100%" : "0%")],
-      }),
-    ],
-  });
-}
-
 // --- Main Generator ---
 
-function teamFormEvidence(forms: TeamForm[], detail: boolean): (Paragraph | Table)[] {
-  if (!forms.length) return detail ? [] : [heading2("3.6 Team Exercise Returns"), bodyText("No team workbooks have been uploaded for this reporting quarter. This does not establish that no visits occurred.")];
-  const output: (Paragraph | Table)[] = [heading2(detail ? "Annex: Team Maintenance Evidence" : "3.6 Team Exercise Returns")];
-  if (!detail) output.push(bodyText("The following team returns are recorded separately from the maintenance activity counts above. Actual visit dates are retained, including exercises performed after the reporting quarter. Outcomes are team-recorded observations, not automatic hardware certification."));
-  for (const form of forms) {
-    output.push(heading2(form.team), bodyText(`Participating officers: ${form.members}. Reporting period: Q${form.quarter} ${form.year}.`));
-    if (detail) {
-      for (const d of form.devices) {
-        output.push(bodyText(`${d.reference} (${d.type}; ${d.makeModel || "make/model not recorded"}) — ${d.entity}, Room ${d.room}, ${d.date}. Checked by: ${d.officer}.`));
-        output.push(bodyText(`Before: ${d.before}. Checks: ${d.checks}. Work: ${d.work || "None recorded"}. After: ${d.after}. Final test: ${d.finalTest}.`));
-        output.push(bodyText(`Outstanding: ${d.outstanding || "None recorded"}. Recommendation/parts: ${d.recommendation || "None recorded"}.`));
-      }
-      if (form.challenges) output.push(bodyText(`Team challenges: ${form.challenges}`));
-      if (form.recommendations) output.push(bodyText(`Team recommendations: ${form.recommendations}`));
-      if (form.helpdesk) output.push(bodyText(`Team-reported helpdesk observations: ${form.helpdesk}`));
-      output.push(bodyText(`Source workbook: ${form.id}`));
-    } else {
-      const widths = [1500, 650, 1400, 1500, 3976];
-      const row = (values: string[], header = false) => new TableRow({ tableHeader: header, children: values.map((value, i) => new TableCell({
-        width: { size: widths[i]!, type: WidthType.DXA }, borders: BORDERS, margins: CELL_MARGINS,
-        shading: header ? { fill: "1A4D2E", type: ShadingType.CLEAR } : undefined,
-        children: [new Paragraph({ children: [new TextRun({ text: value, font: FONT, size: 18, bold: header, color: header ? "FFFFFF" : "222222" })] })],
-      })) });
-      output.push(new Table({ width: { size: TABLE_WIDTH, type: WidthType.DXA }, columnWidths: widths, rows: [
-        row(["Directorate", "Room", "Actual date", "Visit", "Device outcomes / notes"], true),
-        ...form.rooms.map(r => {
-          const devices = form.devices.filter(d => d.entity === r.entity && d.room === r.room && d.date === r.date);
-          const counts = ["functional", "limited", "nonfunctional", "not_tested"].map(s => `${s}: ${devices.filter(d => d.after === s).length}`).join("; ");
-          return row([r.entity, r.room, r.date, `${r.mode}; ${r.status}`, `${devices.length} device records. ${counts}. ${r.notes}`]);
-        }),
-      ] }));
-      output.push(spacer());
-    }
-  }
-  return output;
-}
-
 export async function generateDocx(content: ReportContent): Promise<Uint8Array> {
-  const { quarter, year, narratives, tables } = content;
-  const months = QUARTER_MONTHS[quarter] ?? ["M1", "M2", "M3"];
+  const { quarter, year, tables } = content;
+  const narratives = Object.fromEntries(Object.entries(content.narratives).map(([key, value]) => [key, reportText(value)])) as unknown as AllNarratives;
   const qLabel = QUARTER_LABELS[quarter] ?? `Q${quarter}`;
 
   const doc = new Document({
     styles: {
       default: {
-        document: { run: { font: FONT, size: 22 } },
+        document: { run: { font: FONT, size: 24 } },
       },
       paragraphStyles: [
         {
@@ -356,7 +277,7 @@ export async function generateDocx(content: ReportContent): Promise<Uint8Array> 
           basedOn: "Normal",
           next: "Normal",
           quickFormat: true,
-          run: { size: 26, bold: true, font: FONT },
+          run: { size: 24, bold: true, font: FONT },
           paragraph: { spacing: { before: 360, after: 200 }, outlineLevel: 0 },
         },
         {
@@ -398,19 +319,9 @@ export async function generateDocx(content: ReportContent): Promise<Uint8Array> 
       {
         properties: {
           page: {
-            size: { width: 11906, height: 16838 },
+            size: { width: 12240, height: 15840 },
             margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 },
           },
-        },
-        headers: {
-          default: new Header({
-            children: [
-              new Paragraph({
-                alignment: AlignmentType.RIGHT,
-                children: [new TextRun({ text: "RSIMD-ITEMS | OHCS Ghana", font: FONT, size: 16, color: "999999", italics: true })],
-              }),
-            ],
-          }),
         },
         footers: {
           default: new Footer({
@@ -430,34 +341,24 @@ export async function generateDocx(content: ReportContent): Promise<Uint8Array> 
           new Paragraph({ spacing: { before: 2000 }, children: [] }),
           new Paragraph({
             alignment: AlignmentType.CENTER,
-            children: [new TextRun({ text: "RESEARCH, STATISTICS, AND INFORMATION MANAGEMENT DIRECTORATE (RSIMD)", bold: true, font: FONT, size: 28 })],
+            children: [new TextRun({ text: "RESEARCH, STATISTICS, AND INFORMATION MANAGEMENT DIRECTORATE (RSIMD)", bold: true, font: FONT, size: 36 })],
           }),
           new Paragraph({ spacing: { after: 400 }, children: [] }),
           new Paragraph({
             alignment: AlignmentType.CENTER,
-            children: [new TextRun({ text: `${qLabel} QUARTER EQUIPMENT MAINTENANCE REPORT`, bold: true, font: FONT, size: 32 })],
+            children: [new TextRun({ text: `${year} ${qLabel} QUARTER IT EQUIPMENT MAINTENANCE AND SERVICING REPORT`, bold: true, font: FONT, size: 36 })],
           }),
           new Paragraph({ spacing: { after: 200 }, children: [] }),
           new Paragraph({
             alignment: AlignmentType.CENTER,
-            children: [new TextRun({ text: `(${months[0]} - ${months[2]}, ${year})`, font: FONT, size: 24 })],
+            children: [new TextRun({ text: `${["APRIL", "JULY", "OCTOBER", "JANUARY"][quarter - 1]}, ${quarter === 4 ? year + 1 : year}`, font: FONT, size: 24 })],
           }),
-          new Paragraph({ spacing: { after: 600 }, children: [] }),
-          new Paragraph({
-            alignment: AlignmentType.CENTER,
-            children: [new TextRun({ text: "Office of the Head of Civil Service", font: FONT, size: 22, italics: true, color: "666666" })],
-          }),
-          new Paragraph({
-            alignment: AlignmentType.CENTER,
-            children: [new TextRun({ text: "Accra, Ghana", font: FONT, size: 22, italics: true, color: "666666" })],
-          }),
-
           // ===== TABLE OF CONTENTS =====
           new Paragraph({ children: [new PageBreak()] }),
           new Paragraph({
             alignment: AlignmentType.CENTER,
             spacing: { after: 400 },
-            children: [new TextRun({ text: "TABLE OF CONTENTS", bold: true, font: FONT, size: 26 })],
+            children: [new TextRun({ text: "TABLE OF CONTENTS", bold: true, font: FONT, size: 24 })],
           }),
           new TableOfContents("Table of Contents", {
             hyperlink: true,
@@ -474,11 +375,10 @@ export async function generateDocx(content: ReportContent): Promise<Uint8Array> 
               { title: "3.3 Corrective Maintenance", level: 2 },
               { title: "3.4 Emergency Maintenance", level: 2 },
               { title: "3.5 Predictive Maintenance", level: 2 },
-              { title: tables.routineByCategory.length || !tables.teamForms?.length ? "3.6 Team Exercise Returns" : "3.6 Participating Teams", level: 2 },
-              { title: "4.0 Challenges", level: 1 },
-              { title: "5.0 Recommendations", level: 1 },
-              { title: "6.0 Conclusion", level: 1 },
-              ...(tables.teamForms?.length ? [{ title: "Annex: Team Maintenance Evidence", level: 2 }] : []),
+              { title: "4.0 OHCS Helpdesk Activities", level: 1 },
+              { title: "5.0 Challenges", level: 1 },
+              { title: "6.0 Recommendations", level: 1 },
+              { title: "7.0 Conclusion", level: 1 },
             ],
           }),
 
@@ -490,22 +390,22 @@ export async function generateDocx(content: ReportContent): Promise<Uint8Array> 
           heading2("1.1 Objectives"),
           new Paragraph({
             spacing: { after: 100 },
-            children: [new TextRun({ text: "This report aims to update management on activities conducted, specifically:", font: FONT, size: 22 })],
+            children: [new TextRun({ text: "This report aims to update management on activities conducted, specifically:", font: FONT, size: 24 })],
           }),
           new Paragraph({
             numbering: { reference: "roman-list", level: 0 },
             spacing: { after: 60 },
-            children: [new TextRun({ text: "Maintenance and servicing of computers and their accessories.", font: FONT, size: 22 })],
+            children: [new TextRun({ text: "Maintenance and servicing of computers and their accessories.", font: FONT, size: 24 })],
           }),
           new Paragraph({
             numbering: { reference: "roman-list", level: 0 },
             spacing: { after: 60 },
-            children: [new TextRun({ text: "Documenting equipment condition, work performed and outstanding faults.", font: FONT, size: 22 })],
+            children: [new TextRun({ text: "Documenting equipment condition, work performed and outstanding faults.", font: FONT, size: 24 })],
           }),
           new Paragraph({
             numbering: { reference: "roman-list", level: 0 },
             spacing: { after: 200 },
-            children: [new TextRun({ text: "Identifying repair, replacement and follow-up priorities for management.", font: FONT, size: 22 })],
+            children: [new TextRun({ text: "Identifying repair, replacement and follow-up priorities for management.", font: FONT, size: 24 })],
           }),
 
           // ===== 2.0 METHODOLOGY =====
@@ -515,11 +415,6 @@ export async function generateDocx(content: ReportContent): Promise<Uint8Array> 
           // ===== 3.0 DETAILS =====
           heading1("3.0 Details of Maintenance and Servicing"),
 
-          // Overview summary table
-          tableCaption("Table 1: Summary of Maintenance Activities"),
-          buildOverviewTable(quarter, year, tables),
-          spacer(),
-
           // --- 3.1 Condition-Based ---
           heading2("3.1 Condition Based Servicing and Monitoring"),
           bodyText(narratives.conditionBased),
@@ -527,72 +422,66 @@ export async function generateDocx(content: ReportContent): Promise<Uint8Array> 
           // --- 3.2 Routine ---
           heading2("3.2 Routine Maintenance and Servicing"),
           bodyText(narratives.routineNarrative),
-          tableCaption(tables.routineByCategory.length ? "Table 2: Routine Maintenance Breakdown by Month" : "Table 2: Submitted Room Maintenance Findings"),
-          ...(tables.routineByCategory.length ? [buildMonthlyTable(tables.routineByCategory, quarter)] : tables.teamForms?.length ? [
-            bodyText("Room findings below preserve the actual exercise dates and recorded status. Combined results are not per-room or per-device totals; pending rooms are explicitly identified."),
-            roomFindings(tables.teamForms),
-          ] : [bodyText("No routine maintenance records were submitted for this period.")]),
+          ...(tables.routineByCategory.length ? [buildMonthlyTable(tables.routineByCategory, quarter)] : [
+            evidenceTable(["ACTIVITY", "DESCRIPTION / OUTCOME"], content.activityTables?.routine ?? [["Routine maintenance and servicing", narratives.routineNarrative]]),
+          ]),
           spacer(),
 
           // --- 3.3 Corrective ---
           heading2("3.3 Corrective Maintenance"),
           bodyText(narratives.correctiveNarrative),
-          tableCaption("Table 3: Corrective Maintenance Summary"),
-          ...(tables.correctiveSummary.length ? [buildSummaryTable(tables.correctiveSummary)] : tables.teamForms?.length ? [correctiveFindings(tables.teamForms)] : [bodyText("No corrective maintenance records were submitted for this period.")]),
+          ...(tables.correctiveSummary.length ? [buildSummaryTable(tables.correctiveSummary)] : [
+            evidenceTable(["DESCRIPTION", "OUTCOME / REQUIRED ACTION"], content.activityTables?.corrective ?? [["Corrective maintenance", narratives.correctiveNarrative]]),
+          ]),
           spacer(),
-          tableCaption("Table 4: Breakdown of Maintenance by Directorate/Rooms"),
-          ...(tables.correctiveByEntity.length ? [buildEntityBreakdownTable(tables.correctiveByEntity)] : [bodyText("No separate counts of resolved issues are available. Reported work and outstanding faults are described above; unresolved faults are not counted as completed repairs.")]),
+          heading2("Breakdown of Maintenance by Directorate"),
+          ...(content.activityTables ? [evidenceTable(["ACTIVITY", "DESCRIPTION", "EXAMPLES / TOOLS"], content.activityTables.breakdown)] : tables.correctiveByEntity.length ? [buildEntityBreakdownTable(tables.correctiveByEntity)] : [evidenceTable(["ACTIVITY", "DESCRIPTION", "EXAMPLES / TOOLS"], [["Routine maintenance", narratives.routineNarrative, "See recorded maintenance activities"], ["Corrective maintenance", narratives.correctiveNarrative, "See recorded corrective actions"]])]),
           spacer(),
 
           // --- 3.4 Emergency ---
           heading2("3.4 Emergency Maintenance"),
           bodyText(narratives.emergencyNarrative),
-          tableCaption("Table 5: Emergency Maintenance Breakdown by Month"),
-          ...(tables.emergencyByCategory.length ? [buildMonthlyTable(tables.emergencyByCategory, quarter)] : [evidenceTable(["ACTIVITY", "RECORDED STATUS"], [["Emergency maintenance", "No emergency intervention recorded in the submitted activity logs. Team findings are retained in the room-evidence section."]])]),
+          ...(tables.emergencyByCategory.length ? [buildMonthlyTable(tables.emergencyByCategory, quarter)] : [evidenceTable(["ACTIVITY", "RECORDED STATUS"], content.activityTables?.emergency ?? [["Emergency maintenance", "No emergency intervention recorded in the submitted activity logs."]])]),
           spacer(),
 
           // --- 3.5 Predictive ---
           heading2("3.5 Predictive Maintenance"),
           bodyText(narratives.predictive),
-          ...(tables.routineByCategory.length || !tables.teamForms?.length ? teamFormEvidence(tables.teamForms ?? [], false) : [
-            heading2("3.6 Participating Teams"),
-            ...tables.teamForms.map(f => bodyText(`${f.team}: ${f.members}. Device records: ${f.devices.length}; functional: ${f.devices.filter(d => d.after === "functional").length}. Room findings are presented in Table 2.`)),
-          ]),
-
-          // ===== 4.0 CHALLENGES =====
-          heading1("4.0 Challenges"),
+          heading1("4.0 OHCS Helpdesk Activities"),
+          bodyText(content.helpdesk || "Helpdesk activity statistics were not included in the maintenance records for this report."),
+          // ===== 5.0 CHALLENGES =====
+          heading1("5.0 Challenges"),
           new Paragraph({
             spacing: { after: 100 },
-            children: [new TextRun({ text: "The following key issues were identified during maintenance and servicing activities:", font: FONT, size: 22 })],
+            children: [new TextRun({ text: "The following key issues were identified during maintenance and servicing activities:", font: FONT, size: 24 })],
           }),
           ...narratives.challenges.split(/[.\n]/).filter((s: string) => s.trim().length > 10).map((challenge: string) =>
             new Paragraph({
               numbering: { reference: "bullet-list", level: 0 },
               spacing: { after: 60 },
-              children: [new TextRun({ text: challenge.trim().replace(/^\d+\.\s*/, ""), font: FONT, size: 22 })],
+              children: [new TextRun({ text: challenge.trim().replace(/^\d+\.\s*/, ""), font: FONT, size: 24 })],
             })
           ),
           spacer(),
 
           // ===== 5.0 RECOMMENDATIONS =====
-          heading1("5.0 Recommendations"),
+          heading1("6.0 Recommendations"),
           new Paragraph({
             spacing: { after: 100 },
-            children: [new TextRun({ text: "The Directorate recommends the following to ensure efficient maintenance and operation of office equipment:", font: FONT, size: 22 })],
+            children: [new TextRun({ text: "The Directorate recommends the following to ensure efficient maintenance and operation of office equipment:", font: FONT, size: 24 })],
           }),
           ...narratives.recommendations.split(/[.\n]/).filter((s: string) => s.trim().length > 10).map((rec: string) =>
             new Paragraph({
               numbering: { reference: "bullet-list", level: 0 },
               spacing: { after: 60 },
-              children: [new TextRun({ text: rec.trim().replace(/^\d+\.\s*/, ""), font: FONT, size: 22 })],
+              children: [new TextRun({ text: rec.trim().replace(/^\d+\.\s*/, ""), font: FONT, size: 24 })],
             })
           ),
           spacer(),
 
           // ===== 6.0 CONCLUSION =====
-          heading1("6.0 Conclusion"),
+          heading1("7.0 Conclusion"),
           bodyText(narratives.conclusion),
-          ...teamFormEvidence(tables.teamForms ?? [], true),
         ],
       },
     ],
